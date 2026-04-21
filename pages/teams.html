@@ -1,0 +1,35 @@
+<div class="space-y-4">
+
+  <div class="flex justify-between items-center">
+    <h2 class="text-xl font-bold">👥 Teams</h2>
+    <button onclick="openCreateTeam()" class="bg-green-600 px-4 py-2 rounded-xl">
+      + Add
+    </button>
+  </div>
+
+  <!-- Team List -->
+  <div id="teamList" class="space-y-2"></div>
+
+</div>
+
+<!-- CREATE TEAM MODAL -->
+<div id="teamModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+
+  <div class="bg-gray-900 p-4 rounded-2xl w-80">
+
+    <h3 class="mb-2">Create Team</h3>
+
+    <input id="teamName" placeholder="Team Name"
+      class="w-full p-2 mb-2 rounded bg-gray-800" />
+
+    <button onclick="createTeam()" class="w-full bg-green-600 p-2 rounded">
+      Save
+    </button>
+
+    <button onclick="closeCreateTeam()" class="w-full mt-2 text-red-400">
+      Cancel
+    </button>
+
+  </div>
+
+</div>

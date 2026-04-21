@@ -1,9 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kabaddi App</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <h1>Hello Kabaddi 🔥</h1>
+
+<body class="bg-gray-950 text-white">
+
+<!-- HEADER -->
+<div class="flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
+  <button onclick="toggleMenu()">☰</button>
+  <h1 class="text-lg font-bold">Kabaddi App</h1>
+  <button>⚙️</button>
+</div>
+
+<!-- SIDE DRAWER -->
+<div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-900 p-4 transform -translate-x-full transition-transform z-50">
+  <h2 class="text-lg font-bold mb-4">Menu</h2>
+
+  <button onclick="loadPage('home')" class="block w-full text-left py-2">Home</button>
+  <button onclick="loadPage('matches')" class="block w-full text-left py-2">Matches</button>
+  <button onclick="loadPage('teams')" class="block w-full text-left py-2">Teams</button>
+  <button onclick="loadPage('tournaments')" class="block w-full text-left py-2">Tournaments</button>
+
+  <button onclick="toggleMenu()" class="mt-4 text-red-400">Close</button>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 hidden"></div>
+
+<!-- MAIN CONTENT -->
+<div id="app" class="p-4 pb-20">
+  <h2 class="text-xl">Welcome 👋</h2>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex justify-around p-2">
+  <button onclick="loadPage('home')" class="text-sm">🏠 Home</button>
+  <button onclick="loadPage('matches')" class="text-sm">🎯 Matches</button>
+  <button onclick="loadPage('teams')" class="text-sm">👥 Teams</button>
+  <button onclick="loadPage('tournaments')" class="text-sm">🏆</button>
+  <button onclick="loadPage('profile')" class="text-sm">👤</button>
+</div>
+
+  <!-- युजरला स्वतः टीम्स, तारीख आणि वेळ निवडता यावी यासाठी tournaments.html मध्ये हा पॉपअप ॲड कर: -->
+
+<div id="matchSetterModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-[150] p-4">
+  <div class="bg-gray-900 p-6 rounded-2xl w-full max-w-sm border border-gray-700 shadow-2xl">
+    <h3 class="text-white font-bold text-lg mb-4 text-center">मॅच सेट करा</h3>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="text-[10px] text-gray-400">Team A</label>
+        <select id="mTeamA" class="w-full mt-1 p-3 bg-gray-800 rounded-xl text-sm text-white border border-gray-700 outline-none"></select>
+      </div>
+      
+      <div class="text-center text-gray-500 font-bold">VS</div>
+
+      <div>
+        <label class="text-[10px] text-gray-400">Team B</label>
+        <select id="mTeamB" class="w-full mt-1 p-3 bg-gray-800 rounded-xl text-sm text-white border border-gray-700 outline-none"></select>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <input id="mDate" type="date" class="p-2 bg-gray-800 rounded-lg text-xs text-white border border-gray-700">
+        <input id="mTime" type="time" class="p-2 bg-gray-800 rounded-lg text-xs text-white border border-gray-700">
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2 mt-6">
+      <button onclick="saveMatchDetails()" class="w-full bg-green-600 p-3 rounded-xl text-white font-bold text-sm">Update Match</button>
+      <button onclick="closeMatchSetter()" class="w-full py-2 text-gray-400 text-xs">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Start Match Moda -->
+<div id="startMatchModal" class="fixed inset-0 bg-black bg-opacity-90 z-[200] hidden flex-col p-4 items-center justify-center">
+    <div class="bg-gray-900 w-full max-w-md rounded-2xl border border-gray-800 shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+        
+        <div class="p-4 border-b border-gray-800 bg-gray-900 shrink-0">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-black text-white uppercase italic">Setup Match</h2>
+                <button onclick="closeStartMatchModal()" class="text-gray-500">✕</button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto custom-scroll">
+            <div class="p-4 bg-gray-800/30 border-b border-gray-800">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Toss Winner</label>
+                        <select id="tossWinner" class="w-full bg-gray-900 text-white text-[11px] p-2 rounded-lg border border-gray-700 mt-1 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Selection</label>
+                        <select id="tossSelection" class="w-full bg-gray-900 text-white text-[11px] p-2 rounded-lg border border-gray-700 mt-1 outline-none">
+                            <option value="Raid">Raid</option>
+                            <option value="Ground">Ground</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex bg-gray-800 sticky top-0 z-20">
+                <button id="tabBtnA" onclick="switchPlayerTab('A')" class="flex-1 py-3 text-[10px] font-black border-b-2 border-green-600 text-white truncate px-2">TEAM A</button>
+                <button id="tabBtnB" onclick="switchPlayerTab('B')" class="flex-1 py-3 text-[10px] font-black border-b-2 border-transparent text-gray-500 truncate px-2">TEAM B</button>
+            </div>
+
+            <div class="p-3">
+                <div id="playerListA" class="space-y-1.5"></div>
+                <div id="playerListB" class="space-y-1.5 hidden"></div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-gray-900 border-t border-gray-800 shrink-0">
+            <button onclick="confirmStartMatch()" class="w-full py-3.5 text-xs font-black text-white bg-green-600 rounded-xl shadow-lg active:scale-95 transition-all uppercase tracking-widest">
+                Start Live Scoring
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- JS FILE -->
+ <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/app.js"></script>
+
+
 </body>
 </html>

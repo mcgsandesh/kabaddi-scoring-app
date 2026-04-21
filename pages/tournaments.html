@@ -1,0 +1,151 @@
+<div class="space-y-4">
+
+  <div class="flex justify-between items-center">
+    <h2 class="text-xl font-bold">🏆 Tournaments</h2>
+    <button onclick="openTournamentModal()" class="bg-green-600 px-4 py-2 rounded-xl">
+      + Create
+    </button>
+  </div>
+
+  <!-- Tournament List -->
+  <div id="tournamentList" class="space-y-2"></div>
+
+</div>
+
+<!-- CREATE TOURNAMENT MODAL -->
+<div id="tournamentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+
+  <div class="bg-gray-900 p-4 rounded-2xl w-80 space-y-2 max-h-[90vh] overflow-y-auto">
+
+    <h3 class="text-lg font-bold">Create Tournament</h3>
+
+    <input id="tName" placeholder="Tournament Name" class="w-full p-2 bg-gray-800 rounded">
+
+    <input id="tOrganizer" placeholder="Organizer Name" class="w-full p-2 bg-gray-800 rounded">
+
+    <!-- Season -->
+    <select id="tSeason" class="w-full p-2 bg-gray-800 rounded">
+     <option value="">सीझन निवडा (Select Season)</option>
+     <option value="2025-2026">2025-2026</option>
+        <option value="2026-2027">2026-2027</option>
+    </select>
+
+    <div class="grid grid-cols-2 gap-2">
+  <div>
+    <label class="text-[10px] text-gray-400">सुरुवात तारीख</label>
+    <input id="tStartDate" type="date" class="w-full p-2 bg-gray-800 rounded text-sm">
+  </div>
+  <div>
+    <label class="text-[10px] text-gray-400">शेवट तारीख</label>
+    <input id="tEndDate" type="date" class="w-full p-2 bg-gray-800 rounded text-sm">
+  </div>
+</div>
+
+    <select id="tSurface" class="w-full p-2 bg-gray-800 rounded">
+    <option value="">खेळाचे मैदान निवडा (Surface Type)</option>
+    <option value="Ground">माती (Ground)</option>
+    <option value="Mat">मॅट (Mat)</option>
+    </select>
+
+    <!-- Level -->
+    <select id="tLevel" onchange="handleLevelChange()" class="w-full p-2 bg-gray-800 rounded">
+      <option value="">Select Level</option>
+      <option>State</option>
+      <option>District</option>
+    </select>
+
+    <!-- Association -->
+    <select id="tAssociation" class="w-full p-2 bg-gray-800 rounded hidden">
+      <option value="">Select Association</option>
+      <option>Mumbai Shahar</option>
+      <option>Mumbai Upnagar</option>
+      <option>Thane</option>
+      <option>Palghar</option>
+    </select>
+
+    <!-- Type -->
+    <select id="tType" class="w-full p-2 bg-gray-800 rounded">
+      <option value="">Type</option>
+      <option>Men</option>
+      <option>Women</option>
+    </select>
+
+    <!-- Category -->
+    <select id="tCategory" class="w-full p-2 bg-gray-800 rounded">
+      <option value="">Category</option>
+      <option>Sub Junior</option>
+      <option>Junior</option>
+      <option>Senior</option>
+    </select>
+
+    <!-- Group -->
+    <select id="tGroup" class="w-full p-2 bg-gray-800 rounded">
+      <option value="">Group</option>
+      <option>A</option>
+      <option>B</option>
+      <option>C</option>
+    </select>
+
+    <!-- Format -->
+    <select id="tFormat" class="w-full p-2 bg-gray-800 rounded">
+      <option value="">Format</option>
+      <option>Knockout</option>
+      <option>Group</option>
+    </select>
+
+
+    <!-- Team Limit -->
+    <input id="tLimit" type="number" placeholder="Team Limit (e.g. 16)" class="w-full p-2 bg-gray-800 rounded">
+
+    <!-- Teams -->
+    <button onclick="openTeamPopup()" class="w-full bg-blue-600 p-2 rounded">
+      Select Teams
+    </button>
+
+<div class="mt-3 p-3 bg-gray-800 rounded-xl">
+  <p class="text-xs text-gray-400 mb-2">निवडलेले संघ (Selected Teams):</p>
+  <div id="selectedTeamsTags" class="flex flex-wrap gap-2">
+    </div>
+  <p id="selectedTeamsCount" class="text-xs text-green-400 mt-2 font-bold">एकूण: 0</p>
+</div>
+
+    <p id="selectedTeamsView" class="text-xs text-green-400 mt-2">
+     निवडलेले संघ: 0
+    </p>
+
+<div id="teamPopup" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-[100]">
+  <div class="bg-gray-900 p-5 rounded-2xl w-80 max-h-[80vh] overflow-y-auto border border-gray-700">
+    
+    <h3 class="mb-4 font-bold text-white text-center">संघ व्यवस्थापन (Team Management)</h3>
+
+    <div class="mb-4 pb-4 border-b border-gray-700">
+      <label class="text-xs text-gray-400">नवीन संघ जोडा:</label>
+      <div class="flex gap-2 mt-1">
+        <input id="newTeamName" type="text" placeholder="संघाचे नाव" class="flex-1 p-2 bg-gray-800 rounded-lg text-sm">
+        <button onclick="addNewTeamManual()" class="bg-green-600 px-3 rounded-lg text-white font-bold text-lg">+</button>
+      </div>
+    </div>
+
+    <label class="text-xs text-gray-400">उपलब्ध संघ (Select from List):</label>
+    <div id="teamPopupList" class="space-y-2 mt-2">
+      </div>
+
+    <button onclick="closeTeamPopup()" class="w-full mt-5 bg-blue-600 p-2 rounded-xl text-white font-bold">
+      पूर्ण (Done)
+    </button>
+  </div>
+</div>
+
+    <!-- Actions -->
+    <button onclick="createTournament()" class="w-full bg-green-600 p-2 rounded">
+      Create
+    </button>
+
+    <button onclick="closeTournamentModal()" class="w-full text-red-400">
+      Cancel
+    </button>
+
+  </div>
+</div>
+
+  <!-- युजरला स्वतः टीम्स, तारीख आणि वेळ निवडता यावी यासाठी tournaments.html मध्ये हा पॉपअप ॲड कर: -->
