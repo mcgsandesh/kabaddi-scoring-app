@@ -3,3 +3,25 @@
 body {
   font-family: system-ui, sans-serif;
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media print {
+    /* प्रिंट करताना बटन्सचा जो खालचा भाग (Footer) आहे तो लपवा */
+    #summaryModal div.p-4.bg-gray-900.border-t {
+        display: none !important;
+    }
+
+    /* क्लोज बटण (X) सुद्धा लपवा */
+    #summaryModal button.text-gray-400 {
+        display: none !important;
+    }
+
+    /* बॅकग्राउंड रंग पांढरा ठेवा जेणेकरून शाई वाचेल */
+    #summaryModal {
+        background-color: white !important;
+        position: absolute;
+        overflow: visible;
+    }
+}

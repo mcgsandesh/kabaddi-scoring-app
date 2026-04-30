@@ -5,6 +5,7 @@ let currentMatchData = null;
 
 window.onload = () => {
       loadPage('home');
+
 };
 
 /** toggle Menu */
@@ -75,6 +76,7 @@ function initPage(page) {
   if (page === 'tournaments') {
     renderTournaments();
   }
+    updateVisualPlayers(); // नवीन बदल
 
 }
 
@@ -652,90 +654,192 @@ function switchPlayerTab(team) {
 // प्लेयर्स रेंडर करण्यासाठी (नंबर आणि नावासाठी वेगळे इनपुट)
 function renderPlayerInputs(containerId, prefix) {
     const container = document.getElementById(containerId);
-    if (!container) return; // सेफ्टी चेक
+    if (!container) return; 
     container.innerHTML = "";
     
-    console.log(`[RENDER] Generating inputs for ${prefix} Team with default numbers.`);
+    console.log(`>>> [RENDER_SETUP] Generating 12 inputs for Team ${prefix}`);
 
     for (let i = 1; i <= 12; i++) {
-        // १. डिफॉल्ट नंबर सेट करा: Team A (1-12) आणि Team B (21-32)
         let defaultNo = (prefix === 'A') ? i : (i + 20);
+        let isP7 = i <= 7;
 
         container.innerHTML += `
             <div class="flex items-center gap-2 bg-gray-800/30 p-1 rounded-lg border border-gray-800">
-                <input type="checkbox" id="${prefix}P${i}_check" class="w-4 h-4 ml-2" ${i <= 7 ? 'checked' : ''}>
+                <input type="checkbox" 
+                    id="${prefix}P${i}_check" 
+                    class="player-check-${prefix} w-4 h-4 ml-2" 
+                    ${isP7 ? 'checked' : ''} 
+                    onchange="handleSetupRoleChange('${prefix}', ${i})">
                 
                 <input type="number" id="${prefix}P${i}_no" 
                     value="${defaultNo}" 
-                    placeholder="No" 
                     class="w-12 bg-gray-900 text-white text-[11px] p-2 rounded-lg border border-gray-700 text-center font-bold">
                 
                 <input type="text" id="${prefix}P${i}_name" 
                     placeholder="Player Name" 
                     class="flex-1 bg-gray-900 text-white text-[11px] p-2 rounded-lg border border-gray-700">
                 
-                <span class="text-[8px] font-bold px-2 ${i <= 7 ? 'text-green-500' : 'text-gray-500'} w-8">
-                    ${i <= 7 ? 'P7' : 'SUB'}
+                <span id="${prefix}P${i}_role_label" class="text-[8px] font-bold px-2 ${isP7 ? 'text-green-500' : 'text-gray-500'} w-8">
+                    ${isP7 ? 'P7' : 'SUB'}
                 </span>
             </div>
         `;
     }
+    console.log(`    [SUCCESS] Finished rendering Team ${prefix}. Default P7 count: 7`);
 }
+
+function handleSetupRoleChange(prefix, index) {
+    console.log(`--- [SETUP_CLICK] Team: ${prefix} | Index: ${index} ---`);
+    
+    const checkbox = document.getElementById(`${prefix}P${index}_check`);
+    const label = document.getElementById(`${prefix}P${index}_role_label`);
+    
+    // सिलेक्ट केलेल्या खेळाडूंची मोजणी
+    const checkedCount = document.querySelectorAll(`.player-check-${prefix}:checked`).length;
+    console.log(`[COUNT_CHECK] Team ${prefix} checked count: ${checkedCount}`);
+
+    if (checkedCount > 7 && checkbox.checked) {
+        console.warn(`[RESTRICTION] User tried to select 8th player. Blocking!`);
+        Swal.fire({
+            title: "मर्यादा!",
+            text: "एका टीममध्ये फक्त ७ 'Playing' खेळाडू असू शकतात.",
+            icon: "warning",
+            background: '#111',
+            color: '#fff'
+        });
+        checkbox.checked = false;
+        return;
+    }
+
+    // UI अपडेटचे लॉग्स
+    if (checkbox.checked) {
+        label.innerText = "P7";
+        label.classList.replace('text-gray-500', 'text-green-500');
+        console.log(`[ROLE_CHANGE] Player ${index} marked as P7`);
+    } else {
+        label.innerText = "SUB";
+        label.classList.replace('text-green-500', 'text-gray-500');
+        console.log(`[ROLE_CHANGE] Player ${index} marked as SUB`);
+    }
+}
+
+
 
 function closeStartMatchModal() {
     document.getElementById('startMatchModal').classList.add('hidden');
 }
 
 async function confirmStartMatch() {
+    console.log("--- [START_MATCH_PROCESS] Final Validation Initiated ---");
     const { tId, mId } = matchSetupData;
-    
-    // प्लेयर्सचा डेटा जमा करा
+
+    // १. 'Playing' खेळाडूंची संख्या मोजा (Strict Exactly 7 Check)
+    const countA = document.querySelectorAll('.player-check-A:checked').length;
+    const countB = document.querySelectorAll('.player-check-B:checked').length;
+
+    console.log(`[VALIDATION] Team A: ${countA}/7 | Team B: ${countB}/7`);
+
+    if (countA !== 7 || countB !== 7) {
+        console.warn(`[DENIED] Match blocked. Improper player count.`);
+        Swal.fire({
+            title: "खेळाडू अपूर्ण आहेत!",
+            text: `मॅच सुरू करण्यासाठी प्रत्येक टीममध्ये ७ खेळाडू निवडणे अनिवार्य आहे. (सध्या: Team A: ${countA}, Team B: ${countB})`,
+            icon: "error",
+            background: '#111',
+            color: '#fff'
+        });
+        return; 
+    }
+
+    // २. जर ७-७ खेळाडू असतील तरच डेटा गोळा करा
+    console.log("[PROCEED] Validation successful. Collecting players data...");
     const playersA = getPlayersData('A');
     const playersB = getPlayersData('B');
 
     const tossWinner = document.getElementById('tossWinner').value;
     const selection = document.getElementById('tossSelection').value;
 
-    const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-    const match = mDoc.data();
-    
-    let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
-
-    const updateData = {
-        status: "Live",
-        tossWinner: tossWinner,
-        tossSelection: selection,
-        firstRaidBy: firstRaidBy,
-        currentRaider: firstRaidBy, // पहिली रेड कुणाची हे इथे सेव्ह होईल
-        teamAPlayers: playersA,
-        teamBPlayers: playersB,
-        scoreA: 0,
-        scoreB: 0,
-        timeoutsA: 4,
-        timeoutsB: 4,
-        matchLog: [] // प्रत्येक पॉईंटची नोंद करण्यासाठी
-    };
-
     try {
+        const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+        const match = mDoc.data();
+        
+        // [IMPORTANT]: इकडे आपण localStorage मध्ये नावे साठवत आहोत
+        // यामुळे scoring.html ला समजेल की नक्की कोणत्या टीम खेळत आहेत.
+        localStorage.setItem('currentTeamA', match.teamA);
+        localStorage.setItem('currentTeamB', match.teamB);
+
+        let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
+
+        const updateData = {
+            status: "Live",
+            tossWinner: tossWinner,
+            tossSelection: selection,
+            firstRaidBy: firstRaidBy,
+            currentRaider: firstRaidBy,
+            teamAPlayers: playersA,
+            teamBPlayers: playersB,
+            scoreA: 0,
+            scoreB: 0,
+            timeoutsA: 4,
+            timeoutsB: 4,
+            matchLog: []
+        };
+
+        console.log("[DATABASE] Updating Firestore with match data...");
         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
+        
+        console.log("--- [MATCH_LIVE] Setup Complete! ---");
         closeStartMatchModal();
-        Swal.fire("Match Live!", "स्कोअरिंग विंडो उघडत आहे...", "success");
-      goToScoring(tId, mId);
+        
+        Swal.fire({
+            title: "Match Live!",
+            text: "स्कोअरिंग विंडो उघडत आहे...",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false
+        });
+
+        goToScoring(tId, mId);
+
     } catch (e) {
-        console.error(e);
+        console.error("[CRITICAL_ERROR] Failed to start match:", e);
+        Swal.fire("Error", "डेटा अपडेट करताना तांत्रिक अडचण आली.", "error");
     }
+    if (typeof updateVisualPlayers === "function") updateVisualPlayers();
 }
 
 function getPlayersData(prefix) {
+    console.log(`--- [DATA_COLLECTION] Starting for Team: ${prefix} ---`);
     let data = [];
+    
     for (let i = 1; i <= 12; i++) {
-        data.push({
-            no: document.getElementById(`${prefix}P${i}_no`).value || i,
-            name: document.getElementById(`${prefix}P${i}_name`).value || `Player ${i}`,
-            isPlaying: document.getElementById(`${prefix}P${i}_check`).checked,
-            status: document.getElementById(`${prefix}P${i}_check`).checked ? "In" : "Out"
-        });
+        const noVal = document.getElementById(`${prefix}P${i}_no`).value;
+        const nameVal = document.getElementById(`${prefix}P${i}_name`).value;
+        const isChecked = document.getElementById(`${prefix}P${i}_check`).checked;
+
+        // १. प्रत्येक प्लेयरचा ऑब्जेक्ट तयार करा
+        const playerObj = {
+            no: noVal || (prefix === 'A' ? i : i + 20),
+            name: nameVal || `Player ${noVal || i}`,
+            // आपण ठरवल्याप्रमाणे 'Playing' आणि 'Bench' हे शब्द वापरूया
+            playingStatus: isChecked ? "Playing" : "Bench", 
+            // कोर्टातील स्थिती
+            status: isChecked ? "In" : "Out",
+            outTime: null
+        };
+
+        data.push(playerObj);
     }
+
+    // २. व्हेरिफिकेशनसाठी कन्सोल लॉग्स
+    const playingCount = data.filter(p => p.playingStatus === "Playing").length;
+    const benchCount = data.filter(p => p.playingStatus === "Bench").length;
+    
+    console.log(`[SUMMARY] Team ${prefix}: ${playingCount} Playing, ${benchCount} Bench.`);
+    
+    // पूर्ण डेटा टेबल फॉरमॅटमध्ये बघण्यासाठी (डेव्हलपमेंटसाठी खूप सोपं पडतं)
+    console.table(data); 
+
     return data;
 }
 
@@ -1048,6 +1152,7 @@ async function generateManualTemplate(tId, teamLimit) {
 /**
  * openMatchSetter लॉजिक
  * हे फंक्शन मॅचमधील ड्रॉपडाउनमध्ये फक्त त्याच टूर्नामेंटच्या टीम्स दाखवेल
+ * openMatchSetter फंक्शन आपण टूर्नामेंटच्या Fixtures (मॅचेस) मॅनेज करण्यासाठी बनवले होते. सोप्या भाषेत सांगायचे तर, "कोणती टीम कोणाविरुद्ध खेळणार" आणि "मॅच कधी होणार" हे ठरवण्यासाठीचा हा 'मॅच एडिटर' आहे.
  */
 
 let currentEditingMatch = null;
@@ -1168,25 +1273,32 @@ function closeMatchSetter() {
   document.getElementById('matchSetterModal').classList.add('hidden'); // [cite: 299]
 }
 
+/**
+ * हे फंक्शन 'मॅच एडमिन' कडून 'लाइव्ह स्कोअरर' कडे जाणारा मुख्य पूल (Bridge) आहे. 
+ * या फंक्शनशिवाय स्कोअरिंग स्क्रीनला हे समजणारच नाही की नक्की कोणत्या टीमची आणि कोणत्या खेळाडूंची मॅच सुरू आहे.
+ */
+
 async function goToScoring(tId, mId) {
-    await loadPage('scoring'); // आधी पेज लोड करा
+    await loadPage('scoring'); 
 
     try {
         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
         const match = mDoc.data();
         currentMatchData = match;
 
-        // १. प्लेयर डेटा ग्लोबल व्हेरिएबल्समध्ये भरा
+        // [ बदल ]: नावे LocalStorage मध्ये साठवा जेणेकरून ती पुढच्या फंक्शनला मिळतील
+        localStorage.setItem('currentTeamA', match.teamA);
+        localStorage.setItem('currentTeamB', match.teamB);
+            // मूळ स्क्रीनवरील नावे अपडेट करा
+                    setupLiveMatchNames();
+
         teamAPlayers = match.teamAPlayers || [];
         teamBPlayers = match.teamBPlayers || [];
 
-        // २. स्क्रीनवर टीमची नावे आणि स्कोअर दाखवा
-        document.getElementById('liveTeamA').innerText = match.teamA;
-        document.getElementById('liveTeamB').innerText = match.teamB;
+
         document.getElementById('scoreA').innerText = match.scoreA || 0;
         document.getElementById('scoreB').innerText = match.scoreB || 0;
 
-        // ३. सुरुवातीचे ७ खेळाडू (In) रेंडर करा
         renderMiniPlayers();
         
         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
@@ -1195,6 +1307,8 @@ async function goToScoring(tId, mId) {
         console.error("Error loading scoring data:", e);
     }
 }
+
+
 
 function renderLivePlayers(players, containerId) {
     const container = document.getElementById(containerId);
@@ -1225,153 +1339,250 @@ function checkActiveRaider(team) {
 let raidInterval;
 let raidTime = 30;
 
-function startRaidTimer(team) {
-    // १. आधी टायमर थांबवा (जर आधीची रेड चुकून सुरू असेल तर)
+// function startRaidTimer(team) {
+//     // १. आधी टायमर थांबवा (जर आधीची रेड चुकून सुरू असेल तर)
+//     clearInterval(raidInterval);
+    
+//     // २. रेडर निवडण्यासाठी मोडल उघडा
+//     openRaiderSelectionModal(team);
+// }
+
+function startRaidTimer(team, isJustStarting = false) {
+    // १. आधी टायमर थांबवा (जर आधीची रेड चुकून सुरू असेल तर) - [मूळ कोड तसाच आहे]
     clearInterval(raidInterval);
     
-    // २. रेडर निवडण्यासाठी मोडल उघडा
-    openRaiderSelectionModal(team);
+    // २. रेडर निवडण्यासाठी मोडल उघडा - [बदल: फक्त isJustStarting पुढे पास केला]
+    openRaiderSelectionModal(team, isJustStarting);
 }
 
-function openRaiderSelectionModal(team) {
-    console.log(`[MODAL_OPEN] Attempting to open Raider Selection for Team: ${team}`);
+
+
+// function openRaiderSelectionModal(team) {
+//     // STRICT LOG: हे सांगेल की हे मोडल नक्की कधी उघडलं
+//     console.error(`[STRICT_LOG] 🚨 Raider Selection Modal OPENED at ${new Date().getTime()}`);
+    
+//     const modal = document.getElementById('playerSelectModal');
+//     const grid = document.getElementById('playerModalGrid');
+//     const title = document.getElementById('playerModalTitle');
+    
+//     if (!modal || !grid) return;
+
+//     let players = (team === 'A') ? teamAPlayers : teamBPlayers;
+//     title.innerText = `Select Raider (Team ${team})`;
+//     grid.innerHTML = "";
+    
+//     const activeRaiders = players.filter(p => p.playingStatus === 'Playing' && p.status === 'In');
+    
+//     activeRaiders.forEach(p => {
+//         grid.innerHTML += `
+//             <button onclick="actuallyStartTimer('${p.no}', '${p.name}', '${team}')" 
+//                 class="bg-gray-800 border border-gray-700 p-3 rounded-xl flex flex-col items-center active:bg-green-600 transition-all shadow-lg">
+//                 <span class="text-xl font-black text-white">${p.no}</span>
+//                 <span class="text-[8px] text-gray-500 font-bold uppercase truncate w-full text-center mt-1">${p.name}</span>
+//             </button>`;
+//     });
+
+//     modal.classList.replace('hidden', 'flex');
+// }
+
+function openRaiderSelectionModal(team, isJustStarting = false) {
+    // STRICT LOG: हे सांगेल की हे मोडल नक्की कधी उघडलं - [मूळ कोड तसाच आहे]
+    console.error(`[STRICT_LOG] 🚨 Raider Selection Modal OPENED at ${new Date().getTime()}`);
     
     const modal = document.getElementById('playerSelectModal');
     const grid = document.getElementById('playerModalGrid');
     const title = document.getElementById('playerModalTitle');
     
-    if (!modal || !grid) {
-        console.error("[ERROR] Modal or Grid element not found in DOM!");
-        return;
-    }
+    if (!modal || !grid) return;
 
-    // १. डेटा चेक करा
     let players = (team === 'A') ? teamAPlayers : teamBPlayers;
-    console.log(`[DATA_CHECK] Total players in Team ${team}:`, players ? players.length : 0);
-    
-    if (!players || players.length === 0) {
-        console.error(`[ERROR] Player data is empty for Team ${team}`);
-        Swal.fire("Error", "खेळाडूंची यादी सापडली नाही!", "error");
-        return;
-    }
-
     title.innerText = `Select Raider (Team ${team})`;
     grid.innerHTML = "";
     
-    // २. 'In' प्लेयर्स फिल्टर करा
-    const inPlayers = players.filter(p => p.status === 'In');
-    console.log(`[DATA_CHECK] Players currently 'In':`, inPlayers.length);
+    const activeRaiders = players.filter(p => p.playingStatus === 'Playing' && p.status === 'In');
     
-    if (inPlayers.length === 0) {
-        console.warn(`[WARN] No players are 'In' for Team ${team}. All are Out.`);
-        grid.innerHTML = "<p class='text-gray-400 text-center col-span-4 py-4 text-[10px] uppercase font-bold'>सर्व खेळाडू आऊट आहेत!</p>";
-    } else {
-        inPlayers.forEach(p => {
-            grid.innerHTML += `
-                <button onclick="actuallyStartTimer('${p.no}', '${p.name}', '${team}')" 
-                    class="bg-gray-800 border border-gray-700 p-3 rounded-xl flex flex-col items-center active:bg-green-600 transition-all">
-                    <span class="text-xl font-black text-white">${p.no}</span>
-                    <span class="text-[8px] text-gray-500 font-bold uppercase truncate w-full text-center mt-1">${p.name}</span>
-                </button>`;
-        });
-        console.log(`[UI_UPDATE] Grid populated with ${inPlayers.length} player buttons.`);
-    }
+    activeRaiders.forEach(p => {
+        // [बदल]: actuallyStartTimer मध्ये isJustStarting पॅरामीटर सुरक्षितपणे ॲड केला आहे
+        grid.innerHTML += `
+            <button onclick="actuallyStartTimer('${p.no}', '${p.name}', '${team}', ${isJustStarting})" 
+                class="bg-gray-800 border border-gray-700 p-3 rounded-xl flex flex-col items-center active:bg-green-600 transition-all shadow-lg">
+                <span class="text-xl font-black text-white">${p.no}</span>
+                <span class="text-[8px] text-gray-500 font-bold uppercase truncate w-full text-center mt-1">${p.name}</span>
+            </button>`;
+    });
 
     modal.classList.replace('hidden', 'flex');
-    console.log(`[MODAL_STATE] Modal is now VISIBLE.`);
 }
+
 
 /**actuallyStartTimer (तुझे मूळ टायमर लॉजिक)
 एकदा रेडर निवडला की हे फंक्शन तुझे टायमरचे काम पूर्ण करेल. */
-function actuallyStartTimer(playerNo, playerName, team) {
-    console.log(`[ACTION] actuallyStartTimer started | Player: ${playerName} (${playerNo}) | Team: ${team}`);
-    
-    // १. मोडल बंद करा
-    closePlayerModal();
+// function actuallyStartTimer(playerNo, playerName, team) {
+//     const timestamp = Date.now();
+//     console.log(`[STRICT_LOG] 🏁 actuallyStartTimer START | Player: ${playerNo} | Team: ${team} | Time: ${timestamp}`);
 
-    // २. स्क्रीनवर रेडरचे नाव अपडेट करा
+//     if (typeof closePlayerModal === "function") {
+//         console.log(`[STRICT_LOG] 🏠 Closing Player Modal...`);
+//         closePlayerModal();
+//     }
+
+//     const activeRaiderEl = document.getElementById('activeRaider');
+//     if (activeRaiderEl) {
+//         activeRaiderEl.innerText = `${playerName.toUpperCase()} (${team})`;
+//         console.log(`[STRICT_LOG] 👤 Active Raider Set: ${playerName} (${team})`);
+//     }
+
+//     // १. बोनस चेक (हा सर्वात आधी व्हायला हवा)
+//     if (window.isBonusPending === true) {
+//         console.log(`[STRICT_LOG] 🎁 BONUS_PENDING Detected!`);
+//         window.isBonusPending = false; // खूण तात्काळ पुसा
+
+//         // नियम: बोनसवर एम्प्टी डॉट्स रिसेट होतात
+//         emptyRaidCount[team] = 0;
+//         if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
+
+//         // समरी अपडेट
+//         if (typeof addRaidToSummary === "function") {
+//             //addRaidToSummary(team, playerName, 'Bonus Point', 1, 'Technical Bonus');
+//         }
+
+//         // बोनस मोडल उघडा
+//         if (typeof openBonusPointsModal === "function") {
+//             console.log(`[STRICT_LOG] 🔓 Opening Bonus Points Modal and STOPPING flow.`);
+//             openBonusPointsModal(team);
+//         }
+
+//         return; // अत्यंत महत्त्वाचे: विरुद्ध टीमचे मोडल उघडू नये म्हणून इथूनच बाहेर पडा
+//     }
+
+//     // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle)
+//     if (window.pendingAction) {
+//         const action = window.pendingAction;
+//         console.log(`[STRICT_LOG] 📦 Pending Action Found: ${action.type}`);
+//         window.pendingAction = null; 
+
+//         if (action.type === 'empty') {
+//             console.log(`[STRICT_LOG] ⚪ Processing Empty Raid...`);
+//             if (typeof addRaidToSummary === "function") {
+//                 addRaidToSummary(action.team, playerName, 'Empty Raid', 0, 'Returned Safely');
+//             }
+
+//             setTimeout(() => {
+//                 processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
+//             }, 400);
+//             return; 
+//         }
+
+//         setTimeout(() => {
+//             console.log(`[STRICT_LOG] ⚡ Executing Delayed Action: ${action.type}`);
+//             if (action.type === 'touch') {
+//                 handlePoint(action.team, action.points);
+//             } else {
+//                 handleAction(action.team, action.type, action.points);
+//             }
+//         }, 300);
+//         return; 
+//     }
+
+//     // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा
+//     console.log(`[STRICT_LOG] ⏱️ Normal Flow: Starting Raid Timer.`);
+//     if (typeof startRaidTimer === "function") startRaidTimer();
+// }
+
+function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) {
+    const timestamp = Date.now();
+    console.log(`[STRICT_LOG] 🏁 actuallyStartTimer START | Player: ${playerNo} | Team: ${team} | Time: ${timestamp} | JustStarting: ${isJustStarting}`);
+
+    if (typeof closePlayerModal === "function") {
+        console.log(`[STRICT_LOG] 🏠 Closing Player Modal...`);
+        closePlayerModal();
+    }
+
     const activeRaiderEl = document.getElementById('activeRaider');
     if (activeRaiderEl) {
-        activeRaiderEl.innerText = playerName;
-        console.log(`[UI_UPDATE] Active Raider set to: ${playerName}`);
-    } else {
-        console.error("[ERROR] Element with ID 'activeRaider' not found!");
+        activeRaiderEl.innerText = `${playerName.toUpperCase()} (${team})`;
+        console.log(`[STRICT_LOG] 👤 Active Raider Set: ${playerName} (${team})`);
     }
 
-    // ३. पेंडिंग ॲक्शन चेक करा (जर युजरने आधी पॉईंट्स किंवा बोनसवर क्लिक केले असेल तर)
-    // आपण isBonusPending (बोनससाठी) आणि window.pendingAction (पॉईंट्ससाठी) दोन्ही चेक करूया
-    
-    // CASE A: बोनससाठी रेडर निवडला असेल तर
-    if (typeof isBonusPending !== 'undefined' && isBonusPending) {
-        console.log(`[FLOW] isBonusPending is TRUE. Redirecting to Bonus Modal.`);
-        isBonusPending = false; // रिसेट करा
-        setTimeout(() => {
-            openBonusPointsModal(team);
-        }, 300);
-        return; // इथेच थांबा, टायमर सुरू करू नका
-    }
-
-    // CASE B: १, २, ३ किंवा मोर पॉईंट्ससाठी रेडर निवडला असेल तर
-    if (window.pendingAction) {
-        const pts = window.pendingAction.points;
-        const t = window.pendingAction.team;
-        const type = window.pendingAction.type;
+    // --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल, तर इथूनच बाहेर पडा ---
+// --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल ---
+    if (isJustStarting === true) {
+        console.log(`[STRICT_LOG] ⏱️ Just Starting: Manual Timer Start Triggered.`);
         
-        console.log(`[FLOW] Pending Action found: ${pts} points. Opening Defender Selection...`);
-        window.pendingAction = null; // रिसेट करा
+        // १. टायमरचा आकडा ३० वर सेट करा
+        const timerEl = document.getElementById('raidTimer');
+        if (timerEl) timerEl.innerText = "30";
 
-        setTimeout(() => {
-            // मल्टिपल प्लेयर निवडण्यासाठी मोडल उघडा
-            requiredPlayers = parseInt(pts);
-            selectedPlayersCount = 0;
-            currentAction = { team: t, type: type, points: requiredPlayers };
-            
-            // तुझे मूळ मोडल फंक्शन कॉल करा
-            openMultiPlayerModal(t, requiredPlayers, "Touch");
-        }, 300);
-        return; // इथेच थांबा, टायमर सुरू करू नका
-    }
-
-    // CASE C: जर ही साधी रेड असेल (Start Raid बटनवरून), तर टायमर सुरू करा
-    console.log(`[FLOW] No pending actions. Starting standard 30-sec timer.`);
-    
-    // जुना टायमर थांबवा
-    clearInterval(raidInterval);
-    
-    raidTime = 30;
-    const timerEl = document.getElementById('raidTimer');
-    
-    if (timerEl) {
-        timerEl.innerText = raidTime;
-        timerEl.classList.remove('text-red-600');
-        timerEl.classList.add('text-green-500');
+        // २. टायमर पळवण्यासाठी लॉजिक
+        let timeLeft = 30;
+        
+        // जुना कोणताही इंटरव्हल असेल तर थांबवा
+        if (typeof raidInterval !== 'undefined') clearInterval(raidInterval);
 
         raidInterval = setInterval(() => {
-            raidTime--;
-            timerEl.innerText = raidTime;
+            timeLeft--;
+            if (timerEl) timerEl.innerText = timeLeft;
 
-            // शेवटचे १० सेकंद
-            if (raidTime <= 10) {
-                timerEl.classList.replace('text-green-500', 'text-red-600');
-            }
-
-            // वेळ संपली
-            if (raidTime <= 0) {
+            if (timeLeft <= 0) {
                 clearInterval(raidInterval);
-                console.log(`[TIMEOUT] Raid Over for ${playerName}`);
-                Swal.fire({
-                    title: "TIME OUT!",
-                    text: `${playerName} आऊट!`,
-                    icon: "error",
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                // टायमर संपल्यावर समोरच्या टीमला पॉईंट देण्याचं लॉजिक इथे टाकू शकतोस
+                console.log("Raid Time Up!");
+                // वेळ संपल्यावर काय व्हायला हवं (उदा. शिट्टी वाजणे) ते इथे टाकू शकतोस
             }
         }, 1000);
-    } else {
-        console.error("[ERROR] Element with ID 'raidTimer' not found!");
+
+        return; 
     }
+    // -------------------------------------------------------------------------
+
+    // १. बोनस चेक (हा सर्वात आधी व्हायला हवा) - [मूळ कोड तसाच आहे]
+    if (window.isBonusPending === true) {
+        console.log(`[STRICT_LOG] 🎁 BONUS_PENDING Detected!`);
+        window.isBonusPending = false; 
+
+        emptyRaidCount[team] = 0;
+        if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
+
+        if (typeof openBonusPointsModal === "function") {
+            console.log(`[STRICT_LOG] 🔓 Opening Bonus Points Modal and STOPPING flow.`);
+            openBonusPointsModal(team);
+        }
+
+        return; 
+    }
+
+    // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle) - [मूळ कोड तसाच आहे]
+    if (window.pendingAction) {
+        const action = window.pendingAction;
+        console.log(`[STRICT_LOG] 📦 Pending Action Found: ${action.type}`);
+        window.pendingAction = null; 
+
+        if (action.type === 'empty') {
+            console.log(`[STRICT_LOG] ⚪ Processing Empty Raid...`);
+            if (typeof addRaidToSummary === "function") {
+                addRaidToSummary(action.team, playerName, 'Empty Raid', 0, 'Returned Safely');
+            }
+
+            setTimeout(() => {
+                processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
+            }, 400);
+            return; 
+        }
+
+        setTimeout(() => {
+            console.log(`[STRICT_LOG] ⚡ Executing Delayed Action: ${action.type}`);
+            if (action.type === 'touch') {
+                handlePoint(action.team, action.points);
+            } else {
+                handleAction(action.team, action.type, action.points);
+            }
+        }, 300);
+        return; 
+    }
+
+    // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा - [मूळ कोड तसाच आहे]
+    console.log(`[STRICT_LOG] ⏱️ Normal Flow: Starting Raid Timer.`);
+    // टीप: इथे startClock() किंवा तुझे मूळ टायमर फंक्शन कॉल होईल
+    if (typeof startRaidTimer === "function") startRaidTimer(); 
 }
 
 function stopRaidTimer() {
@@ -1380,68 +1591,127 @@ function stopRaidTimer() {
 
 let currentAction = null; // { team: 'A', type: 'touch', points: 1 }
 
-// १. पॉईंट बटण दाबल्यावर काय होईल?
+// १. टच पॉईंट बटण दाबल्यावर (Touch, Bonus+Touch साठी)
 function handlePoint(team, points) {
-    console.log(`[CHECK] handlePoint clicked | Team: ${team} | Points: ${points}`);
+    const ptsInt = parseInt(points);
+    console.log(`>>> [TOUCH_START] Team: ${team} | Points: ${ptsInt}`);
     stopRaidTimer();
 
-    // १. रेडर चेक (Case-Insensitive)
-    const activeRaiderEl = document.getElementById('activeRaider');
-    const raiderText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
-    console.log(`[CHECK] Current Raider: "${raiderText}"`);
+    const oppositeTeam = (team === 'A' ? 'B' : 'A');
+    
+    // १. मर्यादा तपासा (तुझे मूळ लॉजिक - सुरक्षित)
+    const oppositePlayers = (oppositeTeam === 'A' ? teamAPlayers : teamBPlayers);
+    const playersInCourt = oppositePlayers.filter(p => p.status === 'In').length;
 
-    if (raiderText === "" || raiderText.includes("WAITING") || raiderText.includes("NONE")) {
-        console.log(`[FLOW] Raider missing. Storing pending action for ${points} points.`);
-        
-        // ही 'Action' सेव्ह करा जेणेकरून रेडर निवडल्यावर ती आपोआप सुरू होईल
-        window.pendingAction = { team: team, points: points, type: 'touch' };
-
+    if (ptsInt > playersInCourt) {
+        console.error(`[RESTRICTION] Only ${playersInCourt} players left. Cannot give ${ptsInt} points.`);
         Swal.fire({
-            title: 'Select Raider First!',
-            text: 'पॉईंट्स देण्यापूर्वी रेडर निवडा.',
-            icon: 'warning',
-            confirmButtonText: 'Select Raider'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                console.log(`[UI] Opening Raider Selection Modal...`);
-                openRaiderSelectionModal(team);
-            }
+            title: 'शक्य नाही!',
+            text: `मैदानात फक्त ${playersInCourt} खेळाडू आहेत, त्यामुळे ${ptsInt} पॉईंट्स निवडता येणार नाहीत.`,
+            icon: 'error',
+            background: '#111',
+            color: '#fff'
         });
         return;
     }
 
-    // २. जर रेडर आधीच असेल तर थेट डिफेंडर्स निवडायला पाठवा
-    console.log(`[FLOW] Raider present. Proceeding to select ${points} defenders.`);
-    startTouchSelection(team, points);
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
+
+    // २. रेडर चेक (जर रेडर नसेल तर पेंडिंग ठेवा - तुझे मूळ लॉजिक)
+    if (raiderText === "" || raiderText.includes("WAITING")) {
+        console.log(`    [FLOW] Raider missing. Storing pendingAction for Touch.`);
+        window.pendingAction = { team: team, points: ptsInt, type: 'touch' };
+        openRaiderSelectionModal(team);
+        return;
+    }
+
+    // --- इथून पुढे समरी जोडली आहे ---
+    
+    // ३. समरी अपडेट (रेडर नाव काढून नोंद करणे)
+    if (typeof addRaidToSummary === "function") {
+        const raiderDisplayName = raiderText.split('(')[0].trim();
+        console.log(`[STRICT_LOG] Adding Touch Point Summary: ${ptsInt} pts for ${raiderDisplayName}`);
+     //   addRaidToSummary(team, raiderDisplayName, 'Touch Point', ptsInt, `${ptsInt} Players Out`);
+    }
+
+    // ४. टच पॉईंटसाठी डेटा सेट करा (तुझे मूळ लॉजिक)
+    currentAction = { 
+        team: team, 
+        type: 'touch', 
+        points: ptsInt 
+    };
+
+    window.requiredPlayers = ptsInt;
+    window.selectedPlayersCount = 0;
+
+    console.log(`    [DATA] currentAction set for Touch:`, currentAction);
+
+    // ५. समोरच्या टीमचे लोक आऊट करण्यासाठी दाखवा
+    openMultiPlayerModal(oppositeTeam, ptsInt, "Touch Points Out");
 }
 
 function openMorePointsModal(team) {
-    console.log(`[UI] Opening More Points Grid for Team ${team}`);
+    console.log(`[STRICT_LOG] Opening More Points Modal for Team: ${team}`);
+    
     Swal.fire({
         title: 'Select Points',
         background: '#111',
         html: `
             <div class="grid grid-cols-2 gap-3 mt-2">
-                ${[4, 5, 6, 7].map(num => `
-                    <button onclick="handlePoint('${team}', ${num})" 
-                        class="bg-gray-800 py-5 rounded-xl text-white font-black text-2xl border border-gray-700 active:bg-orange-600">
-                        ${num}
-                    </button>
-                `).join('')}
+                <button onclick="handlePoint('${team}', 4)" class="bg-gray-800 p-5 rounded-xl text-white font-black text-xl">4</button>
+                <button onclick="handlePoint('${team}', 5)" class="bg-gray-800 p-5 rounded-xl text-white font-black text-xl">5</button>
+                <button onclick="handlePoint('${team}', 6)" class="bg-gray-800 p-5 rounded-xl text-white font-black text-xl">6</button>
+                <button onclick="handlePoint('${team}', 7)" class="bg-gray-800 p-5 rounded-xl text-white font-black text-xl">7</button>
             </div>
         `,
         showConfirmButton: false,
-        showCancelButton: true,
-        cancelButtonText: 'CANCEL'
+        showCancelButton: true
     });
 }
 
-function startTouchSelection(team, count) {
-    console.log(`[DATA] Setting up Touch Selection: ${count} players needed.`);
+
+// ३. मोडल उघडण्याचे मास्टर फंक्शन
+function openMultiPlayerModal(teamToShow, count, headerText) {
+    console.log(`>>> [MODAL_OPEN] Team: ${teamToShow} | Type: ${headerText}`);
     
-    // तुझे मूळ व्हेरिएबल्स
-    requiredPlayers = parseInt(count);
+    const modal = document.getElementById('playerSelectModal');
+    const grid = document.getElementById('playerModalGrid');
+    const title = document.getElementById('playerModalTitle');
+    
+    title.innerText = `Select ${count} ${headerText} (Team ${teamToShow})`;
+    grid.innerHTML = "";
+    
+    let players = (teamToShow === 'A') ? teamAPlayers : teamBPlayers;
+
+    players.filter(p => p.status === 'In').forEach(p => {
+        // टॅकल असेल तर वेगळे फंक्शन, टच असेल तर वेगळे
+        let clickFn = (currentAction.type === 'tackle' || currentAction.type === 'super_tackle') 
+                      ? `selectDefenderForTackle('${p.no}', '${teamToShow}')`
+                      : `selectMultiplePlayers('${p.no}', '${teamToShow}')`;
+
+        grid.innerHTML += `
+            <button id="p-btn-${p.no}" onclick="${clickFn}" 
+                class="bg-gray-800 border border-gray-700 p-3 rounded-xl flex flex-col items-center active:bg-blue-600 transition-all">
+                <span class="text-xl font-black text-white">${p.no}</span>
+                <span class="text-[8px] text-gray-400 uppercase mt-1 truncate w-full text-center">${p.name}</span>
+            </button>`;
+    });
+
+    modal.classList.replace('hidden', 'flex');
+}
+
+function startTouchSelection(team, count) {
+    console.log(`[DATA] startTouchSelection: Team ${team}, Count ${count}`);
+    
+    // १. count ला सक्तीने नंबरमध्ये बदला (NaN टाळण्यासाठी)
+    requiredPlayers = Number(count);
     selectedPlayersCount = 0;
+
+    if (isNaN(requiredPlayers) || requiredPlayers <= 0) {
+        console.error("[ERROR] Invalid count received:", count);
+        requiredPlayers = 1; // डिफॉल्ट १ सेट करा जर काही चूक झाली तर
+    }
 
     currentAction = { 
         team: team, 
@@ -1449,14 +1719,14 @@ function startTouchSelection(team, count) {
         points: requiredPlayers 
     };
 
-    // तुझे आधीचे 'openMultiPlayerModal' फंक्शन कॉल करा
-    // आपण टायटल म्हणून "Touch" पाठवूया
+    console.log(`[MODAL] Asking to select ${requiredPlayers} players.`);
+    
+    // तुझे मूळ मोडल फंक्शन कॉल करा
     if (typeof openMultiPlayerModal === "function") {
         openMultiPlayerModal(team, requiredPlayers, "Touch");
-    } else {
-        console.error("[ERROR] openMultiPlayerModal function सापडले नाही!");
     }
 }
+
 
 // २. प्लेयर निवडण्यासाठी मोडल उघडणे
 function openPlayerModal(team, type) {
@@ -1464,6 +1734,7 @@ function openPlayerModal(team, type) {
     const grid = document.getElementById('playerModalGrid');
     
     let targetTeam;
+    // १. टीम ठरवण्याचे तुझे मूळ लॉजिक
     if (type === 'out') {
         targetTeam = team; 
     } else if (type === 'tackle') {
@@ -1472,14 +1743,15 @@ function openPlayerModal(team, type) {
         targetTeam = (team === 'A' ? 'B' : 'A'); 
     }
 
-    console.log(`[MODAL] Type: ${type}, Opening players for Team: ${targetTeam}`);
+    console.log(`>>> [MODAL_OPEN] Type: ${type} | Team: ${targetTeam}`);
     
     let players = (targetTeam === 'A') ? teamAPlayers : teamBPlayers;
     grid.innerHTML = "";
     
+    // २. फक्त 'In' असलेल्या खेळाडूंची लिस्ट दाखवणे
     players.filter(p => p.status === 'In').forEach(p => {
         grid.innerHTML += `
-            <button onclick="selectPlayer('${p.no}', '${targetTeam}')" 
+            <button onclick="selectPlayer('${p.no}', '${targetTeam}', '${type}')" 
                 class="bg-gray-900 border border-gray-800 p-2.5 rounded-xl flex flex-col items-center active:bg-orange-600 transition-colors shadow-inner overflow-hidden">
                 <span class="text-xl font-black text-white leading-tight">${p.no}</span>
                 <span class="text-[8px] text-gray-500 font-bold uppercase truncate w-full text-center mt-0.5">
@@ -1492,22 +1764,38 @@ function openPlayerModal(team, type) {
 }
 // ३. प्लेयर सिलेक्ट केल्यावर पॉईंट फायनल करणे
 // selectPlayer मध्ये हा लॉजिक पार्ट चेक कर
-function selectPlayer(playerNo, team) {
-    console.log(`[SELECT] Player ${playerNo} from Team ${team} selected.`);
+function selectPlayer(playerNo, team, type) {
+    console.log(`>>> [SELECT_PLAYER] No: ${playerNo} | Team: ${team} | Type: ${type}`);
     
-    // १. डिफेंडरला सिलेक्ट करणे (किंवा जो प्लेयर क्लिक केलाय त्याला)
-    updatePlayerStatus(playerNo, team, 'In'); // डिफेंडर तर 'In'च राहणार
+    if (type === 'out' || type === 'tackle') {
+        // १. खेळाडूला OUT करा
+        updatePlayerStatus(playerNo, team, 'Out');
+        
+        // २. स्कोर अपडेट (जर टॅकल पॉईंट असेल तर)
+        if (window.currentAction && window.currentAction.team) {
+            updateScore(window.currentAction.team, 1);
+            
+            // ३. टॅकल झाल्यावर सुद्धा समोरच्याचा खेळाडू रिवाइव्ह (In) झाला पाहिजे
+            if (typeof revivePlayers === "function") {
+                revivePlayers(window.currentAction.team, 1);
+            }
+            
+            window.currentAction = null; 
+        }
+    } else {
+        updatePlayerStatus(playerNo, team, 'In');
+    }
 
-    // २. जर ही टॅकल असेल, तर जो रेडर 'Raiding' करत होता त्याला 'Out' करा
-    // आपण 'activeRaider' मधला डेटा वापरून त्याला आऊट करू शकतो
-    processRaiderOutStatus(); 
+    // ३ऱ्या रेडच्या वेळी (Direct Out) आपण खालची फंक्शन्स थांबवतोय
+    if (type !== 'out') {
+        if (typeof processRaiderOutStatus === "function") processRaiderOutStatus(); 
+        if (typeof processPoints === "function") processPoints();
+    }
 
-    // ३. स्कोअर आणि मोडल क्लोज
-    processPoints();
     closePlayerModal();
     
-    // ४. रेडरचं नाव रिसेट करा
-    document.getElementById('activeRaider').innerText = "Waiting for Raid...";
+    const raiderEl = document.getElementById('activeRaider');
+    if (raiderEl) raiderEl.innerText = "WAITING FOR RAIDER...";
 }
 
 // रेडरला मॅन्युअली आऊट करण्यासाठी एक सपोर्ट फंक्शन
@@ -1519,32 +1807,131 @@ function processRaiderOutStatus() {
 }
 
 function processPoints() {
-    if (!currentAction) return;
-
-    const { team, type, points } = currentAction;
-
-    if (type === 'bonus_tackle') {
-        // १. डिफेंडर टीमला १ पॉईंट (Tackle)
-        updateScore(team, 1); 
-
-        // २. रेडर टीमला १ पॉईंट (Bonus)
-        const raiderTeam = (team === 'A' ? 'B' : 'A');
-        updateScore(raiderTeam, 1);
-        
-        console.log(`[SCORE UPDATE] Bonus + Tackle: 1 point to each team.`);
-    } else {
-        // तुझे बाकीचे नेहमीचे पॉईंट्स (Touch, Tackle, etc.)
-        updateScore(team, points);
+    // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
+    if (!currentAction) {
+        console.error(">>> [PROCESS_ERROR] No currentAction found to process!");
+        return;
     }
 
-    // ३. एम्प्टी रेड काउंट रिसेट करा (बोनस/टॅकल झालाय म्हणून)
-    emptyRaidCount['A'] = 0;
-    emptyRaidCount['B'] = 0;
-    updateEmptyDots('A');
-    updateEmptyDots('B');
+    // २. [CRITICAL ORDER]: UI रिसेट करण्यापूर्वी सर्व आवश्यक डेटा व्हेरिएबल्समध्ये काढून घ्या
+    const { team, type, points, raiderName } = currentAction;
+    const oppositeTeam = (team === 'A' ? 'B' : 'A');
 
-    // क्लिनअप
+    // एक्टिव रेडरचे नाव मिळवा (UI वरून किंवा currentAction मधून)
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const currentRaider = raiderName || (activeRaiderEl && activeRaiderEl.innerText !== "NONE (WAITING)" 
+                         ? activeRaiderEl.innerText.split('(')[0].trim() 
+                         : "Raider");
+
+    console.log(`--- [PROCESS_START] ---`);
+    console.log(`[ACTION_INFO] Processing ${type} for Team ${team} | Raider: ${currentRaider}`);
+
+    // ३. [CLEANUP]: डेटा वाचून झाल्यावर आता UI रिसेट करा (जेणेकरून NONE चा प्रॉब्लेम येणार नाही)
+    if (activeRaiderEl) {
+        console.log(`[CLEANUP] Resetting activeRaider UI...`);
+        activeRaiderEl.innerText = "NONE (WAITING)";
+        activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
+    }
+
+    // ४. आऊट झालेल्या खेळाडूंची यादी तयार करा
+    let outPlayersInfo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) 
+                         ? "Out: " + window.selectedPlayersList.join(", ") 
+                         : points + " Players Out";
+
+    // ५. [LOGIC SECTION]: जुन्या बटनांचे सर्व नियम इथे सुरक्षित आहेत
+    if (type === 'touch') {
+        updateScore(team, points);
+        addRaidToSummary(team, currentRaider, 'TOUCH POINT', points, outPlayersInfo);
+    } 
+    else if (type === 'bonus_touch') {
+        updateScore(team, points); 
+        addRaidToSummary(team, currentRaider, 'BONUS + TOUCH', points, outPlayersInfo);
+    }
+    else if (type === 'tackle') {
+        updateScore(team, 1);
+        let defender = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : 'Defender';
+        addRaidToSummary(team, currentRaider, 'TACKLE', 1, `Caught by ${defender}`);
+    }
+    else if (type === 'super_tackle') {
+        updateScore(team, 2);
+        let defenders = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList.join(', ') : 'Defenders';
+        addRaidToSummary(team, currentRaider, 'SUPER TACKLE', 2, `Caught by ${defenders}`);
+    }
+    else if (type === 'bonus_tackle') {
+        updateScore(team, 1);
+        updateScore(oppositeTeam, 1);
+        addRaidToSummary(team, currentRaider, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
+    }
+    else if (type === 'self_out') {
+        updateScore(team, points);
+        addRaidToSummary(team, currentRaider, 'SELF OUT', points, 'Raider went out of bounds');
+    }
+    else if (type === 'technical') {
+        updateScore(team, points);
+        addRaidToSummary(team, 'OFFICIALS', 'TECHNICAL POINT', points, 'Technical Violation');
+    }
+
+    // ६. [REVIVAL LOGIC]: रिवाइव्हलचे नियम (जुनेच आहेत)
+    let pointsToRevive = 0;
+    if (type === 'touch') pointsToRevive = points;
+    else if (type === 'bonus_touch') pointsToRevive = points - 1;
+    else if (type === 'tackle' || type === 'super_tackle' || type === 'bonus_tackle') pointsToRevive = 1;
+
+    if (pointsToRevive > 0 && typeof revivePlayers === "function") {
+        revivePlayers(team, pointsToRevive);
+    }
+
+    // ७. [EMPTY RAID RESET]: एम्प्टी रेड सिस्टिम रिसेट
+    if (type === 'touch' || type === 'bonus_touch' || type === 'bonus_tackle') {
+        if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
+        if (typeof updateEmptyDots === "function") updateEmptyDots(team);
+    }
+
+    // ८. अंतिम क्लिनअप: मेमरी रिसेट करा
+    window.selectedPlayersList = []; 
     currentAction = null;
+    
+    console.log(`--- [PROCESS_END] ---`);
+}
+
+
+
+function revivePlayers(team, count) {
+    console.log(`>>> [REVIVE_START] Team: ${team} | Points to Revive: ${count}`);
+    
+    let players = (team === 'A' ? teamAPlayers : teamBPlayers);
+    let currentInCount = players.filter(p => p.status === 'In').length;
+    
+    console.log(`    [CHECK] Current In-Court: ${currentInCount}/7`);
+
+    if (currentInCount >= 7) {
+        console.log(`    [SKIP] Already 7 players. No revival possible.`);
+        return;
+    }
+
+    let maxCanRevive = 7 - currentInCount;
+    let actualReviveCount = Math.min(count, maxCanRevive);
+
+    // सॉर्टिंग आणि फिल्टरिंगचे स्टेप-बाय-स्टेप लॉक्स
+    let outPlayers = players.filter(p => p.status === 'Out');
+    console.log(`    [DEBUG] Total Out Players found: ${outPlayers.length}`);
+
+    outPlayers.sort((a, b) => {
+        let timeA = a.outTime || Infinity;
+        let timeB = b.outTime || Infinity;
+        console.log(`    [SORTING] Comparing No.${a.no} (Time: ${timeA}) vs No.${b.no} (Time: ${timeB})`);
+        return timeA - timeB;
+    });
+
+    console.log(`    [FINAL_SEQUENCE] Order to Revive:`, outPlayers.map(p => `No.${p.no} (Time: ${p.outTime})`));
+
+    for (let i = 0; i < actualReviveCount; i++) {
+        if (outPlayers[i]) {
+            console.log(`    [REVIVE_EXEC] Executing Revival for index ${i}: Player No.${outPlayers[i].no}`);
+            updatePlayerStatus(outPlayers[i].no, team, 'In');
+        }
+    }
+    updateVisualPlayers(); // नवीन बदल
 }
 
 /**
@@ -1557,20 +1944,23 @@ function processPoints() {
 let isBonusPending = false; // हे ग्लोबल व्हेरिएबल वरती डिक्लेअर कर
 
 function handleBonus(team) {
-    console.log(`[CHECK] handleBonus clicked for team: ${team}`);
-    stopRaidTimer();
+    const ts = Date.now();
+    console.log(`[BONUS_DEBUG] Step 1: handleBonus Clicked | Team: ${team} | TS: ${ts}`);
+    
+    if (typeof stopRaidTimer === "function") {
+        stopRaidTimer();
+        console.log(`[BONUS_DEBUG] Step 2: stopRaidTimer called`);
+    }
 
     const activeRaiderEl = document.getElementById('activeRaider');
-    // .trim() मुळे फाजील स्पेस निघून जाईल आणि .toUpperCase() मुळे अक्षरांचा घोळ मिटेल
     const activeRaiderText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
-    
-    console.log(`[CHECK] Normalized Raider text: "${activeRaiderText}"`);
+    console.log(`[BONUS_DEBUG] Step 3: Raider Text found: "${activeRaiderText}"`);
 
-    // आता आपण फक्त "WAITING" हा शब्द आहे का ते चेक करूया
-    if (activeRaiderText === "" || activeRaiderText.includes("WAITING") || activeRaiderText.includes("NONE")) {
-        console.log(`[CHECK] Raider missing (Matched 'WAITING'). Opening Selection...`);
-        
-        isBonusPending = true; // बोनस मोडल उघडण्यासाठी खूण
+    const isWaiting = activeRaiderText === "" || activeRaiderText.includes("WAITING") || activeRaiderText.includes("NONE");
+
+    if (isWaiting) {
+        console.log(`[BONUS_DEBUG] Step 4: Raider Missing. Setting isBonusPending = true`);
+        window.isBonusPending = true; 
 
         Swal.fire({
             title: 'Select Raider First!',
@@ -1579,13 +1969,14 @@ function handleBonus(team) {
             confirmButtonText: 'Select Raider'
         }).then((result) => {
             if (result.isConfirmed) {
+                console.log(`[BONUS_DEBUG] Step 5: Swal Confirmed. Opening Selection Modal for ${team}`);
                 openRaiderSelectionModal(team);
             }
         });
         return;
     }
 
-    console.log(`[CHECK] Raider found. Opening Bonus Modal Directly.`);
+    console.log(`[BONUS_DEBUG] Step 4: Raider already present. Opening Bonus Modal Directly.`);
     openBonusPointsModal(team);
 }
 
@@ -1613,20 +2004,102 @@ function openBonusPointsModal(team) {
     });
 }
 
+let selectedPlayersCount = 0;
+let requiredPlayers = 0;
+
+function processBonus(team, touchPoints) {
+    const ts = Date.now();
+    console.log(`[BONUS_DEBUG] processBonus Start | Team: ${team} | TouchPts: ${touchPoints} | TS: ${ts}`);
+    
+    Swal.close();
+    
+    const ptsInt = parseInt(touchPoints);
+    window.requiredPlayers = ptsInt;
+    window.selectedPlayersCount = 0;
+    const oppositeTeam = (team === 'A' ? 'B' : 'A');
+
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderName = activeRaiderEl ? activeRaiderEl.innerText.split('(')[0].trim() : "Raider";
+
+    if (ptsInt === 0) {
+        // --- १. फक्त बोनस (+1) ---
+        updateScore(team, 1);
+        
+        // एम्प्टी रेड डॉट्स रिसेट (तुझे मूळ लॉजिक)
+        if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
+        if (typeof updateEmptyDots === "function") updateEmptyDots(team);
+        
+        // --- २. समरी अपडेट (आता आपण हे processPoints कडे सोपवू शकतो किंवा इथेच ठेवू शकतो) ---
+        if (typeof addRaidToSummary === "function") {
+            addRaidToSummary(team, raiderName, 'BONUS POINT', 1, 'Technical Bonus');
+        }
+
+        Swal.fire({ title: 'Bonus Only!', icon: 'success', toast: true, position: 'top', timer: 1500 });
+
+        // --- ३. सर्वात महत्त्वाचा बदल: रेड क्लोज करणे ---
+        // खेळाडू निवडायचे नसल्यामुळे आपण इथूनच 'Cleanup' करूया
+        if (activeRaiderEl) {
+            console.log(`[CLEANUP] Resetting activeRaider after Only Bonus...`);
+            activeRaiderEl.innerText = "NONE (WAITING)";
+            activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
+        }
+
+        // प्रॉब्लेम सोडवण्यासाठी: जर currentAction सेट असेल तर तो null करा
+        currentAction = null;
+        window.selectedPlayersList = [];
+
+        // टायमर सुरू करा (तुझे मूळ लॉजिक)
+       // if (typeof startRaidTimer === "function") startRaidTimer();
+
+    } else {
+        // --- बोनस (+1) + टच पॉईंट्स (हे लॉजिक जसे आहे तसेच राहील) ---
+        console.log(`[BONUS_DEBUG] Bonus + Touch points. Opening Modal for Team: ${oppositeTeam}`);
+        
+        const totalPoints = 1 + ptsInt;
+
+        currentAction = { 
+            team: team, 
+            type: 'bonus_touch', 
+            points: totalPoints 
+        };
+
+        // डिफेन्डर निवडण्यासाठी मोडल उघडा
+        openMultiPlayerModal(oppositeTeam, ptsInt, "Bonus Touch Out"); 
+    }
+}
+
 function handleBonusTackle(raiderTeam) {
-    console.log(`[ACTION] Bonus + Tackle! Raider Team: ${raiderTeam}`);
+    console.log(`[STRICT_LOG] Bonus + Tackle! Raider Team: ${raiderTeam}`);
     Swal.close();
 
     const defenderTeam = (raiderTeam === 'A' ? 'B' : 'A');
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderRaw = activeRaiderEl ? activeRaiderEl.innerText : "";
+    const raiderName = raiderRaw.split('(')[0].trim();
 
-    // १. फक्त ॲक्शन सेट करा, स्कोअर इथे देऊ नका
+    // १. एम्प्टी रेड काउंट रिसेट करा (बोनस मिळाल्यामुळे)
+    emptyRaidCount[raiderTeam] = 0; 
+    if (typeof updateEmptyDots === 'function') updateEmptyDots(raiderTeam);
+
+    // २. रेडरला Out List मध्ये टाका
+    let raiderNoMatch = raiderRaw.match(/\d+/); 
+    if (raiderNoMatch) {
+        console.log(`[STRICT_LOG] Raider ${raiderNoMatch[0]} identified for Out status.`);
+        updatePlayerStatus(raiderNoMatch[0], raiderTeam, 'Out');
+    }
+
+    // ३. समरीमध्ये नोंद
+    if (typeof addRaidToSummary === "function") {
+        addRaidToSummary(raiderTeam, raiderName, 'Bonus+Tackle', 1, 'Scored Bonus then Tackled');
+    }
+
+    // ४. करंट ॲक्शन सेट करा (स्कोर आता processPoints मधून अपडेट होईल)
     currentAction = { 
-        team: defenderTeam, // टॅकलचे मुख्य पॉईंट्स डिफेंडरला
+        team: defenderTeam, 
         type: 'bonus_tackle', 
-        points: 1 // हा टॅकलचा १ पॉईंट
+        points: 1 
     };
 
-    // २. थेट डिफेंडर निवडण्यासाठी मोडल उघडा
     console.log(`[FLOW] Opening Defender List for Team ${defenderTeam}`);
     openPlayerModal(defenderTeam, 'tackle'); 
 
@@ -1634,76 +2107,88 @@ function handleBonusTackle(raiderTeam) {
         title: 'Bonus + Tackle!',
         text: 'आता टॅकल करणाऱ्या डिफेंडरला निवडा.',
         icon: 'success',
-        toast: true,
-        position: 'top',
-        timer: 2000,
-        showConfirmButton: false
+        toast: true, position: 'top', timer: 2000, showConfirmButton: false
     });
 }
 
-// function processBonus(team, touchPoints) {
-//     Swal.close(); // जुना पॉईंट्सचा पॉपअप बंद करा
-    
-//     const totalPoints = 1 + touchPoints; // १ बोनस + किती टच
-//     console.log(`[BONUS PROCESS] Team: ${team}, Bonus: 1, Touch: ${touchPoints}, Total: ${totalPoints}`);
 
-//     if (touchPoints === 0) {
-//         // फक्त बोनस - थेट स्कोअर अपडेट
-//         updateScore(team, 1);
-//         emptyRaidCount[team] = 0; // बोनस मिळाला की एम्प्टी रेड काउंट रिसेट
-//         updateEmptyDots(team);
-        
-//         Swal.fire({ title: 'Bonus Point!', icon: 'success', toast: true, position: 'top', timer: 1500 });
-//     } else {
-//         // बोनस + टच पॉईंट्स - समोरच्या टीमची प्लेयर लिस्ट उघडा
-//         currentAction = { 
-//             team: team, 
-//             type: 'bonus_touch', 
-//             points: totalPoints 
-//         };
-        
-//         // समोरच्या टीमची लिस्ट उघडा (आउट झालेले प्लेयर्स निवडण्यासाठी)
-//         openPlayerModal(team, 'touch'); 
-//     }
-// }
 
 function renderMiniPlayers() {
+    console.log(`>>> [RENDER_UI] Refreshing Mini Players and Out Lists...`);
+    
     const containerA = document.getElementById('miniInA');
     const containerB = document.getElementById('miniInB');
-    
-    if(!containerA || !containerB) return;
+    const outListA = document.getElementById('outListA'); 
+    const outListB = document.getElementById('outListB');
 
-    // Team A रेंडरिंग आणि काउंट
-    const inCountA = teamAPlayers.filter(p => p.status === 'In').length;
-    containerA.innerHTML = teamAPlayers.map(p => 
-        `<span class="${p.status === 'In' ? 'text-green-500' : 'text-red-600'} text-xs">👤</span>`
-    ).join('');
-    // जर हवं असेल तर तू इथे 'inCountA' चा वापर करून "Players In: 5" असं ही दाखवू शकतोस.
+    // Team A Logic
+    const outA = teamAPlayers.filter(p => p.status === 'Out' && p.outTime !== null)
+                             .sort((a, b) => a.outTime - b.outTime);
+    if (outListA) {
+        outListA.innerText = outA.length > 0 ? `OUT: ${outA.map(p => p.no).join(', ')}` : "OUT: -";
+        console.log(`    [UI_UPDATE] Team A Out List: ${outListA.innerText}`);
+    }
 
-    // Team B रेंडरिंग आणि काउंट
-    const inCountB = teamBPlayers.filter(p => p.status === 'In').length;
-    containerB.innerHTML = teamBPlayers.map(p => 
-        `<span class="${p.status === 'In' ? 'text-green-500' : 'text-red-600'} text-xs">👤</span>`
-    ).join('');
+    // Team B Logic
+    const outB = teamBPlayers.filter(p => p.status === 'Out' && p.outTime !== null)
+                             .sort((a, b) => a.outTime - b.outTime);
+    if (outListB) {
+        outListB.innerText = outB.length > 0 ? `OUT: ${outB.map(p => p.no).join(', ')}` : "OUT: -";
+        console.log(`    [UI_UPDATE] Team B Out List: ${outListB.innerText}`);
+    }
 
-    // Super Tackle Check (जर ३ किंवा त्यापेक्षा कमी खेळाडू उरले असतील तर)
-    checkSuperTackleAvailability(inCountA, inCountB);
+    // आयकॉन्स रेंडरिंग (तुझा जुना कोड)
+    if(containerA) {
+        containerA.innerHTML = teamAPlayers.map(p => 
+            `<span class="${p.status === 'In' ? 'text-green-500' : 'text-red-600'} text-xs">👤</span>`
+        ).join('');
+    }
+    if(containerB) {
+        containerB.innerHTML = teamBPlayers.map(p => 
+            `<span class="${p.status === 'In' ? 'text-green-500' : 'text-red-600'} text-xs">👤</span>`
+        ).join('');
+    }
 }
 
-function checkSuperTackleAvailability(countA, countB) {
-    // इथे आपण सुपर टॅकल बटण चमकवायचं की नाही याचं लॉजिक लिहू शकतो
-    console.log(`Live Status - Team A: ${countA}, Team B: ${countB}`);
-}
+
 
 function updatePlayerStatus(playerNo, teamPrefix, newStatus) {
+    console.log(`>>> [STATUS_CHANGE] Player: ${playerNo} | Team: ${teamPrefix} | New Status: ${newStatus}`);
+    
     let targetList = (teamPrefix === 'A') ? teamAPlayers : teamBPlayers;
     let player = targetList.find(p => p.no == playerNo);
     
     if (player) {
         player.status = newStatus;
-        renderMiniPlayers(); // स्क्रीनवर आयकॉनचा रंग बदलण्यासाठी
-        
-        // TODO: इथे Firebase मध्ये सुद्धा अपडेट पाठवू शकतोस जेणेकरून लाईव्ह दिसले
+
+        if (newStatus === 'Out') {
+            player.outTime = Date.now(); 
+            console.log(`    [OUT_LOG] Time set for Player ${playerNo}: ${player.outTime}`);
+            
+            // १. आउट सिक्वेन्स अपडेट करा
+            updateOutSequence(playerNo, teamPrefix, 'Out');
+
+            // २. ऑल आऊट चेक करा
+            console.log(`    [CHECK] Checking if Team ${teamPrefix} is All Out...`);
+            checkAllOut(teamPrefix); 
+        } 
+        else if (newStatus === 'In') {
+            console.log(`    [IN_LOG] Clearing Time for Player ${playerNo}.`);
+            player.outTime = null; 
+
+            // ३. आउट सिक्वेन्स अपडेट करा
+            updateOutSequence(playerNo, teamPrefix, 'In');
+        }
+
+        // जुना प्लेयर्स लिस्ट रेंडर
+        if (typeof renderMiniPlayers === "function") renderMiniPlayers();
+    } else {
+        console.error(`    [ERROR] Player ${playerNo} not found in Team ${teamPrefix}!`);
+    }
+
+    // [IMPORTANT]: व्हिज्युअल आयकॉन्स अपडेट करा (Font Awesome Color Change)
+    if (typeof updateVisualPlayers === "function") {
+        updateVisualPlayers(); 
     }
 }
 
@@ -1717,18 +2202,52 @@ function closePlayerModal() {
 }
 
 // २. स्कोअर अपडेट करण्यासाठी (Local UI + Firebase)
+// async function updateScore(teamPrefix, points) {
+//     const { tId, mId } = matchSetupData; // आपण मॅच सेटअप वेळी हे सेव्ह केले होते
+//     const scoreEl = document.getElementById(`score${teamPrefix}`);
+
+//     if (!scoreEl) return;
+
+//     // Local UI अपडेट
+//     let currentScore = parseInt(scoreEl.innerText);
+//     let newScore = currentScore + points;
+//     scoreEl.innerText = newScore;
+
+//     // Firebase अपडेट
+//     try {
+//         const matchRef = db.collection("tournaments").doc(tId).collection("matches").doc(mId);
+        
+//         const updateData = {};
+//         if (teamPrefix === 'A') {
+//             updateData.scoreA = newScore;
+//         } else {
+//             updateData.scoreB = newScore;
+//         }
+
+//         await matchRef.update(updateData);
+//         console.log(`Score Updated for Team ${teamPrefix}: ${newScore}`);
+        
+//     } catch (error) {
+//         console.error("Score Update Error:", error);
+//     }
+
+//     // [ADD THIS]: स्कोअर LocalStorage मध्ये साठवा
+//     localStorage.setItem('liveScoreA', scoreA);
+//     localStorage.setItem('liveScoreB', scoreB);
+// }
+
 async function updateScore(teamPrefix, points) {
-    const { tId, mId } = matchSetupData; // आपण मॅच सेटअप वेळी हे सेव्ह केले होते
+    const { tId, mId } = matchSetupData; 
     const scoreEl = document.getElementById(`score${teamPrefix}`);
 
     if (!scoreEl) return;
 
-    // Local UI अपडेट
+    // Local UI अपडेट (जुना कोड तसाच आहे)
     let currentScore = parseInt(scoreEl.innerText);
     let newScore = currentScore + points;
     scoreEl.innerText = newScore;
 
-    // Firebase अपडेट
+    // Firebase अपडेट (जुना कोड तसाच आहे)
     try {
         const matchRef = db.collection("tournaments").doc(tId).collection("matches").doc(mId);
         
@@ -1745,51 +2264,122 @@ async function updateScore(teamPrefix, points) {
     } catch (error) {
         console.error("Score Update Error:", error);
     }
+
+    // --- [SAFE FIX]: फक्त खालील २ ओळी दुरुस्त केल्या आहेत ---
+    // आपण थेट स्क्रीनवरचा मजकूर (Text) स्टोरेजमध्ये साठवत आहोत
+    const sA = document.getElementById('scoreA')?.innerText || "0";
+    const sB = document.getElementById('scoreB')?.innerText || "0";
+
+    localStorage.setItem('liveScoreA', sA);
+    localStorage.setItem('liveScoreB', sB);
 }
 
 let outSequenceA = [];
 let outSequenceB = [];
 
-function updateOutSequence(playerNo, team) {
-    if (team === 'A') {
-        outSequenceA.push(playerNo);
-        document.getElementById('outSequenceA').innerText = outSequenceA.join(', ');
-    } else {
-        outSequenceB.push(playerNo);
-        document.getElementById('outSequenceB').innerText = outSequenceB.join(', ');
+function updateOutSequence(playerNo, team, status) {
+    console.log(`>>> [OUT_SEQ] Updating Team ${team} | Player ${playerNo} | Status ${status}`);
+    
+    let currentSeq = (team === 'A') ? outSequenceA : outSequenceB;
+    const elementId = (team === 'A') ? 'outSequenceA' : 'outSequenceB';
+
+    if (status === 'Out') {
+        // खेळाडू आऊट झाला तर लिस्टच्या शेवटी टाका
+        if (!currentSeq.includes(playerNo)) {
+            currentSeq.push(playerNo);
+        }
+    } else if (status === 'In') {
+        // खेळाडू जिवंत झाला तर लिस्ट मधून काढून टाका
+        if (team === 'A') {
+            outSequenceA = outSequenceA.filter(no => no != playerNo);
+            currentSeq = outSequenceA;
+        } else {
+            outSequenceB = outSequenceB.filter(no => no != playerNo);
+            currentSeq = outSequenceB;
+        }
+    }
+
+    // UI अपडेट करा
+    const displayEl = document.getElementById(elementId);
+    if (displayEl) {
+        displayEl.innerText = currentSeq.length > 0 ? currentSeq.join(', ') : 'NONE';
+    }
+    
+    console.log(`    [SEQ_RESULT] Team ${team}:`, currentSeq);
+
+    if (typeof updateVisualPlayers === "function") {
+        updateVisualPlayers(); 
     }
 }
+
 
 /** Empty Raid */
 let emptyRaidCount = { A: 0, B: 0 };
 
 function handleEmptyRaid(team) {
-    console.log(`[EMPTY RAID] Team: ${team}, Current Count: ${emptyRaidCount[team]}`);
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
+
+    if (raiderText === "" || raiderText.includes("WAITING") || !raiderText.includes(`(${team})`)) {
+        window.pendingAction = { type: 'empty', team: team };
+        openRaiderSelectionModal(team);
+        return;
+    }
+
+    // १. रेडरचे नाव किंवा नंबर स्वच्छ करा (उदा. "PLAYER 23 (B)" -> "PLAYER 23")
+    let raiderNo = raiderText.split(' ')[1] || raiderText.split('(')[0].trim();
+    let displayName = raiderText.split('(')[0].trim(); 
+
+    // २. रेड समरीमध्ये नोंद करा (पॉईंट्स ० कारण ही एम्टी रेड आहे)
+    if (typeof addRaidToSummary === "function") {
+        addRaidToSummary(team, displayName, 'Empty Raid', 0, 'Returned Safely');
+    }
+    
+    // ३. मूळ लॉजिक चालू ठेवा
+    processEmptyRaidLogic(team, "DIRECT_CLICK", raiderNo);
+}
+
+function processEmptyRaidLogic(team, source, raiderNo) {
+    console.log(`[STRICT_LOG] 📥 processEmptyRaidLogic | Raider: ${raiderNo} | Team: ${team}`);
     
     emptyRaidCount[team]++;
 
     if (emptyRaidCount[team] === 3) {
-        console.log(`[DO OR DIE] Team ${team} failed.`);
-        let oppositeTeam = (team === 'A' ? 'B' : 'A');
-
-        // महत्त्वाचं: इथे थेट updateScore() करू नकोस, म्हणून २ पॉईंट्स जात होते.
-        // आपण फक्त 'currentAction' सेट करू आणि मोडल उघडू.
+        console.error(`[STRICT_LOG] 🎯 3rd Raid FAIL! Auto-Out Raider: ${raiderNo}`);
         
-        currentAction = { 
-            team: oppositeTeam, // पॉईंट कोणाला मिळणार? (Opposite Team ला)
-            type: 'tackle', 
-            points: 1 
-        };
+        let oppositeTeam = (team === 'A' ? 'B' : 'A');
+        
+        // १. रेडरला OUT करा (ज्याने रेड केली तो आऊट होईल)
+        if (typeof updatePlayerStatus === "function") {
+            updatePlayerStatus(raiderNo, team, 'Out');
+        }
 
-        // टीम 'A' ची रेड असेल तर टीम 'A' चाच प्लेयर आउट दाखवला पाहिजे.
-        // त्यासाठी आपण 'out' प्रकार वापरून त्याच टीमची लिस्ट उघडू.
-        openPlayerModal(team, 'out'); 
+        // २. समोरच्या टीमला १ पॉईंट द्या
+        if (typeof updateScore === "function") {
+            updateScore(oppositeTeam, 1);
+        }
 
-        emptyRaidCount[team] = 0; // काउंट रिसेट
+        // ३. समोरच्या टीमचा खेळाडू रिवाइव्ह करा (आत आणा)
+        // इथे तुझे 'revivePlayers' फंक्शन कॉल करा
+        if (typeof revivePlayers === "function") {
+            console.log(`[REVIVAL_CALL] Calling revivePlayers for Team ${oppositeTeam}`);
+            revivePlayers(oppositeTeam, 1); 
+        }
+
+        // ४. काउंट रिसेट करा
+        emptyRaidCount[team] = 0;
+        
+        const activeRaiderEl = document.getElementById('activeRaider');
+        if (activeRaiderEl) activeRaiderEl.innerText = "WAITING FOR RAIDER...";
+        
+    } else {
+        const activeRaiderEl = document.getElementById('activeRaider');
+        if (activeRaiderEl) activeRaiderEl.innerText = "WAITING FOR RAIDER...";
     }
     
-    updateEmptyDots(team);
+    if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
 }
+
 
 function updateEmptyDots(team) {
     const dotsContainer = document.getElementById(`empty${team}`);
@@ -1862,6 +2452,8 @@ function updateOutSequenceDisplay() {
 }
 
 
+
+
 function openRaiderSelectionForBonus(team) {
     console.log(`[DEBUG] Attempting to open raider list for Team: ${team}`);
     const modal = document.getElementById('playerSelectModal');
@@ -1898,80 +2490,84 @@ function openRaiderSelectionForBonus(team) {
     modal.classList.replace('hidden', 'flex');
 }
 
-let selectedPlayersCount = 0;
-let requiredPlayers = 0;
 
-function processBonus(team, touchPoints) {
-    Swal.close();
-    requiredPlayers = parseInt(touchPoints);
-    selectedPlayersCount = 0;
-
-    if (requiredPlayers === 0) {
-        updateScore(team, 1);
-        emptyRaidCount[team] = 0;
-        updateEmptyDots(team);
-        Swal.fire({ title: 'Bonus Only!', icon: 'success', toast: true, position: 'top', timer: 1500 });
-    } else {
-        currentAction = { 
-            team: team, 
-            type: 'bonus_touch', 
-            points: 1 + requiredPlayers 
-        };
-        // समोरच्या टीमची लिस्ट उघडा - इथे "Bonus Touch" पाठवा
-        openMultiPlayerModal(team, requiredPlayers, "Bonus Touch"); 
-    }
-}
-
-function openMultiPlayerModal(team, count, headerText = "Out Players") {
-    console.log(`[MODAL] Opening Multi-Select for Team ${team}. Goal: ${count} players.`);
-    
-    const modal = document.getElementById('playerSelectModal');
-    const grid = document.getElementById('playerModalGrid');
-    const title = document.getElementById('playerModalTitle');
-    
-    let targetTeam = (team === 'A' ? 'B' : 'A');
-    
-    // परिस्थितीनुसार टायटल बदला (उदा. "Select 2 Touch Points")
-    title.innerText = `Select ${count} ${headerText} (Team ${targetTeam})`;
-    
-    let players = (targetTeam === 'A') ? teamAPlayers : teamBPlayers;
-    grid.innerHTML = "";
-    
-    players.filter(p => p.status === 'In').forEach(p => {
-        grid.innerHTML += `
-            <button id="p-btn-${p.no}" onclick="selectMultiplePlayers('${p.no}', '${targetTeam}')" 
-                class="bg-gray-800 border border-gray-700 p-3 rounded-xl flex flex-col items-center active:bg-red-600 transition-all">
-                <span class="text-xl font-black text-white">${p.no}</span>
-                <span class="text-[8px] text-gray-500 uppercase mt-1">${p.name}</span>
-            </button>`;
-    });
-
-    modal.classList.replace('hidden', 'flex');
-}
 
 function selectMultiplePlayers(playerNo, team) {
-    // १. प्लेयरचा स्टेटस अपडेट करा (आऊट करा)
-    updatePlayerStatus(playerNo, team, 'Out');
-    updateOutSequence(playerNo, team);
-    
-    // २. बटण डिसेबल करा जेणेकरून तोच प्लेयर पुन्हा निवडता येणार नाही
-    const btn = document.getElementById(`p-btn-${playerNo}`);
-    btn.classList.replace('bg-gray-800', 'bg-red-900');
-    btn.disabled = true;
+    console.log("--- [TOUCH_MODE_START] ---");
 
-    selectedPlayersCount++;
-
-    // ३. जर ठरवलेले सर्व प्लेयर्स निवडून झाले असतील, तरच मोडल बंद करा आणि स्कोअर द्या
-    if (selectedPlayersCount === requiredPlayers) {
-        setTimeout(() => {
-            processPoints();
-            closePlayerModal();
-        }, 500);
-    } else {
-        // अजून प्लेयर्स निवडायचे आहेत असा मेसेज
-        const title = document.getElementById('playerModalTitle');
-        title.innerText = `Select ${requiredPlayers - selectedPlayersCount} more...`;
+    // --- नवीन बदल: खेळाडूचा नंबर पिशवीत (List) टाका ---
+    if (!window.selectedPlayersList) window.selectedPlayersList = [];
+    if (!window.selectedPlayersList.includes(playerNo)) {
+        window.selectedPlayersList.push(playerNo);
     }
+    // ------------------------------------------------
+
+    const btn = document.getElementById(`p-btn-${playerNo}`);
+    if (btn) {
+        if (btn.classList.contains('bg-green-600')) return; 
+        btn.classList.remove('bg-gray-800');
+        btn.classList.add('bg-green-600', 'border-white', 'scale-95');
+        console.log(`[UI] Player No.${playerNo} highlighted.`);
+    }
+
+    updatePlayerStatus(playerNo, team, 'Out');
+    
+    window.selectedPlayersCount = (window.selectedPlayersCount || 0) + 1;
+    console.log(`[PROGRESS] Selected: ${window.selectedPlayersCount} / Required: ${window.requiredPlayers}`);
+
+    if (window.selectedPlayersCount >= window.requiredPlayers) {
+        console.log(`[FINISH] All required players selected.`);
+        setTimeout(() => {
+            finishAction();
+        }, 300); 
+    } else {
+        const title = document.getElementById('playerModalTitle');
+        if (title) title.innerText = `Select ${window.requiredPlayers - window.selectedPlayersCount} more...`;
+    }
+}
+
+// २. टॅकलसाठी स्वतंत्र फंक्शन
+function selectDefenderForTackle(playerNo, team) {
+    console.log("--- [TACKLE_MODE_START] ---");
+    console.log(`[CLICK] Defender No.${playerNo} from Team ${team} recorded the tackle.`);
+
+    // १. डिफेंडरचा नंबर पिशवीत (List) टाका जेणेकरून समरीमध्ये 'undefined' येणार नाही
+    window.selectedPlayersList = [playerNo]; 
+
+    const raiderTeam = currentAction.raiderTeam;
+    const raiderName = currentAction.raiderName;
+    
+    let raiderList = (raiderTeam === 'A' ? teamAPlayers : teamBPlayers);
+    
+    // तुझ्या जुन्या कोडमध्ये नाव मॅच करण्याऐवजी आपण डायरेक्ट एक्टिव रेडरला आऊट करू शकतो
+    // कारण टॅकल झाल्यावर रेडर आऊट होणे अनिवार्य आहे.
+    let raiderNoMatch = raiderName.match(/\d+/);
+    if (raiderNoMatch) {
+        console.log(`[EXECUTION] Marking Raider No.${raiderNoMatch[0]} (Team ${raiderTeam}) as OUT.`);
+        updatePlayerStatus(raiderNoMatch[0], raiderTeam, 'Out');
+    }
+    
+    // २. finishAction ऐवजी डायरेक्ट processPoints कॉल करणे जास्त सुरक्षित आहे 
+    // जेणेकरून स्कोअर आणि समरी लगेच अपडेट होईल.
+    closePlayerModal(); 
+    processPoints();
+}
+
+
+// हेल्पर फंक्शन - क्लोजिंग लॉजिकसाठी
+// ४. ॲक्शन पूर्ण झाल्यावर रिसेट करण्यासाठी
+function finishAction() {
+    setTimeout(() => {
+        processPoints(); 
+        closePlayerModal();
+        
+        window.selectedPlayersCount = 0;
+        window.requiredPlayers = 0;
+
+        const activeRaiderEl = document.getElementById('activeRaider');
+        if (activeRaiderEl) activeRaiderEl.innerText = "WAITING FOR RAIDER...";
+        console.log("--- [ACTION COMPLETE & GLOBALS RESET] ---");
+    }, 400);
 }
 
 function confirmRaider(no, name, team) {
@@ -2052,4 +2648,546 @@ function updatePlayerData(team, index, field, value) {
         teamBPlayers[index][field] = value;
     }
     console.log(`[UPDATE] Team ${team} Player ${index} ${field} set to: ${value}`);
+}
+
+function resetMatchData() {
+    // Team A रिसेट करा
+    teamAPlayers.forEach(p => {
+        p.status = 'In';
+        p.outTime = null; // जुना वेळ काढून टाका
+    });
+
+    // Team B रिसेट करा
+    teamBPlayers.forEach(p => {
+        p.status = 'In';
+        p.outTime = null;
+    });
+
+    // स्क्रीनवरची आउट लिस्ट रिकामी करा
+    renderMiniPlayers(); 
+    console.log("[RESET] All players are now IN and Out-history cleared.");
+}
+
+function initializeMatchPlayers() {
+    console.log("[INITIALIZE] Clearing old out-data and resetting players...");
+    
+    const resetList = (list) => {
+        list.forEach(p => {
+            // फक्त Starting 7 ला 'In' करा, बाकीच्यांना 'Sub' किंवा 'Out' ठेवा (तुझ्या गरजेनुसार)
+            // सध्या आपण सर्वांना 'In' धरूया जेणेकरून लिस्ट क्लियर होईल
+            p.status = 'In'; 
+            p.outTime = null; // सर्वात महत्त्वाचं: जुना आऊट वेळ डिलीट करा
+        });
+    };
+
+    resetList(teamAPlayers);
+    resetList(teamBPlayers);
+
+    renderMiniPlayers(); // UI रिफ्रेश करा
+}
+
+// २. ॲक्शन बटण दाबल्यावर (Tackle, Super Tackle, Self Out इ. साठी)
+function handleAction(team, type, points) {
+    console.log(`>>> [ACTION_START] Team: ${team} | Type: ${type} | Points: ${points}`);
+
+    // १. टेक्निकल पॉईंटसाठीचा तुझा मूळ ब्लॉक (जसा आहे तसाच ठेवा)
+    if (type === 'technical') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Technical Violation',
+                input: 'select',
+                inputOptions: {
+                    'Calling Raider while Riding': 'Calling Raider while Riding',
+                    'Touching Middle line While start Riding': 'Touching Middle line While start Riding',
+                    'Riding 2 Player together': 'Riding 2 Player together',
+                    'Raid not start in 5 Second': 'Raid not start in 5 Second',
+                    'Other': 'Other'
+                },
+                inputPlaceholder: 'Reason निवडा',
+                showCancelButton: true,
+                confirmButtonText: 'Give Point',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    console.log(`    [TECH_POINT] Adding ${points} point to Team ${team}. Reason: ${result.value}`);
+                    if (typeof updateScore === "function") {
+                        updateScore(team, parseInt(points)); 
+                    }
+                }
+            });
+        }
+        return; 
+    }
+
+    stopRaidTimer();
+
+    const oppositeTeam = (team === 'A' ? 'B' : 'A');
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderRawText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
+    const isRaiderWaiting = raiderRawText === "" || raiderRawText.includes("WAITING") || raiderRawText.includes("NONE");
+
+    // २. रेडर नसेल तर निवडायला सांगणे (तुझा मूळ कोड)
+    if (isRaiderWaiting) {
+        window.pendingAction = { team: team, points: parseInt(points), type: type };
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Select Raider!',
+                text: `पॉईंट देण्यासाठी आधी टीम ${oppositeTeam} चा रेडर निवडा.`,
+                icon: 'warning',
+                confirmButtonText: 'Select Raider'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openRaiderSelectionModal(oppositeTeam);
+                }
+            });
+        }
+        return;
+    }
+
+    // ३. नवीन "SELF OUT" लॉजिक (तुझा मूळ कोड)
+    if (type === 'self_out') {
+        console.log(`[STRICT_LOG] Processing Self Out for Raider from Team ${oppositeTeam}`);
+        let raiderNoMatch = raiderRawText.match(/\d+/);
+        if (raiderNoMatch && typeof updatePlayerStatus === "function") {
+            updatePlayerStatus(raiderNoMatch[0], oppositeTeam, 'Out');
+        }
+        currentAction = { team: team, type: 'self_out', points: parseInt(points) };
+        if (typeof processPoints === "function") {
+            processPoints();
+        }
+        return; 
+    }
+
+    // --- ४. टॅकल आणि सुपर टॅकल लॉजिक (इथे नवीन बदल केले आहेत) ---
+    console.log(`[STRICT_LOG] Raider found: ${raiderRawText}. Moving to Out Logic.`);
+
+    // [NEW CHANGE]: सुपर टॅकल नियम तपासणे (३ किंवा कमी खेळाडू आहेत का?)
+    if (type === 'super_tackle') {
+        let defendersList = (team === 'A') ? teamAPlayers : teamBPlayers;
+        let playersInCourt = defendersList.filter(p => p.status === 'In').length;
+
+        console.log(`[RULE_CHECK] Defenders in court: ${playersInCourt}`);
+
+        if (playersInCourt > 3) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Rule Violation!',
+                    text: `मैदानात ${playersInCourt} डिफेंडर्स आहेत. सुपर टॅकलसाठी ३ किंवा कमी खेळाडू लागतात.`,
+                    icon: 'error'
+                });
+            }
+
+            // [FIX]: नियम मोडला तरी रेड संपली आहे, म्हणून रेडर क्लिअर करा
+            if (activeRaiderEl) {
+                console.log(`[CLEANUP] Rule violated, resetting activeRaider UI...`);
+                activeRaiderEl.innerText = "NONE (WAITING)";
+                activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
+            }
+            
+            // डेटा रिसेट
+            currentAction = null;
+            window.selectedPlayersList = [];
+
+            return; // नियम मोडला असेल तर प्रक्रिया इथेच थांबवा
+        }
+    }
+
+    let raiderNoMatch = raiderRawText.match(/\d+/);
+    let raiderNo = raiderNoMatch ? raiderNoMatch[0] : null;
+
+    if (type === 'tackle' || type === 'super_tackle') {
+        if (raiderNo && typeof updatePlayerStatus === "function") {
+            updatePlayerStatus(raiderNo, oppositeTeam, 'Out');
+        }
+        // [INFO]: addRaidToSummary इथून कमेंट केली आहे कारण आता ती processPoints मध्ये आहे
+    }
+
+    currentAction = { 
+        team: team, 
+        type: type, 
+        points: parseInt(points),
+        raiderName: raiderRawText,
+        raiderTeam: oppositeTeam 
+    };
+
+    window.requiredPlayers = 1; 
+    window.selectedPlayersCount = 0;
+
+    // [NEW CHANGE]: मोडलचे टायटल परिस्थितीनुसार बदला
+    let modalHeader = (type === 'super_tackle') ? "Super Tackle By" : "Tackled By";
+    openMultiPlayerModal(team, 1, modalHeader);
+}
+
+
+function checkSuperTackle(defendingTeam) {
+    let inCount = (defendingTeam === 'A' ? teamAPlayers : teamBPlayers).filter(p => p.status === 'In').length;
+    
+    if (inCount <= 3) {
+        console.log("    [SPECIAL] SUPER TACKLE! 2 Points.");
+        handlePoint(defendingTeam, 2); // २ पॉईंट्स आणि १ पेक्षा जास्त प्लेयर इन करण्याचं लॉजिक
+    } else {
+        handleTackle(defendingTeam);
+    }
+}
+
+function handleAllOut(team) {
+    console.log(`>>> [ALL_OUT_START] Team ${team} gets All Out points!`);
+    
+    // १. २ एक्स्ट्रा पॉईंट्स द्या
+    updateScore(team, 2);
+    console.log(`    [SCORE] Added 2 All-Out points to Team ${team}`);
+
+    // २. समोरच्या टीमचे (ज्यांची पूर्ण टीम आऊट झाली होती) सर्व खेळाडू IN करा
+    const targetTeam = (team === 'A' ? 'B' : 'A');
+    let targetList = (targetTeam === 'A' ? teamAPlayers : teamBPlayers);
+
+    console.log(`    [REVIVE] Reviving ALL players for Team ${targetTeam}`);
+
+    targetList.forEach(p => {
+        // फक्त जे 'Out' आहेत त्यांनाच 'In' करा (जे आधीच 'In' आहेत त्यांना धक्का लावू नका)
+        if (p.status === 'Out') {
+            updatePlayerStatus(p.no, targetTeam, 'In');
+        }
+    });
+
+    // ३. रेडर रिसेट करा
+    const activeRaiderEl = document.getElementById('activeRaider');
+    if (activeRaiderEl) activeRaiderEl.innerText = "Waiting for Raider...";
+
+    Swal.fire({
+        title: 'ALL OUT!',
+        text: `Team ${team} ला २ ज्यादा गुण मिळाले!`,
+        icon: 'success',
+        timer: 1500
+    });
+    
+    console.log(`>>> [ALL_OUT_END] All players are back in court.`);
+}
+
+
+
+
+// खेळाडू आऊट झाला की हे फंक्शन कॉल कर (updatePlayerStatus मध्ये शेवटी हे टाक)
+function checkAllOut(team) {
+    const players = (team === 'A' ? teamAPlayers : teamBPlayers);
+    const inCourtCount = players.filter(p => p.status === 'In').length;
+
+    if (inCourtCount === 0) {
+        console.log(`>>> [ALL_OUT_DETECTED] Team ${team} is All Out!`);
+        const scoringTeam = (team === 'A' ? 'B' : 'A');
+
+        Swal.fire({
+            title: `TEAM ${team} ALL OUT!`,
+            text: `Team ${scoringTeam} ला २ ऑल-आऊट पॉईंट्स मिळतील.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm All Out',
+            background: '#111',
+            color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeAllOut(team, scoringTeam);
+            }
+        });
+    }
+}
+
+// ऑल-आऊटची प्रत्यक्ष अंमलबजावणी
+function executeAllOut(allOutTeam, scoringTeam) {
+    console.log(`>>> [ALL_OUT_START] Team: ${allOutTeam} is All-Out. Scoring Team: ${scoringTeam}`);
+
+    updateScore(scoringTeam, 2); // २ ऑल-आऊट पॉईंट्स
+    console.log(`    [SCORE] +2 Points added to Team ${scoringTeam}`);
+
+    let players = (allOutTeam === 'A') ? teamAPlayers : teamBPlayers;
+    
+    // १. आउट सिक्वेन्स पूर्णपणे रिकामी करा (RESET)
+    if (allOutTeam === 'A') {
+        outSequenceA = [];
+        const elA = document.getElementById('outSequenceA');
+        if (elA) elA.innerText = 'NONE';
+    } else {
+        outSequenceB = [];
+        const elB = document.getElementById('outSequenceB');
+        if (elB) elB.innerText = 'NONE';
+    }
+    console.log(`    [SEQ_RESET] Out sequence for Team ${allOutTeam} cleared.`);
+
+    // २. प्लेइंग ७ ला पुन्हा मैदानात आणा
+    players.forEach(p => {
+        if (p.playingStatus === "Playing") {
+            p.status = "In"; // तुझ्या आधीच्या फंक्शनमध्ये courtStatus होतं, ते 'status' आहे का एकदा चेक कर.
+            p.outTime = null;
+            console.log(`    [REVIVE] Player ${p.no} (${p.name}) is back In.`);
+        } else {
+            p.status = "Out"; 
+            console.log(`    [BENCH] Player ${p.no} remains on Bench.`);
+        }
+    });
+
+    renderMiniPlayers();
+    console.log(`<<< [ALL_OUT_COMPLETE] Team ${allOutTeam} is fully revived.`);
+}
+
+function substitutePlayer(outPlayerNo, inPlayerNo, team) {
+    let players = (team === 'A') ? teamAPlayers : teamBPlayers;
+    
+    let pOut = players.find(p => p.no == outPlayerNo);
+    let pIn = players.find(p => p.no == inPlayerNo);
+
+    if (pOut && pIn) {
+        // ७ नंबर बेंचवर गेला
+        pOut.playingStatus = "Bench";
+        pOut.courtStatus = "Out"; 
+
+        // ८ नंबर प्लेइंगमध्ये आला
+        pIn.playingStatus = "Playing";
+        pIn.courtStatus = "In";
+
+        console.log(`>>> [SUB] ${outPlayerNo} is now Bench, ${inPlayerNo} is now Playing.`);
+        renderMiniPlayers();
+    }
+}
+
+function togglePlayerRole(checkbox, playerNo) {
+    // समजा तुझ्या लेबलचा ID 'role-label-1' असा आहे
+    const label = document.getElementById(`role-label-${playerNo}`);
+    
+    if (checkbox.checked) {
+        label.innerText = "P7";
+        label.className = "text-[10px] text-green-500 font-bold"; // हिरवा रंग P7 साठी
+    } else {
+        label.innerText = "SUB";
+        label.className = "text-[10px] text-gray-500 font-bold"; // राखाडी रंग SUB साठी
+    }
+}
+
+function finalizeMatchSetup() {
+    let tempTeamA = [];
+    
+    // समजा १ ते १२ खेळाडू आहेत
+    for (let i = 1; i <= 12; i++) {
+        const name = document.getElementById(`name-input-${i}`).value;
+        const isPlaying = document.getElementById(`check-${i}`).checked;
+
+        tempTeamA.push({
+            no: i.toString(),
+            name: name || `Player ${i}`,
+            // इथे आपण आपलं 'Playing' आणि 'Bench' लॉजिक सेट करत आहोत
+            playingStatus: isPlaying ? "Playing" : "Bench",
+            status: isPlaying ? "In" : "Out", // सुरुवातीला प्लेइंग वाले 'In' असतील
+            outTime: null
+        });
+    }
+    
+    teamAPlayers = tempTeamA;
+    console.log("Team A Setup Complete:", teamAPlayers);
+    
+    // यानंतर मॅच स्क्रीनवर जा
+}
+
+function validateCheckboxes() {
+    const checkedCount = document.querySelectorAll('input[type="checkbox"]:checked').length;
+    if (checkedCount > 7) {
+        Swal.fire("मर्यादा!", "तुम्ही ७ पेक्षा जास्त खेळाडू 'Playing' म्हणून निवडू शकत नाही.", "warning");
+        return false;
+    }
+    return true;
+}
+
+function handleCheckboxChange(playerNo) {
+    const checkbox = document.getElementById(`check-${playerNo}`);
+    const label = document.getElementById(`role-label-${playerNo}`); // जिथे P7/SUB लिहिलंय
+
+    // ७ खेळाडूंची मर्यादा पाळण्यासाठी चेक (Optional पण गरजेचं)
+    const checkedCount = document.querySelectorAll('.setup-checkbox:checked').length;
+    
+    if (checkedCount > 7 && checkbox.checked) {
+        Swal.fire("मर्यादा!", "तुम्ही ७ पेक्षा जास्त 'Playing' खेळाडू निवडू शकत नाही.", "warning");
+        checkbox.checked = false; // टिक काढून टाका
+        return;
+    }
+
+    // UI अपडेट करा
+    if (checkbox.checked) {
+        label.innerText = "P7";
+        label.classList.remove('text-gray-500');
+        label.classList.add('text-green-500', 'font-bold');
+    } else {
+        label.innerText = "SUB";
+        label.classList.remove('text-green-500');
+        label.classList.add('text-gray-500', 'font-bold');
+    }
+}
+
+/***हे फंक्शन आपण प्रत्येक रेडच्या रिझल्ट नंतर (Empty, Point, Tackle) कॉल करू. */
+
+let raidCounter = 0;
+
+function addRaidToSummary(team, raiderName, result, points, details) {
+    const raidFeed = document.getElementById('raidFeed');
+    const modalRaidList = document.getElementById('modalRaidList');
+    const noRaidText = document.getElementById('noRaidText');
+    const modalEmptyText = document.getElementById('modalEmptyText');
+
+    if (noRaidText) noRaidText.remove(); 
+    if (modalEmptyText) modalEmptyText.remove(); 
+
+    raidCounter++;
+    document.getElementById('totalRaids').innerText = `Raids: ${raidCounter}`;
+
+    // --- तुझे मूळ स्टाइलिंग लॉजिक (Raid Feed साठी) ---
+    const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
+    let actionBg = "bg-gray-900"; 
+    let indicatorIcon = "•"; 
+    if (result.toUpperCase().includes('TACKLE')) { actionBg = "bg-red-900/30"; indicatorIcon = "🛑"; }
+    else if (result.toUpperCase().includes('BONUS')) { actionBg = "bg-blue-900/30"; indicatorIcon = "✨"; }
+    else if (points > 0) { actionBg = "bg-green-900/30"; indicatorIcon = "🎯"; }
+
+    const displayDetails = (details && details !== "") ? details : "";
+
+    // १. आडवा स्क्रोलर (Small Card) - हे बदलू नकोस
+    const raidEntry = document.createElement('div');
+    raidEntry.className = `flex-shrink-0 w-40 ${actionBg} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
+    raidEntry.innerHTML = `
+        <div class="flex justify-between items-start mb-0.5">
+            <span class="text-[10px] font-black text-white truncate w-28 uppercase">${raiderName}</span>
+            <span class="text-[10px] font-bold ${points > 0 ? 'text-green-400' : 'text-red-400'}">+${points}</span>
+        </div>
+        <div class="flex items-center gap-1 mb-1 opacity-90"><span class="text-[8px] text-gray-200 font-black uppercase tracking-tighter">${indicatorIcon} ${result}</span></div>
+        <div class="border-t border-white/10 pt-1 mt-1"><div class="text-[8px] text-white/80 leading-snug font-medium italic">${displayDetails}</div></div>
+    `;
+    raidFeed.prepend(raidEntry);
+
+    // २. [NEW STYLE]: मॉडेलमधील कॉमेंट्री स्टाईल लिस्ट
+    if (modalRaidList) {
+        const modalEntry = document.createElement('div');
+        // क्रिकेट कॉमेंट्री सारखा लुक
+        modalEntry.className = "py-2.5 border-b border-gray-100 flex gap-3 items-start bg-white";
+        
+        // पॉइंट्सचा रंग (हिरवा किंवा लाल)
+        const ptsBg = points > 0 ? 'bg-green-600' : 'bg-red-600';
+        const teamName = (team === 'A') ? (document.getElementById('teamAName')?.innerText || 'Team A') : (document.getElementById('teamBName')?.innerText || 'Team B');
+
+        modalEntry.innerHTML = `
+            <div class="shrink-0 w-6 h-6 ${ptsBg} text-white text-[10px] font-black flex items-center justify-center rounded shadow-sm">
+                ${points}
+            </div>
+            <div class="flex-1 text-[11px] leading-relaxed text-gray-800">
+                <span class="font-bold text-black uppercase">${raiderName}</span> 
+                <span class="text-gray-400 text-[9px] font-bold">[${teamName}]</span>: 
+                <span class="font-bold text-blue-800 uppercase tracking-tighter">${result}</span>. 
+                <span class="text-gray-500 italic ml-1">${displayDetails}</span>
+            </div>
+        `;
+        modalRaidList.prepend(modalEntry);
+    }
+}
+
+// १. मॉडेल उघडण्यासाठी
+function openSummaryModal() {
+    console.log("--- [ULTIMATE_FIX_START] ---");
+    const modal = document.getElementById('summaryModal');
+
+    // १. टीमची नावे (फक्त मजकूर)
+    const nameA = document.getElementById('teamAName')?.innerText || "Team A";
+    const nameB = document.getElementById('teamBName')?.innerText || "Team B";
+
+    // २. स्कोअर (LocalStorage मधून फक्त नंबर काढा)
+    // यामुळे <h1 id="scoreA"> वाला गोंधळ कायमचा संपेल
+    const finalScoreA = localStorage.getItem('liveScoreA') || "0";
+    const finalScoreB = localStorage.getItem('liveScoreB') || "0";
+
+    console.log("[FIXED_LOG] Final Values:", nameA, finalScoreA, "vs", nameB, finalScoreB);
+
+    // ३. मॉडेलमध्ये डेटा सेट करा
+    const mNameA = document.getElementById('modalTeamAName');
+    const mNameB = document.getElementById('modalTeamBName');
+    const mScoreA = document.getElementById('modalTeamAScore');
+    const mScoreB = document.getElementById('modalTeamBScore');
+
+    if (mNameA) mNameA.innerText = nameA;
+    if (mNameB) mNameB.innerText = nameB;
+    if (mScoreA) mScoreA.innerText = finalScoreA;
+    if (mScoreB) mScoreB.innerText = finalScoreB;
+
+    // ४. मॉडेल उघडा
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    console.log("--- [ULTIMATE_FIX_END] ---");
+}
+
+// २. मॉडेल बंद करण्यासाठी
+function closeSummaryModal() {
+    const modal = document.getElementById('summaryModal');
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
+    
+    // बॉडी स्क्रोल पुन्हा सुरू करा
+    document.body.style.overflow = 'auto';
+}
+
+
+function updateVisualPlayers() {
+    console.log("--- [ICON_DEBUG_START] ---");
+
+    const renderIcons = (team, containerId) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // जर window. वर नसेल तर थेट व्हेरिएबल नाव वापरून बघा
+        let players = [];
+        try {
+            players = (team === 'A') ? teamAPlayers : teamBPlayers;
+        } catch(e) {
+            console.error(`[ICON_DEBUG] Could not access team${team}Players variable!`);
+        }
+        
+        console.log(`[ICON_DEBUG] Team ${team} has ${players ? players.length : 0} players in data.`);
+        container.innerHTML = ""; 
+
+        for (let i = 0; i < 7; i++) {
+            let p = players && players[i] ? players[i] : null;
+            
+            // जर खेळाडू सापडला आणि त्याचा स्टेटस 'Out' असेल तरच राखाडी
+            const isOut = p && p.status === 'Out';
+            const iconColor = isOut ? '#4b5563' : '#10b981'; 
+            
+            if(p) {
+                console.log(`  [PLAYER_${i+1}] No: ${p.no} | Status: ${p.status} | Color: ${iconColor}`);
+            }
+
+            container.innerHTML += `<i class="fa-solid fa-user" style="color: ${iconColor} !important; font-size: 11px; margin: 0 1px;"></i>`;
+        }
+    };
+
+    renderIcons('A', 'playerIconsA');
+    renderIcons('B', 'playerIconsB');
+    console.log("--- [ICON_DEBUG_END] ---");
+}
+
+function setupLiveMatchNames() {
+    // १. Storage मधून फक्त नावे (Text) काढून व्हेरिएबलमध्ये ठेवली
+    const nameA = localStorage.getItem('currentTeamA') || "TEAM A";
+    const nameB = localStorage.getItem('currentTeamB') || "TEAM B";
+
+    // २. मुख्य स्क्रीनवरची नावे बदलली
+    const elA = document.getElementById('teamAName') || document.getElementById('liveTeamA');
+    const elB = document.getElementById('teamBName') || document.getElementById('liveTeamB');
+
+    if (elA) elA.innerText = nameA;
+    if (elB) elB.innerText = nameB;
+
+    // ३. मॉडेल (Timeline) मधली नावे बदलली
+    const modalA = document.getElementById('modalTeamAName');
+    const modalB = document.getElementById('modalTeamBName');
+
+    if (modalA) modalA.innerText = nameA;
+    if (modalB) modalB.innerText = nameB;
+
+    console.log("Names fixed: ", nameA, " vs ", nameB);
 }
