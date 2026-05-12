@@ -9,13 +9,46 @@ window.onload = () => {
 };
 
 /** toggle Menu */
-function toggleMenu() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
+// function toggleMenu() {
+//   const sidebar = document.getElementById('sidebar');
+//   const overlay = document.getElementById('overlay');
 
-  sidebar.classList.toggle('-translate-x-full');
-  overlay.classList.toggle('hidden');
+//   sidebar.classList.toggle('-translate-x-full');
+//   overlay.classList.toggle('hidden');
+// }
+
+function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    // तुझ्या HTML मध्ये आयडी 'overlay' असेल तर तोच ठेव, मी इथे 'overlay' वापरला आहे
+    const overlay = document.getElementById('overlay'); 
+
+    sidebar.classList.toggle('-translate-x-full');
+    
+    if (overlay) {
+        overlay.classList.toggle('hidden');
+        // जर तुला ब्लर नको असेल, तर तुझ्या HTML मधून 'backdrop-blur-sm' काढून टाक
+    }
 }
+
+
+function setActiveNav(pageId) {
+    // १. बॉटम नेव्हिगेशनची सर्व बटणे पकडा
+    const navButtons = document.querySelectorAll('.fixed.bottom-0 button');
+    
+    navButtons.forEach(btn => {
+        // २. सर्वांचा ऑरेंज कलर काढा आणि ग्रे (Gray) करा
+        btn.classList.remove('text-orange-500');
+        btn.classList.add('text-gray-500');
+    });
+
+    // ३. फक्त ज्या पेजवर आपण आहोत, त्याला ऑरेंज करा
+    const activeBtn = document.getElementById(`nav-${pageId}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-gray-500');
+        activeBtn.classList.add('text-orange-500');
+    }
+}
+
 
 /** 
 function loadPage(page) {
@@ -46,7 +79,11 @@ function loadPage(page) {
 */
 /** loadPage async */
 async function loadPage(page) {
+
   const app = document.getElementById('app');
+
+  // 🔥 १. हे नाव फायनल (UI अपडेट करण्यासाठी)
+  setActiveNav(page);   
 
   // 🔥 fetch page
   const res = await fetch(`pages/${page}.html`);
@@ -63,21 +100,75 @@ async function loadPage(page) {
 }
 
 /** Pages */
-function initPage(page) {
+async function initPage(page) {
+    const user = firebase.auth().currentUser;
+    let userRole = 'viewer';
 
-  if (page === 'home') {
-    // future home logic
+    if (user) {
+        userRole = await checkUserPermissions(user.email);
+    }
+
+    // 1. Navigation update kara
+    handleNavigationUI(userRole);
+
+    // 2. Viewer sathi Restricted Pages check
+    // Viewer la fakta 'home' ani 'profile' chi parvaangi aahe
+    const allowedPages = ['home', 'profile'];
+    
+    if (userRole === 'viewer' && !allowedPages.includes(page)) {
+        console.warn("Unauthorized access! Redirecting to home...");
+        loadPage('home'); 
+        return;
+    }
+
+    // 3. Home Page Logic
+    if (page === 'home') {
+        if (userRole === 'viewer') {
+            renderLiveMatchesForViewers(); 
+        } else {
+            renderAdminDashboard();
+        }
+    }
+
+    // Bakiche logic (Profile, Teams, etc.)
+    if (page === 'profile' && user) updateProfileUI(user);
+    if (page === 'teams' && userRole !== 'viewer') renderTeams();
+    if (page === 'tournaments' && userRole !== 'viewer') renderTournaments();
+
+}
+
+
+/**२. व्हिटलिस्ट चेक करण्यासाठी फंक्शन (Helper Function) */
+async function checkUserPermissions(email) {
+  console.log("Fetching permissions from Firestore for:", email);
+  try {
+    const db = firebase.firestore();
+    const docRef = db.collection('authorized_users').doc(email);
+    const doc = await docRef.get();
+    
+    if (doc.exists) {
+      const data = doc.data();
+      console.log("Firestore Data Found:", data);
+      return data.role; // 'admin' किंवा 'scorer'
+    } else {
+      console.error("No document found in 'authorized_users' for this email!");
+      return 'viewer';
+    }
+  } catch (error) {
+    console.error("Firestore Error in checkUserPermissions:", error);
+    return 'viewer';
   }
+}
 
-  if (page === 'teams') {
-    renderTeams();
-  }
 
-  if (page === 'tournaments') {
-    renderTournaments();
-  }
-    updateVisualPlayers(); // नवीन बदल
-
+function updateProfileUI(user) {
+    const profileName = document.getElementById('userDisplayName');
+    const profilePic = document.getElementById('userProfilePic');
+    const profileEmail = document.getElementById('userEmail');
+    
+    if (profileName) profileName.innerText = user.displayName;
+    if (profilePic) profilePic.src = user.photoURL;
+    if (profileEmail) profileEmail.innerText = user.email;
 }
 
 
@@ -177,6 +268,107 @@ function handleLevelChange() {
  * @createTournament 
  */
 
+// async function createTournament() {
+//   const tName = document.getElementById('tName').value;
+//   const startDate = document.getElementById('tStartDate').value;
+//   const endDate = document.getElementById('tEndDate').value;
+
+//   // १. नाव आणि तारखा रिकाम्या नसाव्यात याची खात्री करा
+//   if (!tName || !startDate || !endDate) {
+//     Swal.fire("चूक!", "कृपया टूर्नामेंटचे नाव आणि तारखा भरा.", "error");
+//     return;
+//   }
+
+//   // २. त्याच नावाच्या टूर्नामेंटची आधीच तपासणी करा (Restriction)
+//   const querySnapshot = await db.collection("tournaments")
+//     .where("name", "==", tName)
+//     .get();
+
+//   if (!querySnapshot.empty) {
+//     Swal.fire("ओहो...", "या नावाची टूर्नामेंट आधीच अस्तित्वात आहे!", "error");
+//     return;
+//   }
+
+//   const t = {
+//     name: tName,
+//     organizer: document.getElementById('tOrganizer').value,
+//     season: document.getElementById('tSeason').value,
+//     level: document.getElementById('tLevel').value,
+//     association: document.getElementById('tAssociation').value,
+//     surface: document.getElementById('tSurface').value,
+//     type: document.getElementById('tType').value,
+//     category: document.getElementById('tCategory').value,
+//     group: document.getElementById('tGroup').value,
+//     format: document.getElementById('tFormat').value,
+//     teamLimit: parseInt(document.getElementById('tLimit').value),
+//     startDate: startDate, // नवीन फील्ड
+//     endDate: endDate,     // नवीन फील्ड
+//     teams: tournamentTeams,
+//     createdAt: firebase.firestore.FieldValue.serverTimestamp()
+//   };
+
+//   try {
+//     await db.collection("tournaments").add(t);
+//     Swal.fire("यशस्वी!", "टूर्नामेंट तयार झाली आहे!", "success");
+//     closeTournamentModal();
+//     renderTournaments();
+//   } catch (error) {
+//     console.error("Error:", error);
+//     Swal.fire("Error", "सेव्ह करताना काहीतरी चूक झाली.", "error");
+//   }
+// }
+/**
+ * renderTournaments
+*/
+// async function renderTournaments() {
+//   const list = document.getElementById('tournamentList');
+//   if (!list) return;
+
+//   list.innerHTML = "<p class='text-center text-gray-500 text-xs'>लोड होत आहे...</p>";
+
+//   try {
+//     const snapshot = await db.collection("tournaments").orderBy("createdAt", "desc").get();
+//     list.innerHTML = "";
+
+//     snapshot.forEach((doc) => {
+//       const t = doc.data();
+//       const tId = doc.id; // Firebase Document ID
+
+//     list.innerHTML += `
+//     <div onclick="viewTournamentDetails('${tId}')" class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-lg mb-3 cursor-pointer hover:border-green-600 transition-all">
+//         <div class="flex justify-between items-start">
+//         <div>
+//             <div class="font-bold text-lg text-green-400">${t.name}</div>
+//             <div class="text-[10px] text-gray-400">${t.season} | ${t.level} - ${t.association || ''}</div>
+            
+//             <div class="text-[10px] text-blue-400 mt-1 font-medium">
+//             📅 ${t.startDate || 'TBD'} ते ${t.endDate || 'TBD'}
+//             </div>
+            
+//             <div class="text-[10px] text-gray-500 mt-1">${t.type} | ${t.group} | ${t.surface}</div>
+//         </div>
+        
+//         <div class="flex flex-col gap-2">
+//             <span class="bg-gray-800 text-[10px] px-2 py-1 rounded text-center">${t.format}</span>
+            
+//             <button onclick="event.stopPropagation(); editTournament('${tId}')" class="bg-blue-600 text-[10px] px-2 py-1 rounded text-white font-bold">
+//             Edit
+//             </button>
+//         </div>
+//         </div>
+        
+//         <div class="mt-2 text-[9px] text-gray-500 italic">
+//         Teams: ${t.teams ? t.teams.length : 0} registered
+//         </div>
+//     </div>
+//     `;
+//     });
+//   } catch (error) {
+//     console.error("Error fetching data:", error);
+//     list.innerHTML = "डेटा लोड करता आला नाही.";
+//   }
+// }
+
 async function createTournament() {
   const tName = document.getElementById('tName').value;
   const startDate = document.getElementById('tStartDate').value;
@@ -198,8 +390,13 @@ async function createTournament() {
     return;
   }
 
+  // 🔥 लॉगिन असलेला युजर मिळवा
+  const user = firebase.auth().currentUser;
+
   const t = {
     name: tName,
+    createdBy: user.email,         // 🔥 नवीन: हा टूर्नामेंटचा मालक (Admin)
+    assignedScorers: [],           // 🔥 नवीन: भविष्यात स्कोअरर नेमण्यासाठी रिकामी लिस्ट
     organizer: document.getElementById('tOrganizer').value,
     season: document.getElementById('tSeason').value,
     level: document.getElementById('tLevel').value,
@@ -210,8 +407,8 @@ async function createTournament() {
     group: document.getElementById('tGroup').value,
     format: document.getElementById('tFormat').value,
     teamLimit: parseInt(document.getElementById('tLimit').value),
-    startDate: startDate, // नवीन फील्ड
-    endDate: endDate,     // नवीन फील्ड
+    startDate: startDate, 
+    endDate: endDate,     
     teams: tournamentTeams,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
@@ -226,9 +423,7 @@ async function createTournament() {
     Swal.fire("Error", "सेव्ह करताना काहीतरी चूक झाली.", "error");
   }
 }
-/**
- * renderTournaments
-*/
+
 async function renderTournaments() {
   const list = document.getElementById('tournamentList');
   if (!list) return;
@@ -236,45 +431,73 @@ async function renderTournaments() {
   list.innerHTML = "<p class='text-center text-gray-500 text-xs'>लोड होत आहे...</p>";
 
   try {
-    const snapshot = await db.collection("tournaments").orderBy("createdAt", "desc").get();
+    const user = firebase.auth().currentUser;
+    // आपण आधी बनवलेले परमिशन फंक्शन वापरून रोल मिळवा
+    const userRole = await checkUserPermissions(user.email); 
+    
+    let query;
+    const dbRef = db.collection("tournaments");
+
+    // 🔥 रोलनुसार डेटा फिल्टर करा
+    if (userRole === 'admin') {
+        // ॲडमिनला त्याने स्वतः बनवलेल्या टूर्नामेंट्स दिसतील
+        query = dbRef.where("createdBy", "==", user.email);
+    } else if (userRole === 'scorer') {
+        // स्कोअररला ज्या टूर्नामेंटमध्ये ॲड केले आहे तीच दिसेल
+        query = dbRef.where("assignedScorers", "array-contains", user.email);
+    } else {
+        list.innerHTML = "<p class='text-center text-red-500 text-xs'>तुम्हाला पाहण्याची परवानगी नाही.</p>";
+        return;
+    }
+
+    // आता फिल्टर केलेला डेटा 'createdAt' नुसार सॉर्ट करा
+    const snapshot = await query.orderBy("createdAt", "desc").get();
     list.innerHTML = "";
+
+    if (snapshot.empty) {
+        list.innerHTML = "<p class='text-center text-gray-500 text-xs'>कोणतीही टूर्नामेंट सापडली नाही.</p>";
+        return;
+    }
 
     snapshot.forEach((doc) => {
       const t = doc.data();
-      const tId = doc.id; // Firebase Document ID
+      const tId = doc.id; 
 
-    list.innerHTML += `
-    <div onclick="viewTournamentDetails('${tId}')" class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-lg mb-3 cursor-pointer hover:border-green-600 transition-all">
-        <div class="flex justify-between items-start">
-        <div>
-            <div class="font-bold text-lg text-green-400">${t.name}</div>
-            <div class="text-[10px] text-gray-400">${t.season} | ${t.level} - ${t.association || ''}</div>
-            
-            <div class="text-[10px] text-blue-400 mt-1 font-medium">
-            📅 ${t.startDate || 'TBD'} ते ${t.endDate || 'TBD'}
-            </div>
-            
-            <div class="text-[10px] text-gray-500 mt-1">${t.type} | ${t.group} | ${t.surface}</div>
-        </div>
-        
-        <div class="flex flex-col gap-2">
-            <span class="bg-gray-800 text-[10px] px-2 py-1 rounded text-center">${t.format}</span>
-            
-            <button onclick="event.stopPropagation(); editTournament('${tId}')" class="bg-blue-600 text-[10px] px-2 py-1 rounded text-white font-bold">
-            Edit
-            </button>
-        </div>
-        </div>
-        
-        <div class="mt-2 text-[9px] text-gray-500 italic">
-        Teams: ${t.teams ? t.teams.length : 0} registered
-        </div>
-    </div>
-    `;
+      list.innerHTML += `
+      <div onclick="viewTournamentDetails('${tId}')" class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-lg mb-3 cursor-pointer hover:border-green-600 transition-all">
+          <div class="flex justify-between items-start">
+          <div>
+              <div class="font-bold text-lg text-green-400">${t.name}</div>
+              <div class="text-[10px] text-gray-400">${t.season} | ${t.level} - ${t.association || ''}</div>
+              
+              <div class="text-[10px] text-blue-400 mt-1 font-medium">
+              📅 ${t.startDate || 'TBD'} ते ${t.endDate || 'TBD'}
+              </div>
+              
+              <div class="text-[10px] text-gray-500 mt-1">${t.type} | ${t.group} | ${t.surface}</div>
+          </div>
+          
+          <div class="flex flex-col gap-2">
+              <span class="bg-gray-800 text-[10px] px-2 py-1 rounded text-center">${t.format}</span>
+              
+              <!-- फक्त ॲडमिनलाच 'Edit' बटण दिसावे असे वाटत असेल तर खालील चेक वापरू शकतोस -->
+              ${userRole === 'admin' ? `
+                <button onclick="event.stopPropagation(); editTournament('${tId}')" class="bg-blue-600 text-[10px] px-2 py-1 rounded text-white font-bold">
+                Edit
+                </button>
+              ` : ''}
+          </div>
+          </div>
+          
+          <div class="mt-2 text-[9px] text-gray-500 italic">
+          Teams: ${t.teams ? t.teams.length : 0} registered
+          </div>
+      </div>
+      `;
     });
   } catch (error) {
     console.error("Error fetching data:", error);
-    list.innerHTML = "डेटा लोड करता आला नाही.";
+    list.innerHTML = "<p class='text-center text-red-500 text-xs'>डेटा लोड करताना चूक झाली (Index गरज असू शकते).</p>";
   }
 }
 /**
@@ -780,8 +1003,8 @@ async function confirmStartMatch() {
             teamBPlayers: playersB,
             scoreA: 0,
             scoreB: 0,
-            timeoutsA: 4,
-            timeoutsB: 4,
+            timeoutsA: 0,
+            timeoutsB: 0,
             matchLog: []
         };
 
@@ -1278,29 +1501,65 @@ function closeMatchSetter() {
  * या फंक्शनशिवाय स्कोअरिंग स्क्रीनला हे समजणारच नाही की नक्की कोणत्या टीमची आणि कोणत्या खेळाडूंची मॅच सुरू आहे.
  */
 
+// async function goToScoring(tId, mId) {
+//     await loadPage('scoring'); 
+
+//     try {
+//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+//         const match = mDoc.data();
+//         currentMatchData = match;
+
+//         // [ बदल ]: नावे LocalStorage मध्ये साठवा जेणेकरून ती पुढच्या फंक्शनला मिळतील
+//         localStorage.setItem('currentTeamA', match.teamA);
+//         localStorage.setItem('currentTeamB', match.teamB);
+//             // मूळ स्क्रीनवरील नावे अपडेट करा
+//                     setupLiveMatchNames();
+
+//         teamAPlayers = match.teamAPlayers || [];
+//         teamBPlayers = match.teamBPlayers || [];
+
+
+//         document.getElementById('scoreA').innerText = match.scoreA || 0;
+//         document.getElementById('scoreB').innerText = match.scoreB || 0;
+
+//         renderMiniPlayers();
+        
+//         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
+
+//     } catch (e) {
+//         console.error("Error loading scoring data:", e);
+//     }
+// }
+
+
 async function goToScoring(tId, mId) {
+    console.log("--- [NAV] Loading Original Scoring Logic ---");
     await loadPage('scoring'); 
 
     try {
         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
         const match = mDoc.data();
+        
+        // १. तुझा जुना मूळ डेटा सेट
         currentMatchData = match;
 
-        // [ बदल ]: नावे LocalStorage मध्ये साठवा जेणेकरून ती पुढच्या फंक्शनला मिळतील
         localStorage.setItem('currentTeamA', match.teamA);
         localStorage.setItem('currentTeamB', match.teamB);
-            // मूळ स्क्रीनवरील नावे अपडेट करा
-                    setupLiveMatchNames();
+        
+        setupLiveMatchNames();
 
         teamAPlayers = match.teamAPlayers || [];
         teamBPlayers = match.teamBPlayers || [];
 
+        if(document.getElementById('scoreA')) document.getElementById('scoreA').innerText = match.scoreA || 0;
+        if(document.getElementById('scoreB')) document.getElementById('scoreB').innerText = match.scoreB || 0;
 
-        document.getElementById('scoreA').innerText = match.scoreA || 0;
-        document.getElementById('scoreB').innerText = match.scoreB || 0;
-
+        // २. तुझे मूळ रेंडरिंग फंक्शन (जसे होते तसेच)
         renderMiniPlayers();
         
+        // ३. फक्त नवीन UI साठी (काहीही बिघडणार नाही)
+        if (typeof updateTimeoutUI === "function") updateTimeoutUI();
+
         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
 
     } catch (e) {
@@ -3132,6 +3391,64 @@ function closeSummaryModal() {
 }
 
 
+//१. नवीन addEventToSummary फंक्शन
+//हे फंक्शन तुझे रेड कार्ड्स आणि इव्हेंट कार्ड्स यांच्यात सुसंगतता ठेवेल.
+
+function addEventToSummary(type, team, message) {
+    console.log(`--- [EVENT_FEED] Adding ${type} for Team ${team} ---`);
+    
+    const raidFeed = document.getElementById('raidFeed');
+    const modalRaidList = document.getElementById('modalRaidList');
+    const noRaidText = document.getElementById('noRaidText');
+    const modalEmptyText = document.getElementById('modalEmptyText');
+
+    if (noRaidText) noRaidText.style.display = 'none';
+    if (modalEmptyText) modalEmptyText.remove();
+
+    // १. आडवा स्क्रोलर (Small Card) - तुझ्या रेड कार्ड सारखाच लुक
+    const borderColor = (team === 'A') ? 'border-green-500' : (team === 'B' ? 'border-blue-500' : 'border-orange-500');
+    const icon = type === 'TIMEOUT' ? '⏱️' : '🔄';
+    const bgColor = type === 'TIMEOUT' ? 'bg-orange-900/30' : 'bg-blue-900/30';
+
+    const eventEntry = document.createElement('div');
+    eventEntry.className = `flex-shrink-0 w-40 ${bgColor} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
+    eventEntry.innerHTML = `
+        <div class="flex justify-between items-start mb-0.5">
+            <span class="text-[10px] font-black text-white uppercase">${type}</span>
+            <span class="text-[8px] text-gray-400">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        </div>
+        <div class="flex items-center gap-1 mb-1 opacity-90">
+            <span class="text-[9px] text-white font-bold tracking-tight">${icon} TEAM ${team}</span>
+        </div>
+        <div class="border-t border-white/10 pt-1 mt-1">
+            <div class="text-[8px] text-white/80 leading-tight font-medium italic">${message}</div>
+        </div>
+    `;
+    raidFeed.prepend(eventEntry);
+
+    // २. मॉडेलमधील कॉमेंट्री स्टाईल (Summary Modal)
+    if (modalRaidList) {
+        const modalEntry = document.createElement('div');
+        modalEntry.className = "py-2.5 border-b border-gray-100 flex gap-3 items-start bg-gray-50/50";
+        
+        const ptsBg = type === 'TIMEOUT' ? 'bg-orange-500' : 'bg-blue-500';
+        
+        modalEntry.innerHTML = `
+            <div class="shrink-0 w-6 h-6 ${ptsBg} text-white text-[10px] font-black flex items-center justify-center rounded">
+                ${type === 'TIMEOUT' ? 'T' : 'S'}
+            </div>
+            <div class="flex-1 text-[11px] leading-relaxed text-gray-700">
+                <span class="font-black text-black uppercase">${type}</span>: 
+                <span class="font-medium text-gray-900">${message}</span>
+                <span class="text-gray-400 text-[9px] ml-2 italic">${new Date().toLocaleTimeString()}</span>
+            </div>
+        `;
+        modalRaidList.prepend(modalEntry);
+    }
+}
+
+
+
 function updateVisualPlayers() {
     console.log("--- [ICON_DEBUG_START] ---");
 
@@ -3190,4 +3507,831 @@ function setupLiveMatchNames() {
     if (modalB) modalB.innerText = nameB;
 
     console.log("Names fixed: ", nameA, " vs ", nameB);
+}
+
+
+
+/** Match Timer */
+
+let matchTotalSeconds = 20 * 60; 
+let matchInterval = null;
+let isMatchPaused = true; 
+
+// १. टायमर फॉरमॅट करणे
+function formatMatchTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// २. टायमर सुरू/पॉज करणे (हे तुमच्या 'Pause Match' बटणासाठी)
+function toggleMatchTimer() {
+    const btn = document.getElementById('mainMatchBtn'); 
+    
+    // १. सर्वात आधी जुना कोणताही इंटरव्हल असेल तर तो थांबवा (Safety Check)
+    clearInterval(matchInterval);
+
+    if (isMatchPaused) {
+        // २. मॅच सुरू/रिझ्युम करा
+        isMatchPaused = false;
+        if (btn) {
+            btn.innerText = "PAUSE MATCH";
+            btn.classList.replace('bg-green-600', 'bg-red-600'); // कलर पण बदलू शकतोस
+        }
+
+        matchInterval = setInterval(() => {
+            if (matchTotalSeconds > 0) {
+                matchTotalSeconds--;
+                updateMatchUI();
+                localStorage.setItem('savedMatchTime', matchTotalSeconds);
+            } else {
+                clearInterval(matchInterval); // वेळ संपल्यावर थांबवा
+                handleMatchTimeEnd();
+            }
+        }, 1000);
+    } else {
+        // ३. मॅच पॉज करा
+        isMatchPaused = true;
+        if (btn) {
+            btn.innerText = "RESUME MATCH";
+            btn.classList.replace('bg-red-600', 'bg-green-600');
+        }
+        // clearInterval आपण वरच (Line 5) केला आहे, तरी इथे राहू दे.
+        clearInterval(matchInterval);
+    }
+}
+
+// ३. UI अपडेट करणे (फक्त 'matchTimer' आयडी वापरून)
+function updateMatchUI() {
+    const display = document.getElementById('matchTimer');
+    if (display) {
+        display.innerText = formatMatchTime(matchTotalSeconds);
+        
+        // १ मिनिटापेक्षा कमी वेळ असेल तर लाल रंग (Optional)
+        if (matchTotalSeconds <= 60) {
+            display.classList.add('text-red-500');
+        }
+    }
+}
+
+
+
+
+/*Refresh reload**/
+
+// १. पेज लोड होताच जुना डेटा चेक करा
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTime = localStorage.getItem('savedMatchTime');
+    const savedStatus = localStorage.getItem('isMatchPaused');
+
+    if (savedTime !== null) {
+        matchTotalSeconds = parseInt(savedTime);
+        updateMatchUI();
+    }
+
+    // [STRICT RULE]: पुन्हा आल्यावर मॅच नेहमी 'PAUSE' मोडमध्येच असावी
+    isMatchPaused = true; 
+    const btn = document.getElementById('mainMatchBtn');
+    if (btn) {
+        btn.innerText = "RESUME MATCH";
+        btn.classList.replace('bg-red-900/40', 'bg-green-900/40');
+    }
+    clearInterval(matchInterval); 
+});
+
+// २. पेज रिफ्रेश करताना वॉर्निंग
+window.onbeforeunload = function() {
+    // १. जाताना डेटा सेव्ह करा
+    saveMatchProgress();
+
+    // २. जर मॅच सुरू असेल, तर पॉज करा
+    if (!isMatchPaused) {
+        isMatchPaused = true;
+        clearInterval(matchInterval);
+    }
+
+    // ३. युजरला वॉर्निंग द्या
+    if (matchTotalSeconds > 0 && matchTotalSeconds < 1200) {
+        return "Match is in progress. Your data is saved and match is paused.";
+    }
+};
+
+
+// १. वेळ सेव्ह करण्यासाठी फंक्शन (टायमर रन होत असताना हे कॉल होईल)
+function saveMatchProgress() {
+    localStorage.setItem('savedMatchTime', matchTotalSeconds);
+    localStorage.setItem('isMatchPaused', isMatchPaused);
+}
+
+// २. मॅच आपोआप पॉज करणे (जेव्हा युजर पेज सोडून जातो)
+window.addEventListener('blur', () => {
+    // युजरने दुसऱ्या टॅबवर क्लिक केले किंवा मिनीमाइज केले तरी पॉज होईल
+    if (!isMatchPaused) {
+        toggleMatchTimer(); // हे फंक्शन मॅच पॉज करेल
+    }
+});
+
+
+/**Login */
+
+// १. लॉगिन फंक्शन (खात्री करा की हे app.js मध्ये आहे)
+async function login() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+        await firebase.auth().signInWithPopup(provider);
+        // यशस्वी झाल्यावर onAuthStateChanged आपोआप पुढचे काम करेल
+    } catch (error) {
+        console.error("Login Error:", error);
+        alert("लॉगिन अयशस्वी!");
+    }
+}
+
+// २. ऑथेंटिकेशन गार्ड
+firebase.auth().onAuthStateChanged((user) => {
+    const overlay = document.getElementById('loginOverlay');
+    if (user) {
+        // जर युजर लॉगिन असेल तरच स्क्रीन लपवा
+        if (overlay) overlay.classList.add('hidden');
+        console.log("User Logged In:", user.displayName);
+        
+        // Welcome मेसेजमध्ये युजरचं नाव दाखवण्यासाठी:
+        const welcomeText = document.querySelector('#app h2');
+        if (welcomeText) welcomeText.innerText = `Welcome ${user.displayName} 👋`;
+    } else {
+        // लॉगिन नसेल तर स्क्रीन दाखवा
+        if (overlay) overlay.classList.remove('hidden');
+    }
+});
+
+// ३. प्रोफाइलची माहिती भरण्यासाठी फंक्शन
+function updateProfileUI(user) {
+    // जेव्हा युजर profile पेजवर असेल, तेव्हाच हे रन होईल
+    const profileName = document.getElementById('userDisplayName');
+    const profilePic = document.getElementById('userProfilePic');
+    
+    if (profileName) profileName.innerText = user.displayName;
+    if (profilePic) profilePic.src = user.photoURL;
+}
+
+
+// app.js मध्ये initPage च्या सुरुवातीला हे टाका
+async function handleNavigationUI(role) {
+    const bottomNav = document.querySelector('.fixed.bottom-0');
+    const sidebarBtn = document.querySelector('button[onclick="toggleMenu()"]');
+
+    // सर्व बटणांची लिस्ट (Sidebar आणि Bottom Nav दोन्हीसाठी)
+    const restrictedElements = [
+        'nav-matches', 'nav-teams', 'nav-tournaments', // Bottom Nav IDs
+        'side-matches', 'side-teams', 'side-tournaments' // Sidebar IDs
+    ];
+
+    if (role === 'viewer') {
+        // व्ह्यूअरला नेव्हिगेशन दिसेल (Home/Profile साठी)
+        if (bottomNav) bottomNav.style.display = 'flex';
+        if (sidebarBtn) sidebarBtn.style.display = 'block';
+
+        // फक्त Restricted बटणे लपवा
+        restrictedElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        
+        console.log("Viewer Mode: Hidden all management tabs.");
+    } else {
+        // Admin/Scorer ला सर्व काही दाखवा
+        if (bottomNav) bottomNav.style.display = 'flex';
+        if (sidebarBtn) sidebarBtn.style.display = 'block';
+
+        restrictedElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'block'; // किंवा Sidebar साठी 'block' आणि Bottom साठी 'inline-block'
+        });
+    }
+}
+
+// Timeout and Sub
+
+//१. triggerCommonTimeout (फक्त टायमर सुरू करण्यासाठी)
+//हे फंक्शन फक्त ३० सेकंदांचा टायमर पडद्यावर (Overlay) सुरू करेल.
+
+let timeoutInterval;
+let timeoutTypeAssigned = false; // क्रेडिट दिले आहे की नाही हे तपासण्यासाठी
+
+function triggerCommonTimeout() {
+    console.log("--- [TIMEOUT_PROCESS] Start ---");
+
+    // १. जर मॅच टायमर सुरू असेल (isMatchPaused false असेल), तर तो पॉज करा
+    if (!isMatchPaused) {
+        console.log("[SYNC] Match is running. Pausing timer for Timeout...");
+        toggleMatchTimer(); // हे फंक्शन कॉल केल्यावर isMatchPaused 'true' होईल आणि clearInterval होईल
+    }
+
+    document.getElementById('timeoutOverlay').classList.remove('hidden');
+    timeoutTypeAssigned = false;
+    
+    let timeLeft = 30;
+    const clockEl = document.getElementById('timeoutClock');
+    
+    clearInterval(timeoutInterval);
+    timeoutInterval = setInterval(() => {
+        timeLeft--;
+        console.log("[TIMEOUT_TICK] Seconds left:", timeLeft); // Console Log जो तू मागितला होतास
+        
+        if (clockEl) clockEl.innerText = timeLeft;
+
+        if (timeLeft <= 0) {
+            console.log("[TIMEOUT_END] 30 seconds finished.");
+            stopTimeout();
+        }
+    }, 1000);
+}
+
+function stopTimeout() {
+    console.log("--- [TIMEOUT_PROCESS] Stop ---");
+
+    // १. बटणे पुन्हा सुरू करा (जर ती Official मुळे Disable झाली असतील तर)
+    const buttons = document.querySelectorAll('#timeoutOverlay button');
+    buttons.forEach(btn => {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.pointerEvents = "auto";
+    });
+
+    // २. टायमर थांबवा आणि मॉडेल लपवा
+    clearInterval(timeoutInterval);
+    document.getElementById('timeoutOverlay').classList.add('hidden');
+
+    // ३. जर मॅच पॉज असेल, तर ती पुन्हा सुरू करा
+    if (isMatchPaused) {
+        console.log("[SYNC] Resuming Match Timer after Timeout.");
+        toggleMatchTimer(); 
+    }
+}
+
+//२. assignTimeoutCredit (कोणी टाईमआऊट घेतला हे ठरवण्यासाठी)
+//जेव्हा स्कोअरर 'Team A' किंवा 'Team B' बटण ओव्हरलेवर दाबतो, तेव्हा हे फंक्शन फायरबेसमध्ये काउंट कमी करेल.
+
+async function assignTimeoutCredit(team) {
+    const teamKey = team === 'A' ? 'timeoutsA' : 'timeoutsB';
+    const opponent = team === 'A' ? 'B' : 'A'; // विरुद्ध टीम ओळखा
+    let valueBefore = Number(currentMatchData[teamKey] || 0);
+
+    if (valueBefore >= 2) {
+        Swal.fire("मर्यादा संपली!", "या टीमचे २ टाईमआऊट झाले आहेत.", "error");
+        return;
+    }
+
+    // १. निव्वळ नेमकी बटणे लॉक करा (Quick Sub ला हात लावू नका)
+    const allButtons = document.querySelectorAll('#timeoutOverlay button');
+    allButtons.forEach(btn => {
+        const txt = btn.innerText.trim().toUpperCase();
+        
+        // अ) विरुद्ध टीमचं बटण लॉक करा (उदा. Team B)
+        // ब) Official बटण लॉक करा
+        // क) स्वतःचं बटण सुद्धा लॉक करा (Double click टाळण्यासाठी)
+        if (txt === `TEAM ${opponent}` || txt === "OFFICIAL" || txt === `TEAM ${team}`) {
+            btn.disabled = true;
+            btn.style.opacity = "0.3";
+            btn.style.pointerEvents = "none";
+        }
+        // टीप: इथे 'QUICK SUB' आणि 'RESUME' ला आपण स्पर्शही केलेला नाही, त्यामुळे ती चालू राहतील.
+    });
+
+    const newValue = valueBefore + 1;
+
+    try {
+        const { tId, mId } = matchSetupData;
+        
+        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+            [teamKey]: newValue
+        });
+
+        if (currentMatchData) {
+            currentMatchData[teamKey] = newValue;
+        }
+        
+        updateTimeoutUI();
+        timeoutTypeAssigned = true;
+        addEventToSummary('TIMEOUT', team, `Timeout ${newValue} taken.`);
+        
+        console.log(`[SUCCESS] Timeout recorded for Team ${team}. Quick Sub is still available.`);
+
+    } catch (e) {
+        console.error("Update Failed:", e);
+        // एरर आली तर सर्व बटणे पुन्हा सुरू करा
+        allButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.style.pointerEvents = "auto";
+        });
+    }
+}
+
+
+let selectedOutPlayers = [];
+let selectedInPlayers = [];
+
+function openSubModal(team) {
+    console.log(`--- [MULTI-SUB] Opening for Team ${team} ---`);
+    currentSubTeam = team;
+    selectedOutPlayers = [];
+    selectedInPlayers = [];
+    
+    const players = (team === 'A') ? currentMatchData.teamAPlayers : currentMatchData.teamBPlayers;
+    const outGrid = document.getElementById('outPlayersGrid');
+    const inGrid = document.getElementById('inPlayersGrid');
+
+    outGrid.innerHTML = "";
+    inGrid.innerHTML = "";
+
+    players.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = "p-2 rounded-lg border border-gray-800 text-[10px] font-bold text-gray-400 flex flex-col items-center transition-all";
+        btn.innerHTML = `<span class="text-xs">#${p.no}</span><span class="truncate w-full text-[8px]">${p.name}</span>`;
+        
+        // जो 'Playing' आणि 'In' आहे तो OUT च्या ग्रेडमध्ये जाईल
+        if (p.playingStatus === "Playing" && p.status === "In") {
+            btn.onclick = () => toggleSelectSub(btn, p.no, 'OUT');
+            outGrid.appendChild(btn);
+        } 
+        // जो 'Bench' वर आहे तो IN च्या ग्रेडमध्ये जाईल
+        else if (p.playingStatus === "Bench") {
+            btn.onclick = () => toggleSelectSub(btn, p.no, 'IN');
+            inGrid.appendChild(btn);
+        }
+    });
+
+    updateSubLabels();
+    document.getElementById('subModal').classList.remove('hidden');
+}
+
+function toggleSelectSub(btn, playerNo, type) {
+    if (type === 'OUT') {
+        if (selectedOutPlayers.includes(playerNo)) {
+            selectedOutPlayers = selectedOutPlayers.filter(id => id !== playerNo);
+            btn.classList.remove('bg-red-900/40', 'border-red-500', 'text-white');
+        } else {
+            selectedOutPlayers.push(playerNo);
+            btn.classList.add('bg-red-900/40', 'border-red-500', 'text-white');
+        }
+    } else {
+        if (selectedInPlayers.includes(playerNo)) {
+            selectedInPlayers = selectedInPlayers.filter(id => id !== playerNo);
+            btn.classList.remove('bg-green-900/40', 'border-green-500', 'text-white');
+        } else {
+            selectedInPlayers.push(playerNo);
+            btn.classList.add('bg-green-900/40', 'border-green-500', 'text-white');
+        }
+    }
+    updateSubLabels();
+}
+
+function updateSubLabels() {
+    document.getElementById('outCountLabel').innerText = selectedOutPlayers.length;
+    document.getElementById('inCountLabel').innerText = selectedInPlayers.length;
+
+    const btn = document.getElementById('confirmSubBtn');
+    // नियम: जेवढे प्लेयर बाहेर काढले तेवढेच आत घेतले पाहिजेत (उदा. २ आउट तर २ इन)
+    if (selectedOutPlayers.length > 0 && selectedOutPlayers.length === selectedInPlayers.length) {
+        btn.classList.remove('opacity-50', 'pointer-events-none');
+        console.log(`[VALID] Substitution of ${selectedOutPlayers.length} players ready.`);
+    } else {
+        btn.classList.add('opacity-50', 'pointer-events-none');
+    }
+}
+
+
+async function processMultiSubstitution() {
+    console.log("--- [SUB_PROCESS_START] ---");
+    
+    if (!currentMatchData || !currentSubTeam) {
+        console.error("[ERROR] Missing currentMatchData or currentSubTeam");
+        return;
+    }
+
+    const teamKey = (currentSubTeam === 'A') ? 'teamAPlayers' : 'teamBPlayers';
+    let players = [...currentMatchData[teamKey]];
+
+    console.log(`[ACTION] Swapping ${selectedOutPlayers.length} players for Team ${currentSubTeam}`);
+    console.log("OUT Players:", selectedOutPlayers);
+    console.log("IN Players:", selectedInPlayers);
+
+    // खेळाडूंचा स्टेटस बदलणे
+    players.forEach(p => {
+        if (selectedOutPlayers.includes(p.no)) {
+            console.log(`[LOG] Player #${p.no} (${p.name}) -> Bench/Out`);
+            p.playingStatus = "Bench";
+            p.status = "Out";
+        }
+        if (selectedInPlayers.includes(p.no)) {
+            console.log(`[LOG] Player #${p.no} (${p.name}) -> Playing/In`);
+            p.playingStatus = "Playing";
+            p.status = "In";
+        }
+    });
+
+    try {
+        const { tId, mId } = matchSetupData;
+        const subMessage = `Multi-Sub (${currentSubTeam}): ${selectedOutPlayers.length} players swapped`;
+
+        console.log(`[DATABASE] Updating Firestore for Match: ${mId}`);
+        
+        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+            [teamKey]: players,
+            matchLog: firebase.firestore.FieldValue.arrayUnion({
+                msg: subMessage,
+                time: new Date().toLocaleTimeString()
+            })
+        });
+        
+        // --- Timeline (Recent Raids) मध्ये कार्ड ॲड करणे ---
+        if (typeof addEventToSummary === "function") {
+            const detailMsg = `Out: #${selectedOutPlayers.join(', #')} | In: #${selectedInPlayers.join(', #')}`;
+            addEventToSummary('SUB', currentSubTeam, detailMsg);
+        }
+
+        console.log("[SUCCESS] Database updated and Timeline entry added.");
+        
+        Swal.fire({
+            title: "बदल यशस्वी!",
+            text: `${selectedOutPlayers.length} खेळाडूंची अदलाबदल झाली आहे.`,
+            icon: "success",
+            timer: 2000
+        });
+
+        closeSubModal();
+
+    } catch (e) {
+        console.error("[CRITICAL_ERROR] processMultiSubstitution failed:", e);
+        Swal.fire("Error", "Substitution नोंदवताना अडचण आली.", "error");
+    }
+}
+
+function closeSubModal() {
+    document.getElementById('subModal').classList.add('hidden');
+}
+
+// २. फायनल सब्स्टिट्युशन कन्फर्म करणे
+// १. Substitution (खेळाडू बदल)
+async function confirmSubstitution() {
+    console.log("--- [SUBSTITUTION_PROCESS] Confirmation Started ---");
+    
+    if (!currentMatchData) {
+        console.error("[ERROR] currentMatchData not found. Substitution aborted.");
+        return;
+    }
+
+    const outNo = document.getElementById('playerToOut').value;
+    const inNo = document.getElementById('playerToIn').value;
+
+    console.log(`[ACTION] Attempting Sub: Player #${outNo} (OUT) <-> Player #${inNo} (IN)`);
+
+    const teamKey = (currentSubTeam === 'A') ? 'teamAPlayers' : 'teamBPlayers';
+    let players = [...currentMatchData[teamKey]];
+
+    players.forEach(p => {
+        if (p.no == outNo) {
+            console.log(`[UPDATE] Player #${p.no} (${p.name}): Status changed to Bench/Out`);
+            p.playingStatus = "Bench";
+            p.status = "Out";
+        }
+        if (p.no == inNo) {
+            console.log(`[UPDATE] Player #${p.no} (${p.name}): Status changed to Playing/In`);
+            p.playingStatus = "Playing";
+            p.status = "In";
+        }
+    });
+
+    try {
+        const { tId, mId } = matchSetupData;
+        console.log(`[DATABASE] Pushing new player list to Firestore for Team ${currentSubTeam}...`);
+        
+        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+            [teamKey]: players
+        });
+
+        console.log("[SUCCESS] Substitution finalized in Database.");
+        console.table(players.filter(p => p.no == outNo || p.no == inNo)); // फक्त बदललेले प्लेयर दिसेल
+
+        Swal.fire("बदल यशस्वी!", "खेळाडूंची अदलाबदल झाली आहे.", "success");
+        closeSubModal();
+    } catch (e) {
+        console.error("[CRITICAL_ERROR] Substitution failed to save:", e);
+    }
+}
+
+// २. Timeout Dots अपडेट (UI)
+// १. Timeout स्क्रीनवरून Sub उघडण्यासाठी
+function openSubFromTimeout() {
+    // टायमर चालू असतानाच मल्टि-सब मॉडेल उघडा
+    // इथे आपण 'A' किंवा 'B' न देता फक्त मॉडेल उघडतोय, युजरला टीम नंतर निवडता येईल
+    // किंवा आपण currentSubTeam सेट करून एका टीमचे सब उघडू शकतो
+    console.log("[TIMEOUT_SUB] Opening Multi-Sub Modal...");
+    // टीम विचारण्यासाठी आपण एक छोटा प्रॉम्प्ट देऊ शकतो किंवा थेट Team A चे उघडू शकतो
+    Swal.fire({
+        title: 'कोणाची Substitution करायची आहे?',
+        showCancelButton: true,
+        confirmButtonText: 'Team A',
+        cancelButtonText: 'Team B',
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#2563eb'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            openSubModal('A');
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            openSubModal('B');
+        }
+    });
+}
+
+// २. Sub Modal बंद झाल्यावर पुन्हा Timeout Overlay पुढे आणण्यासाठी बदल
+function closeSubModal() {
+    console.log("[SUB_MODAL] Closing...");
+    document.getElementById('subModal').classList.add('hidden');
+    
+    // जर टायमर सुरू असेल, तर Timeout Overlay पुन्हा फ्रंटला आणा
+    if (!document.getElementById('timeoutOverlay').classList.contains('hidden')) {
+        document.getElementById('timeoutOverlay').style.zIndex = "1000";
+    }
+}
+
+// ३. UI वर टाईमआऊट किती बाकी आहेत ते दाखवण्यासाठी (Counter)
+function updateTimeoutUI() {
+    // १. फंक्शन कॉल झालं की नाही हे बघण्यासाठी
+    console.log("%c--- [STEP 6: UI_RENDER] updateTimeoutUI() Started ---", "background: #444; color: #fff; padding: 2px 5px;");
+
+    if (!currentMatchData) {
+        console.error("%c[UI_ERROR] currentMatchData is EMPTY/NULL!", "color: red; font-weight: bold;");
+        return;
+    }
+
+    // २. डेटाबेसकडून नक्की काय आकडा आलाय तो पकडणे
+    // इथे आपण 'OR 0' वापरतोय, म्हणजे व्हॅल्यू नसेल तर ती 0 दिसेल.
+    let tA = Number(currentMatchData.timeoutsA || 0);
+    let tB = Number(currentMatchData.timeoutsB || 0);
+    
+    // सर्वात महत्त्वाचा लॉग: बॅकएंडचा खरा आकडा इथे दिसेल
+    console.log(`%c[DATA_SYNC] Backend says -> Team A: ${tA} | Team B: ${tB}`, "color: yellow; font-size: 12px; font-weight: bold;");
+
+    const labelA = document.getElementById('timeoutDisplayA');
+    const labelB = document.getElementById('timeoutDisplayB');
+
+    // ३. Team A साठी निर्णय प्रक्रिया
+    if (labelA) {
+        console.log(`[CHECK_A] Testing Logic for Team A (Value: ${tA})`);
+        if (tA === 0) {
+            labelA.innerText = "TO - 0";
+            labelA.className = "text-[10px] font-black text-orange-500 uppercase";
+            console.log("-> Result: Set to TO-0");
+        } else if (tA === 1) {
+            labelA.innerText = "TO - 1";
+            labelA.className = "text-[10px] font-black text-orange-500 uppercase";
+            console.log("-> Result: Set to TO-1");
+        } else {
+            // जर व्हॅल्यू 2, 3 किंवा 4 (तुझ्या केसमध्ये) असेल तर 'OVER' दिसेल
+            labelA.innerText = "TO - 2 (OVER)";
+            labelA.className = "text-[10px] font-black text-red-600 uppercase";
+            console.warn(`-> Result: Set to OVER (Because value ${tA} is >= 2)`);
+        }
+    } else {
+        console.error("[UI_ERROR] HTML Element 'timeoutDisplayA' NOT FOUND!");
+    }
+
+    // ४. Team B साठी निर्णय प्रक्रिया
+    if (labelB) {
+        console.log(`[CHECK_B] Testing Logic for Team B (Value: ${tB})`);
+        if (tB === 0) {
+            labelB.innerText = "TO - 0";
+            labelB.className = "text-[10px] font-black text-orange-500 uppercase";
+        } else if (tB === 1) {
+            labelB.innerText = "TO - 1";
+            labelB.className = "text-[10px] font-black text-orange-500 uppercase";
+        } else {
+            labelB.innerText = "TO - 2 (OVER)";
+            labelB.className = "text-[10px] font-black text-red-600 uppercase";
+        }
+    }
+    
+    console.log("%c--- [UI_RENDER] Finished ---", "color: gray; font-style: italic;");
+}
+
+//१. setOfficialType दुरुस्त करा (विंडो बंद होणार नाही)
+//stopTimeout() ऐवजी फक्त टायमर थांबवा आणि मेसेज अपडेट करा:
+
+async function setOfficialType(type) {
+    console.log(`[OFFICIAL_TIMEOUT] Mode: ${type}`);
+    
+    const statusLabel = document.getElementById('timeoutStatus');
+    const clockLabel = document.getElementById('timeoutClock');
+
+    // १. UI अपडेट
+    if (statusLabel) statusLabel.innerText = "OFFICIAL TIMEOUT";
+    if (clockLabel) clockLabel.innerText = "--";
+    
+    // २. टायमर थांबवा
+    if (typeof timeoutInterval !== 'undefined') clearInterval(timeoutInterval);
+    
+    // ३. [IMPORTANT] बटणे Disable करणे
+    // Team A, Team B आणि Quick Sub या बटणांना शोधून बंद करा
+    const buttons = document.querySelectorAll('#timeoutOverlay button');
+    buttons.forEach(btn => {
+        // जर बटणावर 'Resume' लिहिलेले नसेल, तरच त्याला बंद करा
+        if (btn.innerText.trim().toUpperCase() !== "RESUME") {
+            btn.disabled = true;
+            btn.style.opacity = "0.3"; // युजरला कळावं की हे बटण आता चालणार नाही
+            btn.style.pointerEvents = "none";
+        }
+    });
+
+    // ४. Firebase Log (आधी ठरवल्याप्रमाणे)
+    try {
+        const { tId, mId } = matchSetupData;
+        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+            matchLog: firebase.firestore.FieldValue.arrayUnion({
+                type: "TIMEOUT",
+                team: "OFFICIAL",
+                detail: "Official/Medical Timeout by Umpire",
+                timestamp: new Date().toISOString()
+            })
+        });
+    } catch (e) {
+        console.error("Log error:", e);
+    }
+}
+
+
+// हा फक्त डेटा बॅकग्राउंडला अपडेट ठेवेल, स्क्रीन रेंडर करणार नाही
+// त्यामुळे तुझे 'Raider List' किंवा 'Out Player' लॉजिक बिघडणार नाही
+function syncDataOnly(tId, mId) {
+    db.collection("tournaments").doc(tId).collection("matches").doc(mId)
+    .onSnapshot((doc) => {
+        if (doc.exists) {
+            const freshData = doc.data();
+            
+            // हा लॉग सर्वात महत्त्वाचा आहे
+            console.log("%c[5. SNAPSHOT_RECEIVE] Data came from Firebase!", "background: green; color: white; padding: 2px 5px;");
+            console.log("-> TimeoutsA:", freshData.timeoutsA);
+            console.log("-> TimeoutsB:", freshData.timeoutsB);
+            
+            currentMatchData = freshData; 
+            updateTimeoutUI();
+        }
+    });
+}
+
+
+// १. ग्लोबल स्टेज सेट करा (फंक्शनच्या बाहेर)
+let matchStage = "1ST_HALF"; 
+
+async function handleMainAction() {
+    const actionBtn = document.getElementById('mainActionBtn');
+    const { tId, mId } = matchSetupData;
+
+    // --- टप्पा १: पहिला हाफ संपवणे ---
+    if (matchStage === "1ST_HALF") {
+        const result = await Swal.fire({
+            title: '1st Half संपवायचा का?',
+            text: "यानंतर ब्रेक सुरू होईल.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'हो, संपवा',
+            background: '#111',
+            color: '#fff'
+        });
+
+        if (result.isConfirmed) {
+            // टायमर पॉज करा (जर सुरू असेल तर)
+            if (!isMatchPaused) toggleMatchTimer(); 
+            
+            matchStage = "INTERVAL";
+            actionBtn.innerText = "Start 2nd Half";
+            
+            // बटणाचा लुक बदला (हिरवा करा जेणेकरून सुरू करायचंय हे कळेल)
+            actionBtn.classList.replace('bg-red-900/20', 'bg-green-600');
+            actionBtn.classList.replace('text-red-500', 'text-white');
+
+            // DB मध्ये स्टेटस अपडेट करा
+            await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+                status: "Half-Time"
+            });
+        }
+    } 
+
+    // --- टप्पा २: दुसरा हाफ सुरू करणे ---
+    else if (matchStage === "INTERVAL") {
+        // २० मिनिटे रिसेट करा (२० * ६० सेकंद)
+        matchTotalSeconds = 20 * 60; 
+        updateMatchUI();
+        
+        matchStage = "2ND_HALF";
+        actionBtn.innerText = "End Match";
+        
+        // बटण पुन्हा लाल करा
+        actionBtn.classList.replace('bg-green-600', 'bg-red-900/20');
+        actionBtn.classList.replace('text-white', 'text-red-500');
+
+        // २nd Half साठी टाईमआऊट रिसेट (Firestore मध्ये)
+        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+            timeoutsA: 0,
+            timeoutsB: 0,
+            status: "Live"
+        });
+
+        // टायमर पुन्हा सुरू करा
+        if (isMatchPaused) toggleMatchTimer();
+    } 
+
+    // --- टप्पा ३: पूर्ण मॅच संपवणे ---
+    else if (matchStage === "2ND_HALF") {
+        // तुझं जे मूळ मॅच संपवण्याचं फंक्शन आहे ते इथे कॉल करा
+        if (typeof confirmEndMatch === "function") {
+            confirmEndMatch();
+        } else {
+            console.log("Match Ended!");
+            // इथे मॅच संपवण्याचे लॉजिक येईल
+        }
+    }
+}
+
+
+async function confirmEndMatch() {
+    // १. युजरला कन्फर्मेशन विचारा
+    const result = await Swal.fire({
+        title: 'मॅच संपवायची का?',
+        text: "यानंतर स्कोअरमध्ये कोणताही बदल करता येणार नाही!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'हो, मॅच संपवा!',
+        cancelButtonText: 'चूक झाली',
+        background: '#111',
+        color: '#fff'
+    });
+
+    if (result.isConfirmed) {
+        const { tId, mId } = matchSetupData;
+        const sA = Number(currentMatchData.scoreA || 0);
+        const sB = Number(currentMatchData.scoreB || 0);
+        
+        let winnerText = "";
+        let winnerTeam = "";
+
+        // २. विजेता ठरवा
+        if (sA > sB) {
+            winnerTeam = currentMatchData.teamA;
+            winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
+        } else if (sB > sA) {
+            winnerTeam = currentMatchData.teamB;
+            winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
+        } else {
+            winnerText = "मॅच टाय (Tie) झाली आहे! 🤝";
+        }
+
+        try {
+            // ३. डेटाबेसमध्ये स्टेटस 'Finished' करा
+            await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+                status: "Finished",
+                winner: winnerTeam,
+                finalScore: `${sA}-${sB}`
+            });
+
+            // ४. स्कोअरिंग लॉक करा (Disable Buttons)
+            lockScoringUI();
+
+            // ५. निकाल दाखवा (Result Alert)
+            Swal.fire({
+                title: 'MATCH FINISHED!',
+                html: `<div class="text-xl font-bold text-orange-500">${winnerText}</div>
+                       <div class="mt-4 text-white text-lg">Final Score: ${sA} - ${sB}</div>`,
+                icon: 'success',
+                confirmButtonText: 'Dashboard ला जा',
+                background: '#111',
+                color: '#fff'
+            }).then(() => {
+                // मॅच संपल्यावर बॅक जा किंवा रिफ्रेश करा
+                window.location.reload(); 
+            });
+
+        } catch (e) {
+            console.error("End Match Error:", e);
+        }
+    }
+}
+
+function lockScoringUI() {
+    console.log("[LOCK] Match Finished. Disabling all scoring controls.");
+    
+    // १. सर्व बटणे शोधा (Raid, Bonus, Tackle, Timeout, Substitution)
+    const allButtons = document.querySelectorAll('button');
+    
+    allButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.3";
+        btn.style.pointerEvents = "none";
+    });
+
+    // २. टायमर थांबवा
+    clearInterval(matchInterval);
+    
+    // ३. बॅकग्राउंड कलर बदला जेणेकरून 'Finished' फील येईल
+    document.body.style.filter = "grayscale(50%)";
 }

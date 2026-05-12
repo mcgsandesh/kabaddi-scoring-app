@@ -25,3 +25,57 @@ body {
         overflow: visible;
     }
 }
+
+.hidden-tab {
+    display: none !important;
+}
+
+/* Active Tab Style */
+.nav-btn.active {
+    color: #f97316 !important; /* Orange-500 */
+    text-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+}
+
+/* Glow Effect on Icons */
+.nav-btn.active i {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
+}
+
+/* Soft transition & Layout Fix */
+.nav-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* खालील ३ ओळी महत्वाच्या आहेत */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+/* Active Tab Style */
+/* इथे आपण क्लासचे नाव .nav-btn.active ऐवजी .text-orange-500 वापरूया कारण JS तोच लावतोय */
+.text-orange-500 {
+    color: #f97316 !important; 
+    text-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+}
+
+/* Glow Effect on Icons */
+.text-orange-500 i {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
+}
+
+/* Sidebar shadow effect */
+#sidebar {
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Active Menu Item (Orange Highlight) */
+.active-drawer {
+    background: linear-gradient(90deg, #ea580c, #f97316) !important;
+    transform: scale(1.02);
+}
+
+/* Drawer Item Hover */
+.drawer-item:active {
+    background-color: rgba(249, 115, 22, 0.2);
+}

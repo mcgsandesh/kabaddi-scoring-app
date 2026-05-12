@@ -11,12 +11,35 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- Custom CSS -->
+<link rel="icon" type="image/png" href="assets/icons/rx-favicon.png">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f97316">
+
+<link rel="apple-touch-icon" href="assets/icons/raidx-192.png">
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body class="bg-gray-950 text-white">
+
+  <!-- LOGIN OVERLAY -->
+<!-- LOGIN OVERLAY (सर्वात वर टाका) -->
+<div id="loginOverlay" class="fixed inset-0 bg-gray-950 z-[1000] flex flex-col items-center justify-center p-6">
+    <div class="text-center">
+        <div class="w-20 h-20 bg-green-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-900/20">
+            <i class="fas fa-trophy text-3xl text-white"></i>
+        </div>
+        <h1 class="text-3xl font-black tracking-tighter mb-2">KABADDI SCORE PRO</h1>
+        <p class="text-gray-500 text-sm mb-8">टूर्नामेंट मॅनेजमेंट आणि लाईव्ह स्कोअरिंग</p>
+        
+        <button onclick="login()" class="flex items-center gap-4 bg-white text-gray-950 px-8 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all active:scale-95 shadow-xl">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">
+            Login with Google
+        </button>
+    </div>
+</div>
 
 <!-- HEADER -->
 <div class="flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
@@ -26,19 +49,58 @@
 </div>
 
 <!-- SIDE DRAWER -->
-<div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-900 p-4 transform -translate-x-full transition-transform z-50">
-  <h2 class="text-lg font-bold mb-4">Menu</h2>
-
-  <button onclick="loadPage('home')" class="block w-full text-left py-2">Home</button>
-  <button onclick="loadPage('matches')" class="block w-full text-left py-2">Matches</button>
-  <button onclick="loadPage('teams')" class="block w-full text-left py-2">Teams</button>
-  <button onclick="loadPage('tournaments')" class="block w-full text-left py-2">Tournaments</button>
-
-  <button onclick="toggleMenu()" class="mt-4 text-red-400">Close</button>
+<div id="sidebar" class="fixed top-0 left-0 w-72 h-full bg-[#0a0a0a] transform -translate-x-full transition-transform duration-300 z-[60] shadow-[10px_0_30px_rgba(0,0,0,0.5)] border-r border-white/5">
+    
+<div class="p-6 mb-4 flex flex-col items-center border-b border-white/5">
+    <img src="assets/logo/raidx-512.png" alt="RaidX" class="w-28 mb-2 object-contain"> 
+    
+    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[3px]">दमदार कबड्डी</p>
 </div>
 
-<!-- OVERLAY -->
-<div id="overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 hidden"></div>
+    <div class="px-4 space-y-2">
+        <button onclick="loadPage('home')" class="drawer-item flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-300 hover:bg-orange-500/10 transition-all">
+            <i class="fa-solid fa-house w-5 text-orange-500"></i>
+            <span class="text-sm font-bold uppercase tracking-wider">Home</span>
+        </button>
+
+        <button id="side-matches" onclick="loadPage('matches')" class="drawer-item flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-300 hover:bg-orange-500/10 transition-all">
+            <i class="fa-solid fa-calendar-day w-5 text-orange-500"></i>
+            <span class="text-sm font-bold uppercase tracking-wider">Matches</span>
+        </button>
+
+        <button id="side-teams" onclick="loadPage('teams')" class="drawer-item flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-300 hover:bg-orange-500/10 transition-all">
+            <i class="fa-solid fa-users w-5 text-orange-500"></i>
+            <span class="text-sm font-bold uppercase tracking-wider">Teams</span>
+        </button>
+
+        <button id="side-tournaments" onclick="loadPage('tournaments')" class="drawer-item active-drawer flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-white bg-orange-600 shadow-lg shadow-orange-900/20 transition-all">
+            <i class="fa-solid fa-trophy w-5 text-white font-bold"></i>
+            <span class="text-sm font-black uppercase tracking-wider">Tournaments</span>
+        </button>
+
+        <div class="border-t border-white/5 my-4 pt-4">
+             <button class="drawer-item flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-400 hover:text-white transition-all">
+                <i class="fa-solid fa-gear w-5"></i>
+                <span class="text-sm font-bold uppercase tracking-wider">Settings</span>
+            </button>
+            <button class="drawer-item flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-400 hover:text-white transition-all">
+                <i class="fa-solid fa-cloud-arrow-up w-5"></i>
+                <span class="text-sm font-bold uppercase tracking-wider">Backup & Restore</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="absolute bottom-8 left-0 w-full px-6">
+        <button onclick="toggleMenu()" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-red-500/30 text-red-500 font-bold uppercase text-[10px] tracking-widest active:scale-95 transition-all">
+            <i class="fa-solid fa-xmark"></i> Close Menu
+        </button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[55] hidden transition-opacity"></div>
+
+<!-- OVERLAY 
+<div id="overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 hidden"></div>-->
 
 <!-- MAIN CONTENT -->
 <div id="app" class="p-4 pb-20">
@@ -46,12 +108,33 @@
 </div>
 
 <!-- BOTTOM NAV -->
-<div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex justify-around p-2">
-  <button onclick="loadPage('home')" class="text-sm">🏠 Home</button>
-  <button onclick="loadPage('matches')" class="text-sm">🎯 Matches</button>
-  <button onclick="loadPage('teams')" class="text-sm">👥 Teams</button>
-  <button onclick="loadPage('tournaments')" class="text-sm">🏆</button>
-  <button onclick="loadPage('profile')" class="text-sm">👤</button>
+<div class="fixed bottom-0 left-0 right-0 bg-[#0f0f0f] border-t border-gray-800 flex justify-around items-center py-2 z-50">
+  
+  <button id="nav-home" onclick="loadPage('home')" class="nav-btn flex flex-col items-center justify-center gap-1 transition-all">
+    <i class="fa-solid fa-house text-lg"></i>
+    <span class="text-[9px] font-black uppercase tracking-widest">Home</span>
+  </button>
+
+  <button id="nav-matches" onclick="loadPage('matches')" class="nav-btn flex flex-col items-center justify-center gap-1 transition-all text-gray-500">
+    <i class="fa-solid fa-calendar-days text-lg"></i>
+    <span class="text-[9px] font-black uppercase tracking-widest">Matches</span>
+  </button>
+
+  <button id="nav-teams" onclick="loadPage('teams')" class="nav-btn flex flex-col items-center justify-center gap-1 transition-all text-gray-500">
+    <i class="fa-solid fa-users text-lg"></i>
+    <span class="text-[9px] font-black uppercase tracking-widest">Teams</span>
+  </button>
+
+  <button id="nav-tournaments" onclick="loadPage('tournaments')" class="nav-btn flex flex-col items-center justify-center gap-1 transition-all text-gray-500">
+    <i class="fa-solid fa-trophy text-lg"></i>
+    <span class="text-[9px] font-black uppercase tracking-widest">Tournaments</span>
+  </button>
+
+  <button id="nav-profile" onclick="loadPage('profile')" class="nav-btn flex flex-col items-center justify-center gap-1 transition-all text-gray-500">
+    <i class="fa-solid fa-user text-lg"></i>
+    <span class="text-[9px] font-black uppercase tracking-widest">Profile</span>
+  </button>
+
 </div>
 
   <!-- युजरला स्वतः टीम्स, तारीख आणि वेळ निवडता यावी यासाठी tournaments.html मध्ये हा पॉपअप ॲड कर: -->
@@ -133,59 +216,44 @@
     </div>
 </div>
 
+<div id="custom-splash" class="fixed inset-0 z-[100] flex items-center justify-center bg-black transition-opacity duration-700">
+        <img src="assets/logo/splash screen.jpg" class="w-full h-full object-cover" alt="RaidX">
+    </div>
 
-
-<!-- Full Match Summary Modal -->
-<div id="summaryModal" class="fixed inset-0 z-[100] hidden flex-col bg-[#0f172a]">
-    
-    <!-- STICKY HEADER: स्कोअर आणि क्लोज बटण -->
-    <div class="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-20">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-yellow-500 font-black italic tracking-tighter text-lg uppercase">Match Timeline</h2>
-            <button onclick="closeSummaryModal()" class="text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-2xl"></i>
-            </button>
+    <div id="app">
         </div>
-        
-        <!-- Live Scoreboard Inside Modal -->
-<div class="flex justify-around items-center bg-black/40 rounded-xl py-3 border border-gray-800">
-    <div class="text-center">
-        <!-- ID 'modalTeamAName' असावा, फक्त 'teamAName' नको -->
-        <p id="modalTeamAName" class="text-[10px] text-gray-500 font-bold uppercase">Team A</p>
-        <p id="modalTeamAScore" class="text-3xl font-black text-white">0</p>
-    </div>
-    <div class="text-gray-700 font-bold text-xl px-4">VS</div>
-    <div class="text-center">
-        <p id="modalTeamBName" class="text-[10px] text-gray-500 font-bold uppercase">Team B</p>
-        <p id="modalTeamBScore" class="text-3xl font-black text-white">0</p>
-    </div>
-</div>
-    </div>
 
-    <!-- MAIN BODY: इकडे सर्व रेड कार्ड्स येतील -->
-    <div id="modalRaidList" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
-        <!-- JS द्वारे इकडे कार्ड्स येतील -->
-        <p id="modalEmptyText" class="text-center text-gray-600 mt-10 italic">No raids recorded yet.</p>
-    </div>
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('custom-splash');
+                if (splash) {
+                    splash.style.opacity = '0'; // फिकट होईल
+                    setTimeout(() => splash.remove(), 700); // डोम मधून निघून जाईल
+                }
+            }, 2500); // २.५ सेकंद फोटो दिसेल
+        });
+    </script>
 
-    <!-- FOOTER: प्रिंट बटण -->
-    <div class="p-4 bg-gray-900 border-t border-gray-800 flex gap-3">
-        <button onclick="window.print()" class="flex-1 bg-white text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2">
-            <i class="fa-solid fa-print"></i> Print Match Report
-        </button>
-        <button onclick="closeSummaryModal()" class="flex-1 bg-gray-800 text-white font-bold py-3 rounded-lg">
-            Close
-        </button>
-    </div>
-</div>
+
 
 <!-- JS FILE -->
  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
+<!-- ही नवीन ओळ ॲड कर (Authentication साठी) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
 <script src="js/firebase-config.js"></script>
 <script src="js/app.js"></script>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log("Service Worker Registered"))
+      .catch(err => console.log("SW Registration Failed", err));
+  }
+</script>
 
 </body>
 </html>
