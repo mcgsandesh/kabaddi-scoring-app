@@ -1,0 +1,52 @@
+<div class="space-y-4 animate-fadeIn pb-12 px-2">
+
+    <div class="flex items-center gap-4 p-2 bg-[#111] border-b border-gray-800/60 shadow-md rounded-2xl">
+        <button onclick="switchTab('teams')" class="text-orange-500 hover:bg-orange-500/10 p-2 rounded-full transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        </button>
+        <div>
+            <h2 id="profTeamNameHeader" class="text-sm font-black text-white uppercase tracking-tighter italic leading-none">Team Profile</h2>
+            <p class="text-[8px] text-gray-500 uppercase tracking-widest font-bold mt-0.5">संघ विहंगावलोकन</p>
+        </div>
+    </div>
+
+    <div class="bg-[#111] p-4 rounded-[2rem] border border-gray-800 shadow-xl relative overflow-hidden">
+        <div class="flex items-center gap-4">
+            <div id="profTeamLogoContainer" class="w-16 h-16 bg-gray-950 rounded-full border-2 border-orange-600/30 flex items-center justify-center p-1 shadow-inner shrink-0">
+                </div>
+            
+            <div class="space-y-0.5 flex-1 min-w-0">
+                <h3 id="profTeamName" class="text-lg font-black text-white uppercase tracking-tighter italic truncate leading-tight"></h3>
+                <p id="profTeamArea" class="text-[10px] text-gray-400 font-bold uppercase tracking-wide"></p>
+                
+                <div class="flex items-center gap-1.5 pt-0.5">
+                    <span class="text-[8px] text-gray-500 font-mono font-bold bg-gray-950 px-2 py-0.5 rounded border border-gray-900" id="profTeamId"></span>
+                    <div id="profTeamForm" class="flex gap-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-1">
+        <div class="flex bg-[#111] p-1 rounded-2xl border border-gray-800 shadow-inner overflow-x-auto custom-scrollbar gap-1">
+            <button id="btnTeamTabOverview" onclick="switchTeamProfileTab('overview')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 bg-orange-600 text-white shadow-md whitespace-nowrap">
+                Overview
+            </button>
+            <button id="btnTeamTabPlayers" onclick="switchTeamProfileTab('players')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+                Players
+            </button> 
+            <button id="btnTeamTabMatches" onclick="switchTeamProfileTab('matches')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+                Matches
+            </button>
+            <button id="btnTeamTabStats" onclick="switchTeamProfileTab('stats')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+                Statistics
+            </button>
+        </div>
+    </div>
+
+    <div id="teamProfileTabContent" class="min-h-[300px] py-1">
+        </div>
+
+</div>

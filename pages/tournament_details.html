@@ -1,55 +1,123 @@
-<div class="space-y-4">
-  <div class="flex items-center gap-2 mb-4">
-    <button onclick="loadPage('tournaments')" class="text-gray-400">←</button>
-    <h2 id="viewTName" class="text-xl font-bold text-green-400 font-bold"></h2>
-  </div>
-
-  <div class="flex border-b border-gray-800">
-    <button onclick="switchTab('details')" class="flex-1 pb-2 border-b-2 border-green-600 text-sm">Details</button>
-    <button onclick="switchTab('fixtures')" class="flex-1 pb-2 border-b-2 border-transparent text-sm">Fixtures</button>
-    <button onclick="switchTab('points')" class="flex-1 pb-2 border-b-2 border-transparent text-sm">Points</button>
-  </div>
-
-  <div id="tabContent" class="mt-4">
+<!--tournament_details.html -->
+<div class="space-y-4 animate-fadeIn">
+  <div class="flex items-center gap-4 p-4 bg-[#111] border-b border-gray-800 shadow-lg">
+    <button onclick="loadPage('tournaments')" class="text-orange-500 hover:bg-orange-500/10 p-2 rounded-full transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+    </button>
+    <div>
+        <h2 id="viewTName" class="text-lg font-black text-white uppercase tracking-tighter italic"></h2>
+        <p class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">Tournament Management</p>
     </div>
+  </div>
+
+  <div class="px-2">
+    <div class="flex bg-[#111] p-1 rounded-2xl border border-gray-800 shadow-inner overflow-hidden">
+      <button id="btnTabDetails" onclick="switchTab('details')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all duration-300 bg-orange-600 text-white shadow-lg">
+        Details
+      </button>
+      <button id="btnTabTeams" onclick="switchTab('teams')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all duration-300 text-gray-500">
+        Teams
+      </button> 
+      <button id="btnTabFixtures" onclick="switchTab('fixtures')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all duration-300 text-gray-500">
+        Fixtures
+      </button>
+      <button id="btnTabPoints" onclick="switchTab('points')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all duration-300 text-gray-500">
+        Points
+      </button>
+    </div>
+  </div>
+
+  <div id="tabContent" class="px-4 py-2 min-h-[400px]">
+      </div>
 </div>
 
-<div id="matchSetterModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-[110] p-4">
-  <div class="bg-gray-900 p-6 rounded-2xl w-full max-w-sm border border-gray-700 shadow-2xl">
-    <h3 class="text-white font-bold text-lg mb-4 text-center border-b border-gray-800 pb-2">मॅच सेट करा</h3>
-    
-    <div class="space-y-4">
-      <div>
-        <label class="text-[10px] text-gray-400 uppercase tracking-wider">संघ १ (Team A)</label>
-        <select id="mTeamA" class="w-full mt-1 p-3 bg-gray-800 rounded-xl text-sm text-white border border-gray-700 focus:border-green-500 outline-none"></select>
-      </div>
-      
-      <div class="text-center text-gray-600 font-bold">VS</div>
+<!-- matchSetterModal -->
 
-      <div>
-        <label class="text-[10px] text-gray-400 uppercase tracking-wider">संघ २ (Team B)</label>
-        <select id="mTeamB" class="w-full mt-1 p-3 bg-gray-800 rounded-xl text-sm text-white border border-gray-700 focus:border-green-500 outline-none"></select>
+<div id="matchSetterModal" class="fixed inset-0 bg-black bg-opacity-90 hidden items-center justify-center z-[110] p-6 backdrop-blur-sm">
+  <div class="bg-[#111] p-6 rounded-[2.5rem] w-full max-w-sm border border-gray-800 shadow-2xl animate-zoomIn">
+    <div class="flex flex-col items-center mb-6">
+        <div class="w-12 h-1 bg-orange-600 rounded-full mb-4"></div>
+        <h3 class="text-white font-black text-xl uppercase tracking-tighter">मॅच सेट करा</h3>
+        <p class="text-[10px] text-gray-500 uppercase">Match Fixture Setup</p>
+    </div>
+    
+    <div class="space-y-5">
+      <div class="relative">
+        <label class="absolute -top-2 left-4 px-2 bg-[#111] text-[9px] text-orange-500 font-bold uppercase tracking-widest">संघ १ (Team A)</label>
+        <select id="mTeamA" class="w-full p-4 bg-gray-900/50 rounded-2xl text-sm text-white border border-gray-800 focus:border-orange-500 outline-none transition-all"></select>
       </div>
       
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-[10px] text-gray-400">तारीख</label>
-          <input id="mDate" type="date" class="w-full mt-1 p-2 bg-gray-800 rounded-lg text-xs text-white border border-gray-700">
+      <div class="flex items-center gap-4">
+          <div class="flex-1 h-[1px] bg-gray-800"></div>
+          <div class="bg-gray-800 px-3 py-1 rounded-lg text-[10px] font-black text-orange-500 italic shadow-lg">VS</div>
+          <div class="flex-1 h-[1px] bg-gray-800"></div>
+      </div>
+
+      <div class="relative">
+        <label class="absolute -top-2 left-4 px-2 bg-[#111] text-[9px] text-orange-500 font-bold uppercase tracking-widest">संघ २ (Team B)</label>
+        <select id="mTeamB" class="w-full p-4 bg-gray-900/50 rounded-2xl text-sm text-white border border-gray-800 focus:border-orange-500 outline-none transition-all"></select>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="relative">
+          <label class="absolute -top-2 left-4 px-2 bg-[#111] text-[9px] text-gray-500 font-bold uppercase">तारीख</label>
+          <input id="mDate" type="date" class="w-full p-4 bg-gray-900/50 rounded-2xl text-xs text-white border border-gray-800 focus:border-orange-500 outline-none">
         </div>
-        <div>
-          <label class="text-[10px] text-gray-400">वेळ</label>
-          <input id="mTime" type="time" class="w-full mt-1 p-2 bg-gray-800 rounded-lg text-xs text-white border border-gray-700">
+        <div class="relative">
+          <label class="absolute -top-2 left-4 px-2 bg-[#111] text-[9px] text-gray-500 font-bold uppercase">वेळ</label>
+          <input id="mTime" type="time" class="w-full p-4 bg-gray-900/50 rounded-2xl text-xs text-white border border-gray-800 focus:border-orange-500 outline-none">
         </div>
       </div>
     </div>
 
-    <div class="flex flex-col gap-2 mt-6">
-      <button onclick="saveMatchDetails()" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-xl text-white font-bold text-sm transition-colors">
-        सेव्ह करा (Save)
+    <div class="flex flex-col gap-3 mt-8">
+      <button onclick="saveMatchDetails()" class="w-full bg-orange-600 hover:bg-orange-700 p-4 rounded-2xl text-white font-black text-sm uppercase shadow-lg active:scale-95 transition-all tracking-tighter">
+        सेव्ह करा (Save Match)
       </button>
-      <button onclick="closeMatchSetter()" class="w-full py-2 text-gray-400 text-xs hover:text-white">
+      <button onclick="closeMatchSetter()" class="w-full py-2 text-gray-500 text-[10px] font-bold uppercase hover:text-white tracking-widest transition-all">
         रद्द करा (Cancel)
       </button>
     </div>
   </div>
+</div>
+
+<!-- globalTeamModal -->
+ <div id="globalTeamModal" class="fixed inset-0 bg-black z-[120] hidden flex flex-col">
+    <div class="bg-[#111] p-4 flex justify-between items-center border-b border-gray-800">
+        <h3 class="text-orange-500 font-bold text-lg">संघ निवडा (Select Team)</h3>
+        <button onclick="closeGlobalTeamModal()" class="text-gray-400 text-3xl">&times;</button>
+    </div>
+
+    <div class="p-4 space-y-3 bg-[#111] border-b border-gray-800">
+        <div class="grid grid-cols-2 gap-2">
+            <select id="filterAssociation" onchange="searchMasterTeams()" class="w-full p-3 bg-gray-900 rounded-xl text-xs text-white border border-gray-700">
+                <option value="">सर्व असोसिएशन</option>
+                <option value="Mumbai Shahar">Mumbai Shahar</option>
+                <option value="Mumbai Upnagar">Mumbai Upnagar</option>
+            </select>
+            <select id="filterGroup" onchange="searchMasterTeams()" class="w-full p-3 bg-gray-900 rounded-xl text-xs text-white border border-gray-700">
+                <option value="">सर्व गट (All)</option>
+                <option value="A">A Group</option>
+                <option value="B">B Group</option>
+                <option value="C">C Group</option>
+            </select>
+        </div>
+        
+        <div class="relative">
+            <input type="text" id="searchTeamInput" oninput="searchMasterTeams()" placeholder="टीमचे नाव शोधा..." class="w-full p-3 bg-gray-900 rounded-xl text-sm text-white border border-gray-700 pl-10">
+            <span class="absolute left-3 top-3.5">🔍</span>
+        </div>
+    </div>
+
+    <div id="masterTeamResults" class="flex-1 overflow-y-auto p-4 space-y-2 bg-black custom-scrollbar">
+        <p class="text-gray-500 text-xs text-center py-4">शोधण्यासाठी टीमचे नाव टाईप करा...</p>
+    </div>
+
+    <div class="p-4 bg-[#111] border-t border-gray-800">
+        <button onclick="showCreateNewTeamForm()" class="w-full bg-orange-600 hover:bg-orange-700 p-4 rounded-xl text-white font-bold text-sm transition-all shadow-lg active:scale-95">
+            + नवीन संघ नोंदणी (New Registration)
+        </button>
+    </div>
 </div>
