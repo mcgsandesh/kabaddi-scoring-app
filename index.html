@@ -249,25 +249,25 @@
     </div>
 </div>-->
 
-<div id="startMatchModal" class="fixed inset-0 bg-black z-[200] hidden flex-col animate-fadeIn font-sans text-white">
+<div id="startMatchModal" class="fixed inset-0 bg-black z-[200] hidden flex-col font-sans text-white overflow-hidden select-none">
     
-    <div class="p-4 bg-[#111] border-b border-gray-950 shrink-0 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_#f97316]"></span>
-            <h2 class="text-xs font-black text-white uppercase italic tracking-wider font-mono">MATCH SETUP <span class="text-orange-500">.</span></h2>
-        </div>
-        <button onclick="closeStartMatchModal()" class="text-gray-500 hover:text-orange-400 bg-gray-950 p-2 px-3 rounded-xl border border-gray-900 transition-all active:scale-75 text-[11px] font-black font-mono">✕ CLOSE</button>
-    </div>
-
-    <div class="p-3 bg-[#0d0d0d] border-b border-gray-900/50 shrink-0">
-        <div class="grid grid-cols-2 gap-3 bg-gray-950/60 p-3 rounded-2xl border border-gray-900 shadow-inner">
-            <div>
-                <label class="text-[8px] text-gray-500 uppercase font-black tracking-widest font-mono">Toss Winner</label>
-                <select id="tossWinner" class="w-full bg-[#111] text-white text-[11px] font-bold p-2.5 rounded-xl border border-gray-800 mt-1 outline-none focus:border-orange-500/50 transition-colors cursor-pointer appearance-none shadow-sm"></select>
+    <div class="p-3 bg-[#111] border-b border-gray-950 shrink-0">
+        <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_#f97316]"></span>
+                <h2 class="text-[11px] font-black tracking-wider font-mono">MATCH SETUP</h2>
             </div>
-            <div>
-                <label class="text-[8px] text-gray-500 uppercase font-black tracking-widest font-mono">Selection</label>
-                <select id="tossSelection" class="w-full bg-[#111] text-white text-[11px] font-bold p-2.5 rounded-xl border border-gray-800 mt-1 outline-none focus:border-orange-500/50 transition-colors cursor-pointer appearance-none shadow-sm">
+            <button onclick="closeStartMatchModal()" class="text-gray-500 hover:text-orange-400 bg-black p-1 px-2.5 rounded-lg border border-gray-900 transition-all active:scale-75 text-[10px] font-black font-mono">✕ CLOSE</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-black p-2 rounded-xl border border-gray-900/60 shadow-inner">
+            <div class="flex items-center gap-2">
+                <label class="text-[8px] text-gray-500 uppercase font-black font-mono shrink-0">Toss:</label>
+                <select id="tossWinner" class="w-full bg-[#111] text-white text-[10px] font-bold p-1.5 rounded-lg border border-gray-800 outline-none focus:border-orange-500/50 cursor-pointer"></select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-[8px] text-gray-500 uppercase font-black font-mono shrink-0">Select:</label>
+                <select id="tossSelection" class="w-full bg-[#111] text-white text-[10px] font-bold p-1.5 rounded-lg border border-gray-800 outline-none focus:border-orange-500/50 cursor-pointer">
                     <option value="Raid">🏃‍♂️ RAID</option>
                     <option value="Ground">🛡️ GROUND</option>
                 </select>
@@ -275,32 +275,57 @@
         </div>
     </div>
 
-    <div class="flex bg-[#111] border-b border-gray-900 shrink-0 sticky top-0 z-20">
-        <button id="tabBtnA" onclick="switchPlayerTab('A')" class="flex-1 py-3.5 text-[10px] font-black border-b-2 border-orange-600 text-white truncate px-2 transition-all tracking-wider uppercase bg-orange-600/5">TEAM A</button>
-        <button id="tabBtnB" onclick="switchPlayerTab('B')" class="flex-1 py-3.5 text-[10px] font-black border-b-2 border-transparent text-gray-500 truncate px-2 transition-all tracking-wider uppercase">TEAM B</button>
+    <div class="flex bg-[#111] border-b border-gray-950 shrink-0 z-20">
+        <button id="tabBtnA" onclick="switchPlayerTab('A')" class="flex-1 py-2 text-[9px] font-black border-b border-orange-600 text-white transition-all tracking-wider uppercase bg-orange-600/5">TEAM A</button>
+        <button id="tabBtnB" onclick="switchPlayerTab('B')" class="flex-1 py-2 text-[9px] font-black border-b border-transparent text-gray-500 transition-all tracking-wider uppercase">TEAM B</button>
     </div>
 
-    <div class="p-2.5 bg-[#0a0a0a] border-b border-gray-900/40 shrink-0 flex items-center gap-2">
+    <div class="p-2 bg-[#0a0a0a] border-b border-gray-950 shrink-0 flex items-center gap-1.5">
         <div class="relative w-full">
             <input type="text" id="squadPlayerSearch" oninput="filterSquadPlayersLive()" 
-                   placeholder="खेळाडूचे नाव शोधा (Search Player...)" 
-                   class="w-full bg-gray-950 text-white placeholder-gray-600 text-xs p-3 pl-9 rounded-xl border border-gray-900/80 outline-none focus:border-orange-500/50 transition-all font-bold">
-            <span class="absolute left-3.5 top-3 text-gray-600 text-xs">🔍</span>
+                   placeholder="खेळाडू शोधा..." 
+                   class="w-full bg-gray-950 text-white placeholder-gray-700 text-[11px] p-2 pl-7 rounded-lg border border-gray-900 outline-none focus:border-orange-500/50 font-bold">
+            <span class="absolute left-2.5 top-2 text-gray-700 text-[10px]">🔍</span>
         </div>
-        <button onclick="clearSquadSearch()" class="p-3 px-3.5 text-[10px] font-black bg-gray-950 text-gray-400 hover:text-white rounded-xl border border-gray-900 transition-all active:scale-90">RESET</button>
+        <button onclick="clearSquadSearch()" class="p-2 px-2.5 text-[9px] font-black bg-gray-950 text-gray-500 hover:text-white rounded-lg border border-gray-900 transition-all active:scale-90 font-mono">RESET</button>
     </div>
 
-    <div class="flex-1 overflow-y-auto bg-black p-3 pb-8 custom-scroll">
-        <div id="playerListA" class="space-y-1.5 transition-all duration-200"></div>
-        <div id="playerListB" class="space-y-1.5 hidden transition-all duration-200"></div>
+    <div class="p-2 bg-[#080808] border-b border-gray-950 shrink-0">
+        <div class="flex justify-between items-center mb-1.5 px-1">
+            <span class="text-[8px] text-gray-500 font-black uppercase tracking-wider">🎯 SELECTED MATCH SQUAD</span>
+            <span id="count_label" class="text-[8px] text-gray-400 font-mono font-black">P: 0/7 | B: 0/5</span>
+        </div>
+
+        <div class="space-y-1 bg-black/60 p-1.5 rounded-xl border border-gray-900/60 shadow-inner">
+            <div class="flex items-center gap-1.5">
+                <span class="text-[7px] font-black bg-green-900/20 text-green-400 border border-green-500/10 p-1 rounded-md shrink-0 font-mono min-w-[55px] text-center">PLAYING</span>
+                <div id="rack_playing" class="flex flex-wrap gap-1 items-center min-h-[22px] flex-1">
+                    <p class="text-[8px] text-gray-700 italic font-bold">७ खेळाडू निवडा...</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 border-t border-gray-950 pt-1 mt-1">
+                <span class="text-[7px] font-black bg-orange-900/20 text-orange-400 border border-orange-500/10 p-1 rounded-md shrink-0 font-mono min-w-[55px] text-center">BENCH</span>
+                <div id="rack_bench" class="flex flex-wrap gap-1 items-center min-h-[22px] flex-1">
+                    <p class="text-[8px] text-gray-700 italic font-bold">५ राखीव निवडा...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="p-4 bg-[#111] border-t border-gray-900 shrink-0 shadow-[0_-10px_20px_rgba(0,0,0,0.8)]">
-        <button onclick="confirmStartMatch()" class="w-full py-4 text-xs font-black text-white bg-orange-600 hover:bg-orange-700 rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.25)] active:scale-[0.98] transition-all uppercase tracking-widest font-mono">
+    <div class="flex-1 overflow-y-auto bg-black p-2 pb-6 custom-scroll">
+        <div id="playerListA" class="space-y-1"></div>
+        <div id="playerListB" class="space-y-1 hidden"></div>
+    </div>
+
+    <div class="p-3 bg-[#111] border-t border-gray-950 shrink-0 shadow-[0_-10px_20px_rgba(0,0,0,0.8)]">
+        <button onclick="confirmStartMatch()" class="w-full py-3 text-xs font-black text-white bg-orange-600 hover:bg-orange-700 rounded-xl shadow-[0_0_15px_rgba(249,115,22,0.2)] active:scale-[0.98] transition-all uppercase tracking-widest font-mono">
             🔥 START LIVE SCORING
         </button>
     </div>
 </div>
+
+
 
 <!-- Create New Teams Modal -->
 <div id="createMasterTeamModal" class="fixed inset-0 bg-black bg-opacity-90 hidden items-center justify-center z-[130] p-4 backdrop-blur-sm">

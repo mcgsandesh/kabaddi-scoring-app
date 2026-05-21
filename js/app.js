@@ -78,26 +78,109 @@ function loadPage(page) {
 }
 */
 /** loadPage async */
+// async function loadPage(page) {
+
+//   const app = document.getElementById('app');
+
+//   // 🔥 १. हे नाव फायनल (UI अपडेट करण्यासाठी)
+//   setActiveNav(page);   
+
+//   // 🔥 fetch page
+//   const res = await fetch(`pages/${page}.html`);
+//   const html = await res.text();
+
+//   // 🔥 render
+//   app.innerHTML = html;
+
+//   // 🔥 page-specific init
+//   initPage(page);
+
+//   // 🔥 close menu
+//   closeMenu();
+// }
+
+//
+
+
 async function loadPage(page) {
+  // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
+  if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId && page !== 'scoring') {
+      
+      console.log(`%c🛑 [Navigation Block]: युझर स्कोअरिंग सोडून "${page}" वर जाण्याचा प्रयत्न करत आहे. वॉर्निंग दाखवत आहे...`, "color: #ef4444; font-weight: bold;");
 
+      const result = await Swal.fire({
+          title: 'स्कोअरिंग सोडून बाहेर जायचे का?',
+          text: "चालू मॅचचा टायमर पॉज केला जाईल आणि संपूर्ण रेड इतिहास सुरक्षित सेव्ह केला जाईल.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'हो, बाहेर पडा',
+          cancelButtonText: 'नाही, इथेच राहा',
+          background: '#111',
+          color: '#fff',
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#4b5563'
+      });
+
+      // ❌ जर युझरने 'नाही' (Cancel) क्लिक केले, तर पेज बदलू नका, इथल्या इथेच फ्लो थांबवा!
+      if (!result.isConfirmed) {
+          console.log("😇 [Navigation Cancelled]: युझर स्कोअरिंग स्क्रीनवरच थांबला.");
+          return; 
+      }
+
+      // ✅ जर युझरने 'हो' (Confirm) केले, तर डेटा सुरक्षित क्लाउडवर पाठवा!
+      console.log("☁️ [Exit Sync]: शिल्लक वेळ आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
+      
+      if (window.matchInterval) clearInterval(window.matchInterval);
+      window.isMatchPaused = true;
+
+      // 🔒 लोकल मेमरी किंवा लोकल स्टोरेजमधून ताजी रेड समरी गोळा करा
+      let finalRaidsArray = window.activeRaidsList || [];
+      if (finalRaidsArray.length === 0) {
+          const storedData = localStorage.getItem(`raids_secure_log_${matchSetupData.mId}`);
+          if (storedData) {
+              try {
+                  finalRaidsArray = JSON.parse(decodeURIComponent(escape(atob(storedData))));
+              } catch (e) { console.error("Error decoding storage on exit:", e); }
+          }
+      }
+
+      try {
+          // ☁️ [ONE-TIME SYNC CALL]: सर्व डेटा एकाच वेळी 'raidsHistory' मध्ये जतन!
+          await db.collection("tournaments").doc(matchSetupData.tId)
+            .collection("matches").doc(matchSetupData.mId).update({
+                savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
+                isMatchPaused: true,
+                raidsHistory: finalRaidsArray,    // 🎯 तुझा संपूर्ण रेड इतिहास एकाच फील्डमध्ये साठवला!
+                lastUpdated: new Date().getTime()
+            });
+          console.log(`✅ [Exit Sync Success]: शिल्लक वेळ आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर जतन केल्या!`);
+          
+          // 🧹 बाहेर पडताना चालू मेमरी साफ करा
+          matchSetupData = null; 
+          currentMatchData = null;
+          window.activeRaidsList = [];
+          
+      } catch (err) {
+          console.error("🚨 [Exit Sync Error]: डेटाबेस अपडेट फेल झाले!", err);
+          Swal.fire("त्रुटी", "डेटा सेव्ह करताना अडचण आली, तरीही पेज बदलत आहे.", "error");
+      }
+  }
+
+  // -------------------------------------------------------------
+  // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
+  // -------------------------------------------------------------
   const app = document.getElementById('app');
-
-  // 🔥 १. हे नाव फायनल (UI अपडेट करण्यासाठी)
   setActiveNav(page);   
 
-  // 🔥 fetch page
   const res = await fetch(`pages/${page}.html`);
   const html = await res.text();
 
-  // 🔥 render
   app.innerHTML = html;
-
-  // 🔥 page-specific init
   initPage(page);
-
-  // 🔥 close menu
   closeMenu();
 }
+
+
 
 /** Pages */
 async function initPage(page) {
@@ -1547,15 +1630,104 @@ let matchSetupData = null;
  * तुझ्या app.js मधील जुन्या फंक्शनच्या जागी हा कोड रिप्लेस करून घे. 
  * यामध्ये आपण डेटाबेस मधून खेळाडू शोधण्यासाठी match.teamAId आणि match.teamBId चा वापर केला आहे: 
  */
+// async function startScoring(tId, mId) {
+//     // 🔥 [FRONTEND LIVE LOG]: स्कोअरिंग मोडल उघडताच संपूर्ण आयडी पॅटर्न कन्सोलमध्ये चमकेल
+//     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
+//     console.log(`%c🚀 [मॅच स्कोअरिंग सुरुवात]: 🔐 फ्युचर-प्रूफ युनिक आयडी तपासणी सुरू...`, "color: #f97316; font-weight: bold; font-size: 11px;");
+//     console.log(`👉 टूर्नामेंट ID : ${tId}`);
+//     console.log(`👉 मॅच आयडी     : ${mId}`);
+//     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
+    
+//     matchSetupData = { tId, mId };
+    
+//     try {
+//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+        
+//         if (!mDoc.exists) {
+//             console.error(`🚨 [ERR]: टूर्नामेंट "${tId}" मध्ये मॅच "${mId}" चा डेटा सापडला नाही!`);
+//             Swal.fire("त्रुटी", "मॅचचा डेटा सापडला नाही!", "error");
+//             return;
+//         }
+
+//         const match = mDoc.data();
+
+//         // 🟢 [अल्टीमेट आयडी फिक्स]: आपण डिझाईन केलेले नवीन कडक सिस्टीम आयडी (TM_...) इथून गोळा करणे
+//         const idA = match.teamA_id;
+//         const idB = match.teamB_id;
+
+//         console.log(`%c[आयडी ट्रॅकिंग]: संघ A आयडी -> %c"${idA}" %c| संघ B आयडी -> %c"${idB}"`, 
+//             "color: #gray;", "color: #3b82f6; font-weight: bold;", "color: #gray;", "color: #3b82f6; font-weight: bold;");
+
+//         // जर आयडी मिळाले नाहीत, तर डेव्हलपमेंटमध्येच अलर्ट येईल जेणेकरून चूक लगेच पकडता येईल
+//         if (!idA || !idB || idA === "TBD" || idB === "TBD") {
+//             console.error("🚨 एरर: मॅच डॉक्युमेंटमध्ये अधिकृत teamA_id किंवा teamB_id (TM_...) सापडला नाही!");
+//             Swal.fire({
+//                 icon: 'error',
+//                 title: 'संघाची माहिती अपूर्ण!',
+//                 text: 'स्कोअरिंग सुरू करण्यापूर्वी कृपया फिक्सचर सेटरमध्ये जाऊन दोन्ही संघांची निवड अचूक करा.'
+//             });
+//             return;
+//         }
+
+//         // जर स्टेटस आधीच "Live" असेल तर थेट स्कोअरिंग स्क्रीनला पाठवा
+//         if (match.status === "Live") {
+//             console.log("%c[REDIRECT]: मॅच आधीच लाईव्ह आहे. थेट स्कोअरिंग स्क्रीनवर पाठवत आहे... 🏁", "color: #22c55e; font-weight: bold;");
+//             localStorage.setItem(`active_match_${mId}`, JSON.stringify(match));
+//             goToScoring(tId, mId); 
+//             return; 
+//         }
+
+//         const modal = document.getElementById('startMatchModal');
+//         const tossSelect = document.getElementById('tossWinner');
+//         const tabBtnA = document.getElementById('tabBtnA');
+//         const tabBtnB = document.getElementById('tabBtnB');
+
+//         if (!modal || !tossSelect) {
+//             console.error("🚨 [UI एरर]: HTML मध्ये 'startMatchModal' किंवा 'tossWinner' एलिमेंट्स गहाळ आहेत!");
+//             Swal.fire("त्रुटी", "Start Match Modal एचटीएमएलमध्ये सापडले नाही!", "error");
+//             return;
+//         }
+
+//         // टॉस विनर ड्रॉपडाउनमध्ये नाव दिसेल, पण व्हॅल्यू म्हणून बॅकएंडला युनिक आयडी (TM_...) जाईल
+//         tossSelect.innerHTML = `
+//             <option value="${idA}">${match.teamA}</option>
+//             <option value="${idB}">${match.teamB}</option>
+//         `;
+
+//         if (tabBtnA) tabBtnA.innerText = match.teamA;
+//         if (tabBtnB) tabBtnB.innerText = match.teamB;
+
+//         // 🟢 [स्मार्ट सिलेक्टर]: थेट नवीन कडक आयडी पास करून मास्टर प्लेअर्समधून ३० खेळाडू ओढणे
+//         console.log(`%c👤 [UI Rendering]: मास्टर डेटाबेसमधून खेळाडू शोधत आहे...`, "color: #06b6d4;");
+//         console.log(`👉 टीम A (ID: ${idA}) चे खेळाडू लोड होत आहेत...`);
+//         await renderSmartSquadSelector('playerListA', idA, 'A');
+        
+//         console.log(`👉 टीम B (ID: ${idB}) चे खेळाडू लोड होत आहेत...`);
+//         await renderSmartSquadSelector('playerListB', idB, 'B');
+
+//         // मोडल ओपन करा
+//         modal.classList.remove('hidden');
+//         modal.classList.add('flex');
+        
+//         // बाय डिफॉल्ट Team A चा टॅब उघडा ठेवा
+//         switchPlayerTab('A');
+//         console.log("%c✅ [मॅच सेटअप मोडल रेडी]: युझर १२ खेळाडू निवडण्यासाठी सज्ज आहे!", "color: #22c55e; font-weight: bold;");
+
+//     } catch (e) {
+//         console.error("🚨 [startScoring क्रिटिकल एरर]:", e);
+//         Swal.fire("त्रुटी", "डेटा लोड करताना तांत्रिक चूक झाली.", "error");
+//     }
+// }
+
 async function startScoring(tId, mId) {
-    // 🔥 [FRONTEND LIVE LOG]: स्कोअरिंग मोडल उघडताच संपूर्ण आयडी पॅटर्न कन्सोलमध्ये चमकेल
     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
-    console.log(`%c🚀 [मॅच स्कोअरिंग सुरुवात]: 🔐 फ्युचर-प्रूफ युनिक आयडी तपासणी सुरू...`, "color: #f97316; font-weight: bold; font-size: 11px;");
-    console.log(`👉 टूर्नामेंट ID : ${tId}`);
-    console.log(`👉 मॅच आयडी     : ${mId}`);
+    console.log(`%c🚀 [मॅच स्कोअरिंग सुरुवात]: 🔐 सुरक्षित युनिक आयडी तपासणी सुरू...`, "color: #f97316; font-weight: bold; font-size: 11px;");
+    console.log(`👉 टूर्नामेंट ID : ${tId} | मॅच आयडी : ${mId}`);
     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
     
     matchSetupData = { tId, mId };
+    currentEditingMatch = { tId, mId }; // बॅकअप सेव्हर
+    localStorage.setItem('squad_editing_match', JSON.stringify(currentEditingMatch));
     
     try {
         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
@@ -1567,15 +1739,9 @@ async function startScoring(tId, mId) {
         }
 
         const match = mDoc.data();
-
-        // 🟢 [अल्टीमेट आयडी फिक्स]: आपण डिझाईन केलेले नवीन कडक सिस्टीम आयडी (TM_...) इथून गोळा करणे
         const idA = match.teamA_id;
         const idB = match.teamB_id;
 
-        console.log(`%c[आयडी ट्रॅकिंग]: संघ A आयडी -> %c"${idA}" %c| संघ B आयडी -> %c"${idB}"`, 
-            "color: #gray;", "color: #3b82f6; font-weight: bold;", "color: #gray;", "color: #3b82f6; font-weight: bold;");
-
-        // जर आयडी मिळाले नाहीत, तर डेव्हलपमेंटमध्येच अलर्ट येईल जेणेकरून चूक लगेच पकडता येईल
         if (!idA || !idB || idA === "TBD" || idB === "TBD") {
             console.error("🚨 एरर: मॅच डॉक्युमेंटमध्ये अधिकृत teamA_id किंवा teamB_id (TM_...) सापडला नाही!");
             Swal.fire({
@@ -1586,14 +1752,32 @@ async function startScoring(tId, mId) {
             return;
         }
 
-        // जर स्टेटस आधीच "Live" असेल तर थेट स्कोअरिंग स्क्रीनला पाठवा
-        if (match.status === "Live") {
-            console.log("%c[REDIRECT]: मॅच आधीच लाईव्ह आहे. थेट स्कोअरिंग स्क्रीनवर पाठवत आहे... 🏁", "color: #22c55e; font-weight: bold;");
+        // 🎯 [YOUR SMART BYPASS FIX]: जर मॅच आधीच लाईव्ह असेल किंवा खेळाडू आधीच निवडले असतील, तर प्लेयर सिलेक्शन बायपास करा!
+        if (match.status === "Live" || (match.teamAPlayers && match.teamAPlayers.length > 0)) {
+            console.log(`%c[STAGE RESTORE] ➔ मॅच आधीच सुरू झालेली आहे! थेट स्कोअरिंग पॅनलकडे नेव्हिगेट करत आहे... 🏁`, "color: #22c55e; font-weight: bold;");
+            
+            // १. पूर्ण मॅच डेटा लोकल स्टोरेजमध्ये साठवा
             localStorage.setItem(`active_match_${mId}`, JSON.stringify(match));
+            
+            // २. ☁️ क्लाउड डेटाबेसवरून चालू वेळ मेमरीमध्ये खेचा 
+            const dbSeconds = (match.savedMatchTime !== undefined) ? match.savedMatchTime : 1200;
+            matchTotalSeconds = dbSeconds;
+            localStorage.setItem('savedMatchTime', dbSeconds);
+            
+            // ३. पुन्हा आत येताना सुरुवातीला टायमर पॉज ठेवा (युझर क्लिक करून रिझ्युम करेल)
+            window.isMatchPaused = true;
+            
+            // 🎯 ४. जर वेळ पूर्ण १२०० सेकंद असेल तरच नवीन मॅच माना, नाहीतर थेट RESUME मोड लागू होईल!
+            window.isFirstTimeStart = (dbSeconds == 1200);
+
+            console.log(`📝 [Cloud Time Sync]: डेटाबेसवर शिल्लक वेळ -> ${dbSeconds} सेकंद | isFirstTimeStart: ${window.isFirstTimeStart}`);
+
+            // ५. थेट स्कोरिंग स्क्रीनवर ढकला
             goToScoring(tId, mId); 
-            return; 
+            return; // 🔐 प्लेयर मोडल उघडणे कायमचे ब्लॉक केले!
         }
 
+        // --- जर मॅच अगदी नवीन असेल (खेळाडू पहिल्यांदा निवडायचे असतील), तरच खालचा कोड चालेल ---
         const modal = document.getElementById('startMatchModal');
         const tossSelect = document.getElementById('tossWinner');
         const tabBtnA = document.getElementById('tabBtnA');
@@ -1601,11 +1785,9 @@ async function startScoring(tId, mId) {
 
         if (!modal || !tossSelect) {
             console.error("🚨 [UI एरर]: HTML मध्ये 'startMatchModal' किंवा 'tossWinner' एलिमेंट्स गहाळ आहेत!");
-            Swal.fire("त्रुटी", "Start Match Modal एचटीएमएलमध्ये सापडले नाही!", "error");
             return;
         }
 
-        // टॉस विनर ड्रॉपडाउनमध्ये नाव दिसेल, पण व्हॅल्यू म्हणून बॅकएंडला युनिक आयडी (TM_...) जाईल
         tossSelect.innerHTML = `
             <option value="${idA}">${match.teamA}</option>
             <option value="${idB}">${match.teamB}</option>
@@ -1614,19 +1796,12 @@ async function startScoring(tId, mId) {
         if (tabBtnA) tabBtnA.innerText = match.teamA;
         if (tabBtnB) tabBtnB.innerText = match.teamB;
 
-        // 🟢 [स्मार्ट सिलेक्टर]: थेट नवीन कडक आयडी पास करून मास्टर प्लेअर्समधून ३० खेळाडू ओढणे
         console.log(`%c👤 [UI Rendering]: मास्टर डेटाबेसमधून खेळाडू शोधत आहे...`, "color: #06b6d4;");
-        console.log(`👉 टीम A (ID: ${idA}) चे खेळाडू लोड होत आहेत...`);
         await renderSmartSquadSelector('playerListA', idA, 'A');
-        
-        console.log(`👉 टीम B (ID: ${idB}) चे खेळाडू लोड होत आहेत...`);
         await renderSmartSquadSelector('playerListB', idB, 'B');
 
-        // मोडल ओपन करा
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        
-        // बाय डिफॉल्ट Team A चा टॅब उघडा ठेवा
         switchPlayerTab('A');
         console.log("%c✅ [मॅच सेटअप मोडल रेडी]: युझर १२ खेळाडू निवडण्यासाठी सज्ज आहे!", "color: #22c55e; font-weight: bold;");
 
@@ -1646,78 +1821,243 @@ async function startScoring(tId, mId) {
 window.selectedMatchSquadA = [];
 window.selectedMatchSquadB = [];
 
+// async function renderSmartSquadSelector(containerId, teamId, teamPrefix) {
+//     const container = document.getElementById(containerId);
+//     if (!container) return;
+
+//     // 🧡 ऑरेंज थीम लोडिंग टेक्स्ट
+//     container.innerHTML = `<p class="text-orange-500 text-[10px] text-center py-5 uppercase tracking-widest animate-pulse font-mono font-bold">डेटाबेसमधून खेळाडू शोधत आहे...</p>`;
+
+//     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027";
+
+//     try {
+//         console.log(`%c[१. स्क्वॉड सिलेक्टर]: ID -> "${teamId}" साठी खेळाडूंचा शोध सुरू...`, "color: #f97316; font-weight: bold;");
+        
+//         // 🟢 पायरी १: आधी नेहमीप्रमाणे थेट 'teamId' फील्ड मॅच करून खेळाडू शोधा (नवीन सिस्टीम आयडी नियम)
+//         let snapshot = await db.collection("master_players")
+//             .where(`seasons.${currentSeason}.teamId`, "==", teamId).get();
+
+//         // 🟢 पायरी २ [बॅकअप सक्रिय]: जर खेळाडू सापडले नाहीत, तर जुन्या डेटासाठी 'registerId' फील्डमध्ये शोध घ्या!
+//         if (snapshot.empty) {
+//             console.log(`%c⚠️ [बॅकअप सक्रिय]: "teamId == ${teamId}" मध्ये खेळाडू सापडले नाहीत. आता "registerId == ${teamId}" साठी शोधत आहे...`, "color: #eab308;");
+            
+//             snapshot = await db.collection("master_players")
+//                 .where(`seasons.${currentSeason}.registerId`, "==", teamId).get();
+//         }
+
+//         if (snapshot.empty) {
+//             console.warn(`🚨 [ERR]: संघ आयडी "${teamId}" साठी कोणत्याही फील्डमध्ये खेळाडू सापडले नाहीत!`);
+//             container.innerHTML = `<p class="text-orange-500 text-[10px] text-center py-5 font-bold uppercase font-mono">⚠️ या संघात (ID: ${teamId}) एकही खेळाडू नोंदणीकृत नाही!</p>`;
+//             return;
+//         }
+
+//         console.log(`%c✅ [यशस्वी]: डेटाबेसमधून एकूण ${snapshot.size} खेळाडू अचूक सापडले!`, "color: #22c55e; font-weight: bold;");
+
+//         // 🎯 [RAID X PURE ORANGE UI]: डबा उभी जागा कमी खाईल आणि पूर्णपणे मॅच होईल
+//         let html = `
+//         <div class="p-2 mb-2 bg-orange-950/20 rounded-xl border border-orange-500/10 flex items-center justify-between px-3.5 shrink-0 shadow-sm">
+//             <span class="text-[9px] text-orange-400 font-black uppercase tracking-tight font-mono">🎯 पायरी १: १२ खेळाडू निवडा</span>
+//             <div class="text-[9px] text-gray-400 font-bold font-mono">
+//                 निवडले: <span id="count_${teamPrefix}" class="text-orange-500 font-black text-xs">0</span> <span class="text-gray-600">/ 12</span>
+//             </div>
+//         </div>
+//         <div class="space-y-1.5 max-h-[52vh] overflow-y-auto pr-1 custom-scrollbar">`;
+
+//         snapshot.forEach(doc => {
+//             const player = doc.data();
+//             const pId = doc.id; // खेळाडूचा सिस्टीम आयडी (उदा. RXO0QN)
+
+//             html += `
+//             <label class="flex justify-between items-center bg-[#0d0d0d] p-3 rounded-xl border border-gray-900 hover:border-gray-800 cursor-pointer transition-all gap-2 group">
+//                 <div class="flex items-center gap-3 min-w-0 flex-1">
+//                     <input type="checkbox" name="squad_check_${teamPrefix}" value="${pId}" data-name="${player.name}"
+//                         onchange="handleSquadSelection('${teamPrefix}')"
+//                         class="w-4 h-4 rounded bg-gray-950 border-gray-800 text-orange-600 focus:ring-0 accent-orange-500 cursor-pointer">
+//                     <div class="leading-tight truncate">
+//                         <p class="text-xs font-bold text-gray-200 uppercase truncate group-hover:text-orange-400 transition-colors">${player.name}</p>
+//                         <p class="text-[8px] text-gray-500 font-mono font-bold mt-0.5 tracking-tight">🔑 ID: ${pId} | 📞 ${player.mobile || '------'} | 🛡️ ${player.skill || 'NA'}</p>
+//                     </div>
+//                 </div>
+//             </label>`;
+//         });
+
+//         html += `</div>
+//         <div id="playingDecisionContainer_${teamPrefix}" class="mt-4 hidden space-y-2 border-t border-gray-900 pt-3">
+//         </div>`;
+
+//         container.innerHTML = html;
+
+//     } catch (err) {
+//         console.error("🚨 [सिएक्वेक्टर क्रिटिकल एरर]: खेळाडू लोड करताना अडचण आली:", err);
+//         container.innerHTML = `<p class="text-red-500 text-[10px] text-center py-5 font-mono">खेळाडू लोड करताना एरर आला.</p>`;
+//     }
+// }
+
+
+// 🎯 १. मास्टर खेळाडूंची यादी दाखवणारे अल्ट्रा-कॉम्पॅक्ट फंक्शन
 async function renderSmartSquadSelector(containerId, teamId, teamPrefix) {
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) {
+        console.error(`🚨 [DOM Error]: #${containerId} हा कंटेनर सापडला नाही!`);
+        return;
+    }
 
-    // 🧡 ऑरेंज थीम लोडिंग टेक्स्ट
-    container.innerHTML = `<p class="text-orange-500 text-[10px] text-center py-5 uppercase tracking-widest animate-pulse font-mono font-bold">डेटाबेसमधून खेळाडू शोधत आहे...</p>`;
+    // 🔍 [लॉग १]: डेटा ओढण्याची प्रोसेस सुरू
+    console.log(`%c==================================================`, "color: #f97316; font-weight: bold;");
+    console.log(`🏃‍♂️ [Squad Selector Initiated] ➔ टीम: "${teamPrefix}" | ID: "${teamId}" साठी खेळाडू गोळा करत आहे...`);
+    console.log(`%c==================================================`, "color: #f97316; font-weight: bold;");
 
+    container.innerHTML = `<p class="text-orange-500 text-[10px] text-center py-5 uppercase tracking-widest animate-pulse font-mono font-bold">लोड होत आहे...</p>`;
     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027";
 
     try {
-        console.log(`%c[१. स्क्वॉड सिलेक्टर]: ID -> "${teamId}" साठी खेळाडूंचा शोध सुरू...`, "color: #f97316; font-weight: bold;");
-        
-        // 🟢 पायरी १: आधी नेहमीप्रमाणे थेट 'teamId' फील्ड मॅच करून खेळाडू शोधा (नवीन सिस्टीम आयडी नियम)
-        let snapshot = await db.collection("master_players")
-            .where(`seasons.${currentSeason}.teamId`, "==", teamId).get();
-
-        // 🟢 पायरी २ [बॅकअप सक्रिय]: जर खेळाडू सापडले नाहीत, तर जुन्या डेटासाठी 'registerId' फील्डमध्ये शोध घ्या!
+        let snapshot = await db.collection("master_players").where(`seasons.${currentSeason}.teamId`, "==", teamId).get();
         if (snapshot.empty) {
-            console.log(`%c⚠️ [बॅकअप सक्रिय]: "teamId == ${teamId}" मध्ये खेळाडू सापडले नाहीत. आता "registerId == ${teamId}" साठी शोधत आहे...`, "color: #eab308;");
-            
-            snapshot = await db.collection("master_players")
-                .where(`seasons.${currentSeason}.registerId`, "==", teamId).get();
+            console.log(`%cℹ️ [बॅकअप क्वेरी सक्रिय]: 'teamId' मध्ये डेटा नाही, आता 'registerId' तपासत आहे...`, "color: #eab308;");
+            snapshot = await db.collection("master_players").where(`seasons.${currentSeason}.registerId`, "==", teamId).get();
         }
 
         if (snapshot.empty) {
-            console.warn(`🚨 [ERR]: संघ आयडी "${teamId}" साठी कोणत्याही फील्डमध्ये खेळाडू सापडले नाहीत!`);
-            container.innerHTML = `<p class="text-orange-500 text-[10px] text-center py-5 font-bold uppercase font-mono">⚠️ या संघात (ID: ${teamId}) एकही खेळाडू नोंदणीकृत नाही!</p>`;
+            console.warn(`⚠️ [Data Warning]: संघ आयडी "${teamId}" साठी एकही खेळाडू सापडला नाही!`);
+            container.innerHTML = `<p class="text-orange-500 text-[9px] text-center py-5 font-bold">⚠️ संघात खेळाडू सापडले नाहीत!</p>`;
             return;
         }
 
-        console.log(`%c✅ [यशस्वी]: डेटाबेसमधून एकूण ${snapshot.size} खेळाडू अचूक सापडले!`, "color: #22c55e; font-weight: bold;");
-
-        // 🎯 [RAID X PURE ORANGE UI]: डबा उभी जागा कमी खाईल आणि पूर्णपणे मॅच होईल
-        let html = `
-        <div class="p-2 mb-2 bg-orange-950/20 rounded-xl border border-orange-500/10 flex items-center justify-between px-3.5 shrink-0 shadow-sm">
-            <span class="text-[9px] text-orange-400 font-black uppercase tracking-tight font-mono">🎯 पायरी १: १२ खेळाडू निवडा</span>
-            <div class="text-[9px] text-gray-400 font-bold font-mono">
-                निवडले: <span id="count_${teamPrefix}" class="text-orange-500 font-black text-xs">0</span> <span class="text-gray-600">/ 12</span>
-            </div>
-        </div>
-        <div class="space-y-1.5 max-h-[52vh] overflow-y-auto pr-1 custom-scrollbar">`;
+        console.log(`%c📊 [Data Success]: डेटाबेसमधून एकूण ${snapshot.size} खेळाडू अचूक मिळाले!`, "color: #22c55e; font-weight: bold;");
+        let html = ``;
 
         snapshot.forEach(doc => {
             const player = doc.data();
-            const pId = doc.id; // खेळाडूचा सिस्टीम आयडी (उदा. RXO0QN)
+            const pId = doc.id;
+            const role = player.skill || player.role || "Raid";
+            const roleIcon = role.toLowerCase().includes('raid') ? '🏃‍♂️' : '🛡️';
 
             html += `
-            <label class="flex justify-between items-center bg-[#0d0d0d] p-3 rounded-xl border border-gray-900 hover:border-gray-800 cursor-pointer transition-all gap-2 group">
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <input type="checkbox" name="squad_check_${teamPrefix}" value="${pId}" data-name="${player.name}"
-                        onchange="handleSquadSelection('${teamPrefix}')"
-                        class="w-4 h-4 rounded bg-gray-950 border-gray-800 text-orange-600 focus:ring-0 accent-orange-500 cursor-pointer">
-                    <div class="leading-tight truncate">
-                        <p class="text-xs font-bold text-gray-200 uppercase truncate group-hover:text-orange-400 transition-colors">${player.name}</p>
-                        <p class="text-[8px] text-gray-500 font-mono font-bold mt-0.5 tracking-tight">🔑 ID: ${pId} | 📞 ${player.mobile || '------'} | 🛡️ ${player.skill || 'NA'}</p>
-                    </div>
+            <div id="pcard_${pId}" class="flex justify-between items-center bg-[#0d0d0d] p-1 px-2.5 rounded-lg border border-gray-900 transition-all gap-2 hover:border-gray-800">
+                <div class="min-w-0 flex-1 leading-none">
+                    <p class="text-[10px] font-black text-gray-200 uppercase truncate">${player.name}</p>
+                    <p class="text-[8px] text-gray-600 font-mono font-bold mt-0.5">${roleIcon} ${role.toUpperCase()}</p>
                 </div>
-            </label>`;
+                
+                <div class="flex items-center gap-1 shrink-0">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status_${pId}" value="Playing" 
+                               onchange="updateSquadLiveCounts('${teamPrefix}')" data-pid="${pId}" data-name="${player.name}"
+                               class="peer hidden">
+                        <span class="text-[8px] font-black px-2 py-1 rounded bg-black border border-gray-900 text-gray-600 peer-checked:bg-green-600/10 peer-checked:border-green-500/40 peer-checked:text-green-400 block transition-all font-mono">PLAY</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status_${pId}" value="Bench" 
+                               onchange="updateSquadLiveCounts('${teamPrefix}')" data-pid="${pId}" data-name="${player.name}"
+                               class="peer hidden">
+                        <span class="text-[8px] font-black px-2 py-1 rounded bg-black border border-gray-900 text-gray-600 peer-checked:bg-orange-600/10 peer-checked:border-orange-500/40 peer-checked:text-orange-400 block transition-all font-mono">BENCH</span>
+                    </label>
+                    <button onclick="resetPlayerSelection('${pId}', '${teamPrefix}')" class="p-1 text-[8px] bg-black text-gray-700 border border-gray-900 rounded hover:text-red-500 transition-colors font-mono">✕</button>
+                </div>
+            </div>`;
         });
 
-        html += `</div>
-        <div id="playingDecisionContainer_${teamPrefix}" class="mt-4 hidden space-y-2 border-t border-gray-900 pt-3">
-        </div>`;
-
         container.innerHTML = html;
+        
+        // मोडल उघडताना सुरुवातीला वरचा प्रिव्ह्यू रेंडर रिसेट करा
+        if(teamPrefix === 'A') {
+            console.log("[Initial Render] Default Team A प्रिव्ह्यू लोड करत आहे...");
+            updateSquadLiveCounts('A');
+        }
 
     } catch (err) {
-        console.error("🚨 [सिएक्वेक्टर क्रिटिकल एरर]: खेळाडू लोड करताना अडचण आली:", err);
-        container.innerHTML = `<p class="text-red-500 text-[10px] text-center py-5 font-mono">खेळाडू लोड करताना एरर आला.</p>`;
+        console.error("🚨 [Smart Selector Critical Error]:", err);
     }
 }
 
+// 📊 २. [THE MASTER UX]: सिलेक्ट केलेल्या खेळाडूंना वरती टॅगच्या रूपात रेंडर करणे
+function updateSquadLiveCounts(teamPrefix) {
+    const container = document.getElementById(teamPrefix === 'A' ? 'playerListA' : 'playerListB');
+    const rackPlaying = document.getElementById('rack_playing');
+    const rackBench = document.getElementById('rack_bench');
+    
+    if (!container || !rackPlaying || !rackBench) {
+        console.error("🚨 [UX Error]: रेंडरिंग रॅक्स किंवा प्लेयर लिस्ट DOM मध्ये सापडली नाही!");
+        return;
+    }
+
+    // सर्व सिलेक्ट केलेले रेडिओ बट्स मिळवा
+    const selectedRadios = container.querySelectorAll(`input[type="radio"]:checked`);
+    
+    console.log(`%c[Live Tracker Event]: Team ${teamPrefix} मधून बदल ट्रॅक झाला... 🎯`, "color: #06b6d4; font-weight: bold;");
+    
+    let playingHTML = "";
+    let benchHTML = "";
+    let pCount = 0;
+    let bCount = 0;
+
+    selectedRadios.forEach(radio => {
+        const pId = radio.getAttribute('data-pid');
+        const pName = radio.getAttribute('data-name');
+        const val = radio.value; // "Playing" किंवा "Bench"
+
+        if (val === 'Playing') {
+            pCount++;
+            playingHTML += `
+                <div class="flex items-center bg-green-950/40 border border-green-500/30 px-1.5 py-0.5 rounded-md text-[9px] font-black text-gray-200 uppercase tracking-tighter animate-scaleIn">
+                    ${pName}
+                </div>`;
+        } else if (val === 'Bench') {
+            bCount++;
+            benchHTML += `
+                <div class="flex items-center bg-orange-950/40 border border-orange-500/30 px-1.5 py-0.5 rounded-md text-[9px] font-black text-gray-200 uppercase tracking-tighter animate-scaleIn">
+                    ${pName}
+                </div>`;
+        }
+    });
+
+    // 🚨 [कडक नियम तपासणी - ७ Playing आणि ५ Bench मर्यादा व्हॅलिडेशन]
+    if (window.event && window.event.target) {
+        const clickedRadio = window.event.target;
+        
+        if (clickedRadio.value === 'Playing' && pCount > 7) {
+            console.warn(`%c❌ [Denied]: Playing मर्यादा संपली! ७ पेक्षा जास्त खेळाडू निवडण्याचा प्रयत्न.`, "color: #ef4444; font-weight: bold;");
+            Swal.fire({ icon: 'warning', title: 'प्लेइंग मर्यादा संपली!', text: 'तुम्ही ७ पेक्षा जास्त खेळाडू Playing निवडू शकत नाही.', timer: 1500, showConfirmButton: false });
+            clickedRadio.checked = false; // अनचेक करा
+            updateSquadLiveCounts(teamPrefix); // पुन्हा रिकलकुलेट
+            return;
+        }
+        
+        if (clickedRadio.value === 'Bench' && bCount > 5) {
+            console.warn(`%c❌ [Denied]: Bench मर्यादा संपली! ५ पेक्षा जास्त खेळाडू निवडण्याचा प्रयत्न.`, "color: #ef4444; font-weight: bold;");
+            Swal.fire({ icon: 'warning', title: 'बेंच मर्यादा संपली!', text: 'तुम्ही ५ पेक्षा जास्त खेळाडू Bench निवडू शकत नाही.', timer: 1500, showConfirmButton: false });
+            clickedRadio.checked = false; // अनचेक करा
+            updateSquadLiveCounts(teamPrefix); // पुन्हा रिकलकुलेट
+            return;
+        }
+    }
+
+    // 🔍 [लाईव्ह स्नॅपशॉट कन्सोल लॉग]: रॅकमध्ये डेटा जाण्यापूर्वीची लाईव्ह स्थिती
+    console.log(`   ↳ 🟢 Playing Count: ${pCount} / 7 | 🟠 Bench Count: ${bCount} / 5 | 📈 एकूण: ${pCount + bCount} / 12`);
+
+    // वरच्या रॅक्समध्ये लहान चिप्स रेंडर करा
+    rackPlaying.innerHTML = pCount === 0 ? `<p class="text-[8px] text-gray-700 italic font-bold">७ खेळाडू निवडा...</p>` : playingHTML;
+    rackBench.innerHTML = bCount === 0 ? `<p class="text-[8px] text-gray-700 italic font-bold">५ राखीव निवडा...</p>` : benchHTML;
+
+    // मास्टर लेबल आणि कलर्स स्लिकली अपडेट करा
+    const totalCount = pCount + bCount;
+    const labelEl = document.getElementById('count_label');
+    if (labelEl) {
+        labelEl.innerHTML = `P: <span class="${pCount === 7 ? 'text-green-400' : 'text-white'} font-black">${pCount}/7</span> | B: <span class="${bCount === 5 ? 'text-orange-400' : 'text-white'} font-black">${bCount}/5</span> | एकूण: <span class="text-orange-500 font-black">${totalCount}/12</span>`;
+    }
+}
+
+// 🧼 ३. खेळाडूची निवड अनसिलेक्ट (Reset) करण्याचे कडक फंक्शन
+function resetPlayerSelection(pId, teamPrefix) {
+    console.log(`%c🧹 [Reset Player]: ID ➔ "${pId}" ची निवड रद्द केली.`, "color: #eab308;");
+    const radios = document.querySelectorAll(`input[name="status_${pId}"]`);
+    radios.forEach(r => r.checked = false);
+    
+    // लाइव्ह मोजणी पुन्हा सुरू करा
+    updateSquadLiveCounts(teamPrefix);
+}
+
+/** */
 
 // 🏃‍♂️ [RAID X SQUAD TRACKER]: खेळाडू निवडल्यावर मोजणी आणि व्हॅलिडेशन करणारे फंक्शन
 function handleSquadSelection(teamPrefix) {
@@ -1800,6 +2140,7 @@ function switchPlayerTab(team) {
         btnA.classList.remove('border-green-600', 'text-white');
         btnA.classList.add('text-gray-500');
     }
+   
 }
 
 
@@ -1961,75 +2302,225 @@ function closeStartMatchModal() {
 // }
 
 
-async function confirmStartMatch() {
-    console.log("--- [START_MATCH_PROCESS] Final Validation Initiated --- 🚀");
-    const { tId, mId } = matchSetupData;
+// async function confirmStartMatch99() {
+//     console.log("--- [START_MATCH_PROCESS] Final Validation Initiated --- 🚀");
+//     const { tId, mId } = matchSetupData;
 
-    // १. [DATA COLLECTION] आधी सर्व १२ खेळाडूंचा डेटा मिळवा (getPlayersData मधून) 🚀
-    // हे फंक्शन आपण मगाशी अपडेट केले आहे जेणेकरून रिकामी नावे पकडता येतील.
+//     // १. [DATA COLLECTION] आधी सर्व १२ खेळाडूंचा डेटा मिळवा (getPlayersData मधून) 🚀
+//     // हे फंक्शन आपण मगाशी अपडेट केले आहे जेणेकरून रिकामी नावे पकडता येतील.
+//     const playersA = getPlayersData('A'); 
+//     const playersB = getPlayersData('B');
+
+//     // २. [STRICT NAME VALIDATION] १२ खेळाडूंची नावे भरली आहेत का ते तपासा 🚀
+//     // जर एक जरी नाव रिकामं असेल (name === ""), तर hasEmpty true होईल.
+//     const hasEmptyA = playersA.some(p => p.name === "");
+//     const hasEmptyB = playersB.some(p => p.name === "");
+
+//     if (hasEmptyA || hasEmptyB) {
+//         console.warn("[DENIED] Match blocked. Real player names are missing. ❌");
+//         Swal.fire({
+//             title: "नावे अनिवार्य आहेत!",
+//             text: "सर्व १२ खेळाडूंची खरी नावे भरणे आवश्यक आहे. डिफॉल्ट नावे चालणार नाहीत.",
+//             icon: "error",
+//             background: '#111',
+//             color: '#fff'
+//         });
+//         return; // नाव नसेल तर प्रोसेस इथेच थांबवा
+//     }
+
+//     // ३. [STRICT COUNT VALIDATION] 'Playing' खेळाडूंची संख्या मोजा (Exactly 7 Check) 🚀
+//     const countA = playersA.filter(p => p.playingStatus === "Playing").length;
+//     const countB = playersB.filter(p => p.playingStatus === "Playing").length;
+
+//     console.log(`[VALIDATION] Names OK. Playing Count - Team A: ${countA}/7 | Team B: ${countB}/7 ✅`);
+
+//     if (countA !== 7 || countB !== 7) {
+//         console.warn("[DENIED] Match blocked. Improper playing count. ❌");
+//         Swal.fire({
+//             title: "खेळाडू निवड चुकली!",
+//             text: `मॅच सुरू करण्यासाठी प्रत्येक टीममध्ये नक्की ७ खेळाडू 'Playing' असणे अनिवार्य आहे. (सध्या: Team A: ${countA}, Team B: ${countB})`,
+//             icon: "error",
+//             background: '#111',
+//             color: '#fff'
+//         });
+//         return; // ७ खेळाडू नसतील तर पुढे जाऊ नका
+//     }
+
+//     // ४. [PROCEED] सर्व व्हॅलिडेशन झाले, आता डेटा गोळा करा ✅
+//     const tossWinner = document.getElementById('tossWinner').value;
+//     const selection = document.getElementById('tossSelection').value;
+
+//     try {
+//         console.log("[DATABASE] Fetching match details... ☁️");
+//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+//         const match = mDoc.data();
+        
+//         // पहिल्या रेडरचे लॉजिक
+//         let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
+
+//         // ५. [HYBRID-DATA] पूर्ण मॅच ऑब्जेक्ट तयार करा (Status "Live") 🚀
+//         const updateData = {
+//             tId: tId,
+//             mId: mId,
+//             teamAName: match.teamA,
+//             teamBName: match.teamB,
+//             status: "Live", // आता स्टेटस लाईव्ह झाला, इथून बॅक येता येणार नाही
+//             tossWinner: tossWinner,
+//             tossSelection: selection,
+//             firstRaidBy: firstRaidBy,
+//             currentRaider: firstRaidBy,
+//             teamAPlayers: playersA, // १२ खरी नावे (Playing/Bench)
+//             teamBPlayers: playersB, // १२ खरी नावे
+//             scoreA: 0,
+//             scoreB: 0,
+//             timeoutsA: 0,
+//             timeoutsB: 0,
+//             matchLog: [],
+//             lastUpdated: new Date().getTime()
+//         };
+
+//         // ६. [HYBRID-SAVE] LocalStorage मध्ये स्नॅपशॉट सेव्ह करा 📦
+//         console.log("[HYBRID-LOCAL] Saving to LocalStorage for safety... ✅");
+//         localStorage.setItem(`active_match_${mId}`, JSON.stringify(updateData));
+        
+//         // ७. [HYBRID-SAVE] Firestore मध्ये सिंक करा ☁️
+//         console.log("[HYBRID-CLOUD] Syncing to Firestore... ✅");
+//         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
+        
+//         console.log("--- [MATCH_LIVE] Status: Live. Setup Locked. 🚀 ---");
+        
+//         closeStartMatchModal();
+        
+//         Swal.fire({
+//             title: "Match Live!",
+//             text: "१२ खेळाडूंची नावे नोंदवली आहेत. मॅच सुरू होत आहे!",
+//             icon: "success",
+//             timer: 1500,
+//             showConfirmButton: false
+//         });
+
+//         // ८. स्कोअरिंग स्क्रीनवर रिडायरेक्ट करा
+//         console.log(`[REDIRECT] Moving to scoring window... 🏁`);
+//         goToScoring(tId, mId);
+
+//     } catch (e) {
+//         console.error("[CRITICAL_ERROR] Setup failed: ❌", e);
+//         Swal.fire("Error", "डेटा अपडेट करताना तांत्रिक अडचण आली.", "error");
+//     }
+// }
+
+/** */
+async function confirmStartMatch() {
+    console.log("%c--- 🚀 [START_MATCH_PROCESS] फायनल व्हॅलिडेशन सुरू ---", "color: #f97316; font-weight: bold;");
+    
+    // १. चालू मॅचचा संदर्भ मिळवा (कंसाचा फिक्स केला आहे 🎯)
+    if (!currentEditingMatch) {
+        console.error("🚨 [मॅच सुरू एरर]: currentEditingMatch चा डेटा मेमरीमध्ये सापडला नाही!");
+        const backupMatch = localStorage.getItem('squad_editing_match');
+        if (backupMatch) {
+            currentEditingMatch = JSON.parse(backupMatch);
+            console.log("%c✅ [Backup Recovered]: LocalStorage मधून मॅच संदर्भ यशस्वीरित्या परत मिळवला!", "color: #22c55e; font-weight: bold;");
+        } else {
+            console.error("🚨 [Fatal Error]: कुठेही मॅचचा आयडी सापडला नाही!");
+            Swal.fire({
+                icon: "error",
+                title: "संदर्भ सापडला नाही!",
+                text: "मॅचचा आयडी मेमरीमधून उडाला आहे. कृपया मोडल बंद करून पुन्हा 'Start Scoring' वर क्लिक करा.",
+                background: '#111',
+                color: '#fff',
+                confirmButtonColor: '#f97316'
+            });
+            return;
+        }
+    }
+
+    const { tId, mId } = currentEditingMatch;
+
+    // २. [DATA COLLECTION]: दोन्ही टीमचा सिलेक्टेड डेटा मिळवा
     const playersA = getPlayersData('A'); 
     const playersB = getPlayersData('B');
 
-    // २. [STRICT NAME VALIDATION] १२ खेळाडूंची नावे भरली आहेत का ते तपासा 🚀
-    // जर एक जरी नाव रिकामं असेल (name === ""), तर hasEmpty true होईल.
-    const hasEmptyA = playersA.some(p => p.name === "");
-    const hasEmptyB = playersB.some(p => p.name === "");
+    // ३. [STRICT TOTAL COUNT CHECK - नियम १२ खेळाडूंचा]:
+    if (playersA.length !== 12 || playersB.length !== 12) {
+        console.warn(`❌ [DENIED]: मॅच儲 ब्लॉक! खेळाडूंची संख्या १२ नाही. (A: ${playersA.length}, B: ${playersB.length})`);
+        Swal.fire({
+            title: "खेळाडू संख्या चुकीची!",
+            text: `PRO-KABADDI नियमांनुसार मॅच सुरू करण्यासाठी प्रत्येक संघातून तंतोतंत १२ खेळाडू निवडणे बंधनकारक आहे! (सध्या तुमच्या निवडीनुसार ➔ Team A: ${playersA.length}, Team B: ${playersB.length})`,
+            icon: "error",
+            background: '#111',
+            color: '#fff',
+            confirmButtonColor: '#f97316'
+        });
+        return;
+    }
+
+    // ४. [STRICT PLAYING & BENCH CHECK - नियम ७ प्लेइंग आणि ५ बेंच]:
+    const playingA = playersA.filter(p => p.playingStatus === "Playing").length;
+    const benchA = playersA.filter(p => p.playingStatus === "Bench").length;
+    
+    const playingB = playersB.filter(p => p.playingStatus === "Playing").length;
+    const benchB = playersB.filter(p => p.playingStatus === "Bench").length;
+
+    if (playingA !== 7 || playingB !== 7 || benchA !== 5 || benchB !== 5) {
+        console.warn(`❌ [DENIED]: मॅच ब्लॉक! ७ Playing आणि ५ Bench चा कोटा मॅच होत नाहीये.`);
+        Swal.fire({
+            title: "स्क्वॉड रचना चुकली!",
+            text: `मॅचसाठी प्रत्येक संघात ७ Playing आणि ५ Bench खेळाडू असणे अनिवार्य आहे! (सध्या ➔ Team A: ${playingA} Playing + ${benchA} Bench | Team B: ${playingB} Playing + ${benchB} Bench)`,
+            icon: "error",
+            background: '#111',
+            color: '#fff',
+            confirmButtonColor: '#f97316'
+        });
+        return;
+    }
+
+    // ५. [STRICT NAME VALIDATION]: सर्व नावे भरलेली आहेत ना याची शेवटची तपासणी
+    const hasEmptyA = playersA.some(p => !p.name || p.name.trim() === "");
+    const hasEmptyB = playersB.some(p => !p.name || p.name.trim() === "");
 
     if (hasEmptyA || hasEmptyB) {
-        console.warn("[DENIED] Match blocked. Real player names are missing. ❌");
-        Swal.fire({
-            title: "नावे अनिवार्य आहेत!",
-            text: "सर्व १२ खेळाडूंची खरी नावे भरणे आवश्यक आहे. डिफॉल्ट नावे चालणार नाहीत.",
-            icon: "error",
-            background: '#111',
-            color: '#fff'
-        });
-        return; // नाव नसेल तर प्रोसेस इथेच थांबवा
+        console.warn("❌ [DENIED]: नावे रिकामी आहेत.");
+        Swal.fire({ title: "नावे अनिवार्य!", text: "निवडलेल्या सर्व १२ खेळाडूंची खरी नावे डेटाबेसमध्ये असणे आवश्यक आहे.", icon: "error", background: '#111', color: '#fff' });
+        return;
     }
 
-    // ३. [STRICT COUNT VALIDATION] 'Playing' खेळाडूंची संख्या मोजा (Exactly 7 Check) 🚀
-    const countA = playersA.filter(p => p.playingStatus === "Playing").length;
-    const countB = playersB.filter(p => p.playingStatus === "Playing").length;
+    console.log("✅ [WHALIDATION SUCCESS]: दोन्ही टीम्सचे १२ खेळाडू (७ Playing + 5 Bench) शंभर टक्के चोख आहेत!");
 
-    console.log(`[VALIDATION] Names OK. Playing Count - Team A: ${countA}/7 | Team B: ${countB}/7 ✅`);
-
-    if (countA !== 7 || countB !== 7) {
-        console.warn("[DENIED] Match blocked. Improper playing count. ❌");
-        Swal.fire({
-            title: "खेळाडू निवड चुकली!",
-            text: `मॅच सुरू करण्यासाठी प्रत्येक टीममध्ये नक्की ७ खेळाडू 'Playing' असणे अनिवार्य आहे. (सध्या: Team A: ${countA}, Team B: ${countB})`,
-            icon: "error",
-            background: '#111',
-            color: '#fff'
-        });
-        return; // ७ खेळाडू नसतील तर पुढे जाऊ नका
-    }
-
-    // ४. [PROCEED] सर्व व्हॅलिडेशन झाले, आता डेटा गोळा करा ✅
+    // ६. टॉस आणि充 सिलेक्शन व्हॅल्यूज मिळवा
     const tossWinner = document.getElementById('tossWinner').value;
     const selection = document.getElementById('tossSelection').value;
 
+    if (tossWinner === "TBD") {
+        Swal.fire({ title: "टॉस विनर निवडा!", text: "मॅच सुरू करण्यापूर्वी टॉस कोणी जिंकला ते निवडणे आवश्यक आहे.", icon: "warning", background: '#111', color: '#fff', confirmButtonColor: '#f97316' });
+        return;
+    }
+
     try {
-        console.log("[DATABASE] Fetching match details... ☁️");
+        console.log("☁️ [DATABASE]: फायरस्टोअरमधून मॅचचे मूळ तपशील मिळवत आहे...");
         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
         const match = mDoc.data();
         
-        // पहिल्या रेडरचे लॉजिक
+        // पहिल्या रेडरचे कडक लॉजिक
         let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
 
-        // ५. [HYBRID-DATA] पूर्ण मॅच ऑब्जेक्ट तयार करा (Status "Live") 🚀
+        // ७. [HYBRID-DATA]: पूर्ण मॅच ऑब्जेक्ट तयार करा (Status "Live")
         const updateData = {
             tId: tId,
             mId: mId,
             teamAName: match.teamA,
             teamBName: match.teamB,
-            status: "Live", // आता स्टेटस लाईव्ह झाला, इथून बॅक येता येणार नाही
+            teamA_id: match.teamA_id || "", 
+            teamB_id: match.teamB_id || "", 
+            status: "Live",        
+            savedMatchTime: 1200,          // ☁️ डेटाबेसमध्ये फ्रेश २० मिनिटे लॉक
+            isMatchPaused: true,           // सुरुवातीला टायमर पॉज असेल
+            isFirstTimeStart: true,         
             tossWinner: tossWinner,
             tossSelection: selection,
             firstRaidBy: firstRaidBy,
             currentRaider: firstRaidBy,
-            teamAPlayers: playersA, // १२ खरी नावे (Playing/Bench)
-            teamBPlayers: playersB, // १२ खरी नावे
+            teamAPlayers: playersA,         
+            teamBPlayers: playersB,         
             scoreA: 0,
             scoreB: 0,
             timeoutsA: 0,
@@ -2038,33 +2529,43 @@ async function confirmStartMatch() {
             lastUpdated: new Date().getTime()
         };
 
-        // ६. [HYBRID-SAVE] LocalStorage मध्ये स्नॅपशॉट सेव्ह करा 📦
-        console.log("[HYBRID-LOCAL] Saving to LocalStorage for safety... ✅");
+        // ८. [HYBRID-SAVE]: LocalStorage मध्ये स्नॅपशॉट सेव्ह करा 📦
+        console.log("📦 [HYBRID-LOCAL]: सुरक्षिततेसाठी LocalStorage मध्ये डेटा जतन करत आहे...");
         localStorage.setItem(`active_match_${mId}`, JSON.stringify(updateData));
         
-        // ७. [HYBRID-SAVE] Firestore मध्ये सिंक करा ☁️
-        console.log("[HYBRID-CLOUD] Syncing to Firestore... ✅");
+        // 🔐 [अल्टीमेट टायमर फिक्स]: जुना कचरा टाईम इथल्या इथे साफ करून कडकडीत १२०० सेकंद टाका!
+        localStorage.setItem('savedMatchTime', 1200);
+        
+        // ग्लोबल मेमरी स्टेट्स सक्तीने फ्रेश मॅचसाठी री-सेट करा
+        window.isMatchPaused = true;
+        window.isFirstTimeStart = true;
+        if (typeof matchTotalSeconds !== 'undefined') matchTotalSeconds = 1200; // मुख्य टायमर रिसेट 🎯
+
+        // ९. [HYBRID-SAVE]: Firestore मध्ये सिंक करा ☁️
+        console.log("☁️ [HYBRID-CLOUD]: फायरस्टोअर क्लाउडमध्ये डेटा सिंक करत आहे...");
         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
         
-        console.log("--- [MATCH_LIVE] Status: Live. Setup Locked. 🚀 ---");
+        console.log("%c--- 🎉 [MATCH_LIVE] मॅच अधिकृतपणे लाईव्ह झाली आहे आणि सेटअप लॉक झाला! 🚀 ---", "background: #22c55e; color: #fff; font-weight: bold; padding: 4px;");
         
         closeStartMatchModal();
         
-        Swal.fire({
-            title: "Match Live!",
+        await Swal.fire({
+            title: "Match Live! 🔥",
             text: "१२ खेळाडूंची नावे नोंदवली आहेत. मॅच सुरू होत आहे!",
             icon: "success",
+            background: '#111',
+            color: '#fff',
             timer: 1500,
             showConfirmButton: false
         });
 
-        // ८. स्कोअरिंग स्क्रीनवर रिडायरेक्ट करा
-        console.log(`[REDIRECT] Moving to scoring window... 🏁`);
+        // १०. स्कोअरिंग स्क्रीनवर रिडायरेक्ट करा
+        console.log(`🏁 [REDIRECT]: स्कोअरिंग विंडो उघडत आहे (goToScoring)...`);
         goToScoring(tId, mId);
 
     } catch (e) {
-        console.error("[CRITICAL_ERROR] Setup failed: ❌", e);
-        Swal.fire("Error", "डेटा अपडेट करताना तांत्रिक अडचण आली.", "error");
+        console.error("🚨 [CRITICAL_ERROR] मॅच लाईव्ह करताना मोठी अडचण आली:", e);
+        Swal.fire({ title: "Error", text: "डेटा अपडेट करताना तांत्रिक अडचण आली.", icon: "error", background: '#111', color: '#fff' });
     }
 }
 
@@ -2104,7 +2605,7 @@ async function confirmStartMatch() {
 //     return data;
 // }
 
-
+/*** 2 
 function getPlayersData(prefix) {
     console.log(`--- [DATA_COLLECTION] Starting for Team: ${prefix} --- 🚀`);
     let data = [];
@@ -2131,6 +2632,54 @@ function getPlayersData(prefix) {
     // २. व्हेरिफिकेशनसाठी कन्सोल लॉग्स
     const playingCount = data.filter(p => p.playingStatus === "Playing").length;
     console.log(`[SUMMARY] Team ${prefix}: ${playingCount}/7 Playing Checked. ✅`);
+    
+    return data;
+}
+*/
+
+function getPlayersData(prefix) {
+    console.log(`%c--- 📥 [डेटा गोळा करणे]: Team ${prefix} चा कस्टमाईज्ड स्क्वॉड डेटा गोळा करत आहे... ---`, "color: #3b82f6; font-weight: bold;");
+    let data = [];
+    
+    const containerId = prefix === 'A' ? 'playerListA' : 'playerListB';
+    const container = document.getElementById(containerId);
+    
+    if (!container) {
+        console.error(`🚨 [डेटा एरर]: #${containerId} हा कंटेनर DOM मध्ये सापडला नाही!`);
+        return data;
+    }
+
+    const selectedRadios = container.querySelectorAll(`input[type="radio"]:checked`);
+    
+    // 🔢 [स्मार्ट नंबरिंग फिक्स]: Team A साठी बेस १ (१, २, ३...) आणि Team B साठी बेस २१ (२१, २२, २३...) 🎯
+    let index = prefix === 'A' ? 1 : 21;
+
+    selectedRadios.forEach(radio => {
+        const pId = radio.getAttribute('data-pid');
+        const nameVal = radio.getAttribute('data-name') || "";
+        const roleVal = radio.getAttribute('data-role') || "Raid";
+        const userDecision = radio.value; // "Playing" किंवा "Bench"
+
+        const playerObj = {
+            pId: pId,                  
+            no: index,                 // 🎯 आता Team A ला १ ते १२ आणि Team B ला २१ ते ३२ नंबर अचूक मिळतील!
+            name: nameVal, 
+            role: roleVal,
+            playingStatus: userDecision, 
+            status: userDecision === "Playing" ? "In" : "Out", 
+            outTime: null,
+            stats: { raids: 0, tackles: 0, points: 0 }
+        };
+
+        data.push(playerObj);
+        index++; // नंबर १ ने पुढे वाढेल
+    });
+
+    const totalSelected = data.length;
+    const playingCount = data.filter(p => p.playingStatus === "Playing").length;
+    const benchCount = data.filter(p => p.playingStatus === "Bench").length;
+    
+    console.log(`%c📊 [जर्सी नंबरिंग समरी ${prefix}]: एकूण निवडलेले: ${totalSelected}/12 ➔ 🏃‍♂️ Playing: ${playingCount}/7 | 🪑 Bench: ${benchCount}/5`, "color: #22c55e; font-weight: bold;");
     
     return data;
 }
@@ -2825,6 +3374,85 @@ function closeMatchSetter() {
 //     }
 // }
 
+// async function goToScoring(tId, mId) {
+//     console.log("--- [NAV] Loading Original Scoring Logic --- 🚀");
+//     await loadPage('scoring'); 
+
+//     try {
+//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+//         const match = mDoc.data();
+        
+//         currentMatchData = match;
+
+//         localStorage.setItem('currentTeamA', match.teamA);
+//         localStorage.setItem('currentTeamB', match.teamB);
+        
+//         setupLiveMatchNames();
+
+//         teamAPlayers = match.teamAPlayers || [];
+//         teamBPlayers = match.teamBPlayers || [];
+
+//         if(document.getElementById('scoreA')) document.getElementById('scoreA').innerText = match.scoreA || 0;
+//         if(document.getElementById('scoreB')) document.getElementById('scoreB').innerText = match.scoreB || 0;
+
+//         renderMiniPlayers();
+        
+//         if (typeof updateTimeoutUI === "function") updateTimeoutUI();
+
+//         // ---------------------------------------------------------
+//         // 🛠️ [LOCKING LOGIC] - मॅच सुरू होण्यापूर्वी बटणे लॉक करणे 🚀
+//         // ---------------------------------------------------------
+//         // १. तुझ्या स्कोअरिंग बटणांचा मुख्य कंटेनर (उदा. जिथे बोनस, टच पॉईंट बटणे आहेत)
+//         const scoringArea = document.getElementById('scoringButtonsContainer'); 
+        
+//         // २. तुझं मूळ "Start Match" बटण
+//         const mainBtn = document.getElementById('mainMatchBtn'); 
+
+//         // ३. रिलोड झाल्यावर किंवा पहिल्यांदा येताना टायमरची स्थिती तपासा
+//         // आपण localStorage मधून टायमरची वेळ तपासू शकतो
+//         const savedTime = localStorage.getItem('savedMatchTime');
+        
+//         // जर मॅच अजून 'Pause' मोडमध्ये असेल आणि वेळ अजून खर्च झाली नसेल
+//         if (!match.isMatchRunning && (!savedTime || savedTime == 1200)) { 
+//             console.log("[LOCK] Initial State: Controls Locked. Click 'Start Match' 🔒");
+            
+//             if (scoringArea) {
+//                 scoringArea.style.pointerEvents = "none";
+//                 scoringArea.style.opacity = "0.4";
+//             }
+            
+//             if (mainBtn) {
+//                 mainBtn.innerText = "START MATCH";
+//                 mainBtn.classList.add('bg-gray-800'); // मूळ कलर
+//             }
+//         } else {
+//             // जर मॅच आधीच सुरू झाली असेल (Reload Case)
+//             console.log("[UNLOCK] Resuming Match: Controls Unlocked. 🏃‍♂️");
+            
+//             if (scoringArea) {
+//                 scoringArea.style.pointerEvents = "auto";
+//                 scoringArea.style.opacity = "1";
+//             }
+            
+//             if (mainBtn) {
+//                 // रिलोड झाल्यावर बटणाचं नाव 'PAUSE' ठेवा कारण मॅच सुरू आहे असं आपण समजू
+//                 mainBtn.innerText = "PAUSE MATCH";
+//                 mainBtn.classList.add('bg-red-600');
+//             }
+
+//             // नेव्हिगेशन लॉक करा जेणेकरून रिलोड झाल्यावरही युजर बाहेर जाऊ शकणार नाही
+//             if (typeof lockUserOnScoringPage === "function") lockUserOnScoringPage(true);
+//         }
+//         // ---------------------------------------------------------
+
+//         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
+
+//     } catch (e) {
+//         console.error("Error loading scoring data:", e);
+//     }
+// }
+
+
 async function goToScoring(tId, mId) {
     console.log("--- [NAV] Loading Original Scoring Logic --- 🚀");
     await loadPage('scoring'); 
@@ -2834,12 +3462,10 @@ async function goToScoring(tId, mId) {
         const match = mDoc.data();
         
         currentMatchData = match;
-
         localStorage.setItem('currentTeamA', match.teamA);
         localStorage.setItem('currentTeamB', match.teamB);
         
         setupLiveMatchNames();
-
         teamAPlayers = match.teamAPlayers || [];
         teamBPlayers = match.teamBPlayers || [];
 
@@ -2847,62 +3473,142 @@ async function goToScoring(tId, mId) {
         if(document.getElementById('scoreB')) document.getElementById('scoreB').innerText = match.scoreB || 0;
 
         renderMiniPlayers();
-        
         if (typeof updateTimeoutUI === "function") updateTimeoutUI();
 
         // ---------------------------------------------------------
-        // 🛠️ [LOCKING LOGIC] - मॅच सुरू होण्यापूर्वी बटणे लॉक करणे 🚀
+        // 🛠️ [STRICT RECOVERY LOGIC] - १२०० सेकंदाच्या निकषावर फिक्स 🚀
         // ---------------------------------------------------------
-        // १. तुझ्या स्कोअरिंग बटणांचा मुख्य कंटेनर (उदा. जिथे बोनस, टच पॉईंट बटणे आहेत)
         const scoringArea = document.getElementById('scoringButtonsContainer'); 
-        
-        // २. तुझं मूळ "Start Match" बटण
         const mainBtn = document.getElementById('mainMatchBtn'); 
-
-        // ३. रिलोड झाल्यावर किंवा पहिल्यांदा येताना टायमरची स्थिती तपासा
-        // आपण localStorage मधून टायमरची वेळ तपासू शकतो
-        const savedTime = localStorage.getItem('savedMatchTime');
+        const actionBtn = document.getElementById('mainActionBtn');
+        const halfTextElement = document.getElementById('matchHalfText') || document.getElementById('periodDisplay');
         
-        // जर मॅच अजून 'Pause' मोडमध्ये असेल आणि वेळ अजून खर्च झाली नसेल
-        if (!match.isMatchRunning && (!savedTime || savedTime == 1200)) { 
-            console.log("[LOCK] Initial State: Controls Locked. Click 'Start Match' 🔒");
-            
+        let dbSeconds = (match.savedMatchTime !== undefined) ? match.savedMatchTime : 1200;
+        matchTotalSeconds = dbSeconds; 
+        localStorage.setItem('savedMatchTime', dbSeconds);
+
+        window.isMatchPaused = true; 
+
+        // ⚙️ [STAGE RECOVERY]: '1st_Half_End' आणि वेळेच्या समीकरणावरून २रा हाफ अचूक ट्रॅक करा! 🔑
+        if (match.status === "1st_Half_End") {
+            if (dbSeconds === 0) {
+                // 🛑 केस १: स्टेटस १स्त हाफ एंड आहे आणि वेळ ० आहे ➔ अजून २रा हाफ सुरू व्हायचा आहे!
+                matchStage = "INTERVAL";
+                console.log("%c⚙️ [Strict Sync]: स्टेज 'INTERVAL' (ब्रेक) रिकव्हर केली.", "color: #3b82f6; font-weight: bold;");
+            } else {
+                // 🏃‍♂️ केस २: स्टेटस १स्त हाफ एंडच आहे, पण वेळ ० पेक्षा जास्त आहे ➔ २रा हाफ सुरू झाला होता आणि रिफ्रेश झालाय!
+                matchStage = "2ND_HALF";
+                console.log("%c⚙️ [Strict Sync]: स्टेज '2ND_HALF' ओळखली. २रा हाफ आधीच चालू होता.", "color: #a855f7; font-weight: bold;");
+            }
+        } else {
+            // 🟢 केस ३: फ्रेश मॅच किंवा पहिला हाफ चालू आहे
+            matchStage = "1ST_HALF";
+            console.log("%c⚙️ [Strict Sync]: स्टेज '1ST_HALF' ओळखीली.", "color: #eab308; font-weight: bold;");
+        }
+
+        // हेडर टेक्स्ट सेट करा ("1st Half" किंवा "2nd Half")
+        if (halfTextElement) {
+            halfTextElement.innerText = (matchStage === "2ND_HALF" || matchStage === "INTERVAL") ? "2nd Half" : "1st Half";
+        }
+
+        // 🟠 [CASE 2 RE-ENTRY FIX] - २रा हाफ सुरू व्हायच्या आधीची ब्रेक स्थिती
+        if (matchStage === "INTERVAL") {
+            console.log("%c[STRICT CASE 2]: १स्त हाफ संपलेला आढळला. डावे बटण डिसेबल करत आहे.", "color: #f97316; font-weight: bold;");
+            window.isFirstTimeStart = true;
+
             if (scoringArea) {
                 scoringArea.style.pointerEvents = "none";
                 scoringArea.style.opacity = "0.4";
             }
-            
             if (mainBtn) {
-                mainBtn.innerText = "START MATCH";
-                mainBtn.classList.add('bg-gray-800'); // मूळ कलर
+                mainBtn.classList.add('hidden'); // दोन बटणे एकत्र दिसू नये म्हणून डावे बटण लपवले 🧼
             }
-        } else {
-            // जर मॅच आधीच सुरू झाली असेल (Reload Case)
-            console.log("[UNLOCK] Resuming Match: Controls Unlocked. 🏃‍♂️");
-            
-            if (scoringArea) {
-                scoringArea.style.pointerEvents = "auto";
-                scoringArea.style.opacity = "1";
+            if (actionBtn) {
+                actionBtn.innerText = "Start 2nd Half";
+                actionBtn.className = "w-full bg-green-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl active:scale-95";
             }
-            
-            if (mainBtn) {
-                // रिलोड झाल्यावर बटणाचं नाव 'PAUSE' ठेवा कारण मॅच सुरू आहे असं आपण समजू
-                mainBtn.innerText = "PAUSE MATCH";
-                mainBtn.classList.add('bg-red-600');
-            }
+        }
+        // 🏃‍♂️ [CASE 1 & CASE 3]: चालू खेळ मधेच थांबला होता (Resume Mode)
+        else if (dbSeconds < 1200) {
+            console.log(`%c[STRICT RESUME]: मॅच मधेच थांबलीये (${dbSeconds} सेकंद). RESUME MODE!`, "color: #22c55e; font-weight: bold;");
+            window.isFirstTimeStart = false; 
 
-            // नेव्हिगेशन लॉक करा जेणेकरून रिलोड झाल्यावरही युजर बाहेर जाऊ शकणार नाही
-            if (typeof lockUserOnScoringPage === "function") lockUserOnScoringPage(true);
+            if (scoringArea) {
+                scoringArea.style.pointerEvents = "none";
+                scoringArea.style.opacity = "0.4";
+            }
+            if (mainBtn) {
+                mainBtn.classList.remove('hidden'); // मॅच रिझ्युम करायची आहे म्हणून डावे बटण समोर आणले
+                mainBtn.innerText = "RESUME MATCH";
+                mainBtn.className = "w-full bg-green-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl text-white animate-pulse";
+            }
+            // 🎯 [THE ULTIMATE FIX]: जर २रा हाफ मधेच थांबून युझर परत आला असेल, तर उजवीकडे थेट "End Match" चे लाल बटन लावा!
+            if (actionBtn) {
+                if (matchStage === "2ND_HALF") {
+                    actionBtn.innerText = "End Match";
+                    actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+                } else {
+                    actionBtn.innerText = "End 1st Half";
+                    actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+                }
+            }
+        } 
+        // 🟢 [FRESH MATCH] - नवीन कोरी मॅच
+        else { 
+            console.log("%c[STRICT FRESH]: नवीन फ्रेश मॅच चालू होत आहे.", "color: #eab308; font-weight: bold;");
+            window.isFirstTimeStart = true;
+
+            if (scoringArea) {
+                scoringArea.style.pointerEvents = "none";
+                scoringArea.style.opacity = "0.4";
+            }
+            if (mainBtn) {
+                mainBtn.classList.remove('hidden');
+                mainBtn.innerText = "Start Match";
+                mainBtn.className = "w-full bg-gray-800 py-4 rounded-2xl text-[10px] font-black uppercase border border-gray-700 shadow-xl text-orange-500 animate-pulse";
+            }
+            if (actionBtn) {
+                actionBtn.innerText = "End 1st Half";
+                actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 🔄 [RAID HISTORY RESTORE]: एकाच फील्डमधून अख्खा इतिहास पुन्हा लोड करा 🚀
+        // ---------------------------------------------------------
+        console.log("🔄 [History Restore]: डेटाबेसवरून 'raidsHistory' इतिहासाची पुनर्रचना सुरू...");
+        
+        raidCounter = 0; 
+        window.activeRaidsList = match.raidsHistory || []; 
+
+        const rFeed = document.getElementById('raidFeed');
+        const mList = document.getElementById('modalRaidList');
+        if (rFeed) rFeed.innerHTML = ""; 
+        if (mList) mList.innerHTML = "";
+
+        if (window.activeRaidsList && window.activeRaidsList.length > 0) {
+            console.log(`🎯 [History Restore]: ${window.activeRaidsList.length} जुन्या रेड्स सापडल्या! स्क्रीनवर रेंडर करत आहे...`);
+            
+            window.activeRaidsList.forEach(r => {
+                addRaidToSummary(r.team, r.raiderName, r.result, r.points, r.details, true);
+            });
+
+            const rawString = JSON.stringify(window.activeRaidsList);
+            const encodedData = btoa(unescape(encodeURIComponent(rawString)));
+            localStorage.setItem(`raids_secure_log_${mId}`, encodedData);
+        } else {
+            console.log("📝 [History Restore]: या मॅचमध्ये अजून एकही रेड झालेली नाही.");
+            if (rFeed) rFeed.innerHTML = `<div id="noRaidText" class="text-gray-500 text-[10px] italic p-2">No raids yet...</div>`;
         }
         // ---------------------------------------------------------
 
+        if (typeof updateMatchUI === "function") updateMatchUI();
         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
 
     } catch (e) {
         console.error("Error loading scoring data:", e);
     }
 }
-
 
 
 function renderLivePlayers(players, containerId) {
@@ -3011,6 +3717,7 @@ function openRaiderSelectionModal(team, isJustStarting = false) {
 
 
 /**actuallyStartTimer (तुझे मूळ टायमर लॉजिक)
+ * 
 एकदा रेडर निवडला की हे फंक्शन तुझे टायमरचे काम पूर्ण करेल. */
 // function actuallyStartTimer(playerNo, playerName, team) {
 //     const timestamp = Date.now();
@@ -3084,6 +3791,118 @@ function openRaiderSelectionModal(team, isJustStarting = false) {
 //     if (typeof startRaidTimer === "function") startRaidTimer();
 // }
 
+/***/
+// function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) {
+//     const timestamp = Date.now();
+//     console.log(`[STRICT_LOG] 🏁 actuallyStartTimer START | Player: ${playerNo} | Team: ${team} | Time: ${timestamp} | JustStarting: ${isJustStarting}`);
+
+//     if (typeof closePlayerModal === "function") {
+//         console.log(`[STRICT_LOG] 🏠 Closing Player Modal...`);
+//         closePlayerModal();
+//     }
+
+//     const activeRaiderEl = document.getElementById('activeRaider');
+//     if (activeRaiderEl) {
+//        // activeRaiderEl.innerText = `${playerName.toUpperCase()} (${team})`;
+//         activeRaiderEl.innerText = `#${playerNo} ${playerName.toUpperCase()} (${team})`; // 🎯 १. स्क्रीनवर आता नंबरसह नाव चमकेल! उदा: #21 Sandesh Mahadik (B)
+//         console.log(`[STRICT_LOG] 👤 Active Raider Set: ${playerName} (${team})`);
+//     }
+
+//     // 🎯 २. ग्लोबल मेमरीमध्ये फक्त नंबर नाही, तर अख्खा रायडरचा डेटा पॅकेज लॉक केला! 📦
+//         window.currentActiveRaider = {
+//             no: playerNo,
+//             name: playerName,
+//             team: team
+//         };
+
+//     console.log(`%c💾 [Global Raider Lock]: चालू रायडरचा पूर्ण डेटा साठवला:`, "color: #16a34a; font-weight: bold;", window.currentActiveRaider);
+
+//     // --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल, तर इथूनच बाहेर पडा ---
+// // --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल ---
+//     if (isJustStarting === true) {
+//         console.log(`[STRICT_LOG] ⏱️ Just Starting: Manual Timer Start Triggered.`);
+        
+//         // १. टायमरचा आकडा ३० वर सेट करा
+//         const timerEl = document.getElementById('raidTimer');
+//         if (timerEl) timerEl.innerText = "30";
+
+//         // २. टायमर पळवण्यासाठी लॉजिक
+//         let timeLeft = 30;
+        
+//         // जुना कोणताही इंटरव्हल असेल तर थांबवा
+//         if (typeof raidInterval !== 'undefined') clearInterval(raidInterval);
+
+//         raidInterval = setInterval(() => {
+//             timeLeft--;
+//             if (timerEl) timerEl.innerText = timeLeft;
+
+//             if (timeLeft <= 0) {
+//                 clearInterval(raidInterval);
+//                 console.log("Raid Time Up!");
+//                 // वेळ संपल्यावर काय व्हायला हवं (उदा. शिट्टी वाजणे) ते इथे टाकू शकतोस
+//             }
+//         }, 1000);
+
+//         return; 
+//     }
+//     // -------------------------------------------------------------------------
+
+//     // १. बोनस चेक (हा सर्वात आधी व्हायला हवा) - [मूळ कोड तसाच आहे]
+//     if (window.isBonusPending === true) {
+//         console.log(`[STRICT_LOG] 🎁 BONUS_PENDING Detected!`);
+//         window.isBonusPending = false; 
+
+//         emptyRaidCount[team] = 0;
+//         if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
+
+//         if (typeof openBonusPointsModal === "function") {
+//             console.log(`[STRICT_LOG] 🔓 Opening Bonus Points Modal and STOPPING flow.`);
+//             openBonusPointsModal(team);
+//         }
+
+//         return; 
+//     }
+
+//     // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle) - [मूळ कोड तसाच आहे]
+//     if (window.pendingAction) {
+//         const action = window.pendingAction;
+//         console.log(`[STRICT_LOG] 📦 Pending Action Found: ${action.type}`);
+//         window.pendingAction = null; 
+
+//         if (action.type === 'empty') {
+//             console.log(`[STRICT_LOG] ⚪ Processing Empty Raid...`);
+//             if (typeof addRaidToSummary === "function") {
+//                 addRaidToSummary(action.team, playerName, 'Empty Raid', 0, 'Returned Safely');
+//             }
+
+//             setTimeout(() => {
+//                 processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
+//             }, 400);
+//             return; 
+//         }
+
+//         setTimeout(() => {
+//             console.log(`[STRICT_LOG] ⚡ Executing Delayed Action: ${action.type}`);
+//             if (action.type === 'touch') {
+//                 handlePoint(action.team, action.points);
+//             } else {
+//                 handleAction(action.team, action.type, action.points);
+//             }
+//         }, 300);
+//         return; 
+//     }
+
+//     // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा - [मूळ कोड तसाच आहे]
+//     console.log(`[STRICT_LOG] ⏱️ Normal Flow: Starting Raid Timer.`);
+//     // टीप: इथे startClock() किंवा तुझे मूळ टायमर फंक्शन कॉल होईल
+//     if (typeof startRaidTimer === "function") startRaidTimer(); 
+// }
+
+/**
+ * 
+ * 
+ */
+
 function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) {
     const timestamp = Date.now();
     console.log(`[STRICT_LOG] 🏁 actuallyStartTimer START | Player: ${playerNo} | Team: ${team} | Time: ${timestamp} | JustStarting: ${isJustStarting}`);
@@ -3095,23 +3914,28 @@ function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) 
 
     const activeRaiderEl = document.getElementById('activeRaider');
     if (activeRaiderEl) {
-        activeRaiderEl.innerText = `${playerName.toUpperCase()} (${team})`;
+        activeRaiderEl.innerText = `#${playerNo} ${playerName.toUpperCase()} (${team})`; 
         console.log(`[STRICT_LOG] 👤 Active Raider Set: ${playerName} (${team})`);
     }
 
-    // --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल, तर इथूनच बाहेर पडा ---
-// --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल ---
+    // 🎯 ग्लोबल मेमरीमध्ये अख्खा रायडरचा डेटा पॅकेज लॉक केला! 📦
+    window.currentActiveRaider = {
+        no: playerNo,
+        name: playerName,
+        team: team
+    };
+
+    console.log(`%c💾 [Global Raider Lock]: चालू रायडरचा पूर्ण डेटा साठवला:`, "color: #16a34a; font-weight: bold;", window.currentActiveRaider);
+
+    // --- [SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल ---
     if (isJustStarting === true) {
         console.log(`[STRICT_LOG] ⏱️ Just Starting: Manual Timer Start Triggered.`);
         
-        // १. टायमरचा आकडा ३० वर सेट करा
         const timerEl = document.getElementById('raidTimer');
         if (timerEl) timerEl.innerText = "30";
 
-        // २. टायमर पळवण्यासाठी लॉजिक
         let timeLeft = 30;
         
-        // जुना कोणताही इंटरव्हल असेल तर थांबवा
         if (typeof raidInterval !== 'undefined') clearInterval(raidInterval);
 
         raidInterval = setInterval(() => {
@@ -3121,7 +3945,6 @@ function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) 
             if (timeLeft <= 0) {
                 clearInterval(raidInterval);
                 console.log("Raid Time Up!");
-                // वेळ संपल्यावर काय व्हायला हवं (उदा. शिट्टी वाजणे) ते इथे टाकू शकतोस
             }
         }, 1000);
 
@@ -3129,7 +3952,7 @@ function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) 
     }
     // -------------------------------------------------------------------------
 
-    // १. बोनस चेक (हा सर्वात आधी व्हायला हवा) - [मूळ कोड तसाच आहे]
+    // १. बोनस चेक (हा सर्वात आधी व्हायला हवा)
     if (window.isBonusPending === true) {
         console.log(`[STRICT_LOG] 🎁 BONUS_PENDING Detected!`);
         window.isBonusPending = false; 
@@ -3145,7 +3968,7 @@ function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) 
         return; 
     }
 
-    // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle) - [मूळ कोड तसाच आहे]
+    // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle)
     if (window.pendingAction) {
         const action = window.pendingAction;
         console.log(`[STRICT_LOG] 📦 Pending Action Found: ${action.type}`);
@@ -3153,12 +3976,25 @@ function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) 
 
         if (action.type === 'empty') {
             console.log(`[STRICT_LOG] ⚪ Processing Empty Raid...`);
-            if (typeof addRaidToSummary === "function") {
-                addRaidToSummary(action.team, playerName, 'Empty Raid', 0, 'Returned Safely');
+            
+            // 🚨 [THE GOLDEN DOUBLE-ENTRY FIX]: ३ऱ्या डू-ऑर-डायच्या वेळी इथून पडणारा चुुकीचा कॉल थांबवला! 🧼
+            // जर सध्याचा काउंट २ असेल, तर पुढचा काउंट ३ होणार आहे (डू-ऑर-डाय आऊट). म्हणून फक्त काउंट २ पेक्षा कमी असेल तरच नॉर्मल समरी पाडा!
+            if (typeof emptyRaidCount !== 'undefined' && emptyRaidCount[team] < 2) {
+                if (typeof addRaidToSummary === "function") {
+                    let cleanNameForSummary = `#${playerNo} ${playerName.toUpperCase()} [${team}]`;
+                    let emptyDetails = `Successful Empty Raid (${emptyRaidCount[team] + 1}/3)`;
+                    
+                    console.log(`%c👉 [DEBUG actuallyStartTimer]: Normal Empty Raid (${emptyRaidCount[team] + 1}/3) समरी पाठवत आहे.`, "color: #22c55e; font-weight: bold;");
+                    addRaidToSummary(action.team, cleanNameForSummary, 'Empty Raid', 0, emptyDetails);
+                }
+            } else {
+                console.log(`%c🚨 [DEBUG actuallyStartTimer]: पुढचा काउंट ३ (Do-or-Die) होणार आहे! Double Entry टाळण्यासाठी सामान्य कार्ड इथून कडक ब्लॉक केले.`, "color: #ef4444; font-weight: bold;");
             }
 
             setTimeout(() => {
-                processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
+                if (typeof processEmptyRaidLogic === "function") {
+                    processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
+                }
             }, 400);
             return; 
         }
@@ -3174,11 +4010,12 @@ function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) 
         return; 
     }
 
-    // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा - [मूळ कोड तसाच आहे]
+    // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा
     console.log(`[STRICT_LOG] ⏱️ Normal Flow: Starting Raid Timer.`);
-    // टीप: इथे startClock() किंवा तुझे मूळ टायमर फंक्शन कॉल होईल
     if (typeof startRaidTimer === "function") startRaidTimer(); 
 }
+
+/***** */
 
 function stopRaidTimer() {
     clearInterval(raidInterval);
@@ -3359,23 +4196,68 @@ function openPlayerModal(team, type) {
 }
 // ३. प्लेयर सिलेक्ट केल्यावर पॉईंट फायनल करणे
 // selectPlayer मध्ये हा लॉजिक पार्ट चेक कर
+// function selectPlayer(playerNo, team, type) {
+//     console.log(`>>> [SELECT_PLAYER] No: ${playerNo} | Team: ${team} | Type: ${type}`);
+    
+//     if (type === 'out' || type === 'tackle') {
+//         // १. खेळाडूला OUT करा
+//         updatePlayerStatus(playerNo, team, 'Out');
+        
+//         // २. स्कोर अपडेट (जर टॅकल पॉईंट असेल तर)
+//         if (window.currentAction && window.currentAction.team) {
+//             updateScore(window.currentAction.team, 1);
+            
+//             // ३. टॅकल झाल्यावर सुद्धा समोरच्याचा खेळाडू रिवाइव्ह (In) झाला पाहिजे
+//             if (typeof revivePlayers === "function") {
+//                 revivePlayers(window.currentAction.team, 1);
+//             }
+            
+//             window.currentAction = null; 
+//         }
+//     } else {
+//         updatePlayerStatus(playerNo, team, 'In');
+//     }
+
+//     // ३ऱ्या रेडच्या वेळी (Direct Out) आपण खालची फंक्शन्स थांबवतोय
+//     if (type !== 'out') {
+//         if (typeof processRaiderOutStatus === "function") processRaiderOutStatus(); 
+//         if (typeof processPoints === "function") processPoints();
+//     }
+
+//     closePlayerModal();
+    
+//     const raiderEl = document.getElementById('activeRaider');
+//     if (raiderEl) raiderEl.innerText = "WAITING FOR RAIDER...";
+// }
+
 function selectPlayer(playerNo, team, type) {
     console.log(`>>> [SELECT_PLAYER] No: ${playerNo} | Team: ${team} | Type: ${type}`);
+    
+    // 🚨 [CRITICAL MEMORY LOCK]: निवडलेल्या डिफेंडरचा नंबर ग्लोबल लिस्टमध्ये साठवला!
+    // जेणेकरून पुढे चालू होणाऱ्या processPoints() ला खेळाडूचे नाव अचूक शोधता येईल.🎯
+    window.selectedPlayersList = [playerNo];
     
     if (type === 'out' || type === 'tackle') {
         // १. खेळाडूला OUT करा
         updatePlayerStatus(playerNo, team, 'Out');
         
         // २. स्कोर अपडेट (जर टॅकल पॉईंट असेल तर)
+        // 🚨 [BUG FIX]: बोनस+टॅकल (bonus_tackle) च्या वेळी स्कोर आधीच handleBonusTackle किंवा processPoints 
+        // मधून अपडेट होतो. जर नॉर्मल टॅकल असेल, तरच इथून स्कोर अपडेट करा, अन्यथा डबल स्कोर वाढेल!
         if (window.currentAction && window.currentAction.team) {
-            updateScore(window.currentAction.team, 1);
-            
-            // ३. टॅकल झाल्यावर सुद्धा समोरच्याचा खेळाडू रिवाइव्ह (In) झाला पाहिजे
-            if (typeof revivePlayers === "function") {
-                revivePlayers(window.currentAction.team, 1);
+            if (window.currentAction.type !== 'bonus_tackle') {
+                updateScore(window.currentAction.team, 1);
+                
+                // ३. टॅकल झाल्यावर सुद्धा समोरच्याचा खेळाडू रिवाइव्ह (In) झाला पाहिजे
+                if (typeof revivePlayers === "function") {
+                    revivePlayers(window.currentAction.team, 1);
+                }
+            } else {
+                console.log("ℹ️ [SELECT_PLAYER]: bonus_tackle प्रकार आढळला. स्कोर आणि रिवाइव्हल मॅनेजमेंट processPoints कडे सोपवली आहे.");
             }
             
-            window.currentAction = null; 
+            // 🚨 [CRITICAL ORDER FIX]: currentAction ला आत्ताच null करू नका! 
+            // processPoints() पूर्ण झाल्यावर तो स्वतःहून शेवटी त्याला null करेल.
         }
     } else {
         updatePlayerStatus(playerNo, team, 'In');
@@ -3384,6 +4266,8 @@ function selectPlayer(playerNo, team, type) {
     // ३ऱ्या रेडच्या वेळी (Direct Out) आपण खालची फंक्शन्स थांबवतोय
     if (type !== 'out') {
         if (typeof processRaiderOutStatus === "function") processRaiderOutStatus(); 
+        
+        console.log(`🚀 [SELECT_PLAYER]: Calling processPoints() with Defender No: ${playerNo}`);
         if (typeof processPoints === "function") processPoints();
     }
 
@@ -3401,7 +4285,115 @@ function processRaiderOutStatus() {
     console.log(`[STATUS] Raider ${raiderName} marked as OUT.`);
 }
 
-function processPoints() {
+/*** */
+// function processPoints() {
+//     // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
+//     if (!currentAction) {
+//         console.error(">>> [PROCESS_ERROR] No currentAction found to process!");
+//         return;
+//     }
+
+//     // २. [CRITICAL ORDER]: UI रिसेट करण्यापूर्वी सर्व आवश्यक डेटा व्हेरिएबल्समध्ये काढून घ्या
+//     const { team, type, points, raiderName } = currentAction;
+//     const oppositeTeam = (team === 'A' ? 'B' : 'A');
+
+//     // एक्टिव रेडरचे नाव मिळवा (UI वरून किंवा currentAction मधून)
+//     const activeRaiderEl = document.getElementById('activeRaider');
+//     const currentRaider = raiderName || (activeRaiderEl && activeRaiderEl.innerText !== "NONE (WAITING)" 
+//                          ? activeRaiderEl.innerText.split('(')[0].trim() 
+//                          : "Raider");
+
+//     console.log(`--- [PROCESS_START] ---`);
+//     console.log(`[ACTION_INFO] Processing ${type} for Team ${team} | Raider: ${currentRaider}`);
+
+//     // ३. [CLEANUP]: डेटा वाचून झाल्यावर आता UI रिसेट करा (जेणेकरून NONE चा प्रॉब्लेम येणार नाही)
+//     if (activeRaiderEl) {
+//         console.log(`[CLEANUP] Resetting activeRaider UI...`);
+//         activeRaiderEl.innerText = "NONE (WAITING)";
+//         activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
+//     }
+
+//     // ४. आऊट झालेल्या खेळाडूंची यादी तयार करा
+//     let outPlayersInfo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) 
+//                          ? "Out: " + window.selectedPlayersList.join(", ") 
+//                          : points + " Players Out";
+
+//     // ५. [LOGIC SECTION]: जुन्या बटनांचे सर्व नियम इथे सुरक्षित आहेत
+//     if (type === 'touch') {
+//         updateScore(team, points);
+//         addRaidToSummary(team, currentRaider, 'TOUCH POINT', points, outPlayersInfo);
+//     } 
+//     else if (type === 'bonus_touch') {
+//         updateScore(team, points); 
+//         addRaidToSummary(team, currentRaider, 'BONUS + TOUCH', points, outPlayersInfo);
+//     }
+//     else if (type === 'tackle') {
+//         // 🚨 डिफेंडरचा नंबर आणि नाव शोधणे
+//         let defenderNo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : null;
+//         let defenderInfo = "Defender";
+//         if (defenderNo) {
+//             let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+//             let pObj = defTeamList.find(p => p.no == defenderNo);
+//             defenderInfo = pObj ? `#${pObj.no} ${pObj.name.toUpperCase()}` : `#${defenderNo}`;
+//         }
+        
+//         // 🎯 अचूक इव्हेंट जनरेशन
+//         addRaidToSummary(team, currentRaider, 'TACKLE', 1, `Caught by ${defenderInfo}`);
+//     }
+//     else if (type === 'super_tackle') {
+//         updateScore(team, 2);
+//         // 🚨 सर्व डिफेंडर्सचे नंबर आणि नावे एकत्र करणे
+//         let defendersInfo = "Defenders";
+//         if (window.selectedPlayersList && window.selectedPlayersList.length > 0) {
+//             let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+//             let mapped = window.selectedPlayersList.map(no => {
+//                 let pObj = defTeamList.find(p => p.no == no);
+//                 return pObj ? `#${pObj.no} ${pObj.name.toUpperCase()}` : `#${no}`;
+//             });
+//             defendersInfo = mapped.join(', ');
+//         }
+        
+//         addRaidToSummary(team, currentRaider, 'SUPER TACKLE', 2, `Caught by ${defendersInfo}`);
+//     }
+//     else if (type === 'bonus_tackle') {
+//         updateScore(team, 1);
+//         updateScore(oppositeTeam, 1);
+//         addRaidToSummary(team, currentRaider, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
+//     }
+//     else if (type === 'self_out') {
+//         updateScore(team, points);
+//         addRaidToSummary(team, currentRaider, 'SELF OUT', points, 'Raider went out of bounds');
+//     }
+//     else if (type === 'technical') {
+//         updateScore(team, points);
+//         addRaidToSummary(team, 'OFFICIALS', 'TECHNICAL POINT', points, 'Technical Violation');
+//     }
+
+//     // ६. [REVIVAL LOGIC]: रिवाइव्हलचे नियम (जुनेच आहेत)
+//     let pointsToRevive = 0;
+//     if (type === 'touch') pointsToRevive = points;
+//     else if (type === 'bonus_touch') pointsToRevive = points - 1;
+//     else if (type === 'tackle' || type === 'super_tackle' || type === 'bonus_tackle') pointsToRevive = 1;
+
+//     if (pointsToRevive > 0 && typeof revivePlayers === "function") {
+//         revivePlayers(team, pointsToRevive);
+//     }
+
+//     // ७. [EMPTY RAID RESET]: एम्प्टी रेड सिस्टिम रिसेट
+//     if (type === 'touch' || type === 'bonus_touch' || type === 'bonus_tackle') {
+//         if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
+//         if (typeof updateEmptyDots === "function") updateEmptyDots(team);
+//     }
+
+//     // ८. अंतिम क्लिनअप: मेमरी रिसेट करा
+//     window.selectedPlayersList = []; 
+//     currentAction = null;
+    
+//     console.log(`--- [PROCESS_END] ---`);
+// }
+/*** */
+
+function processPoints99() {
     // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
     if (!currentAction) {
         console.error(">>> [PROCESS_ERROR] No currentAction found to process!");
@@ -3428,38 +4420,104 @@ function processPoints() {
         activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
     }
 
-    // ४. आऊट झालेल्या खेळाडूंची यादी तयार करा
-    let outPlayersInfo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) 
-                         ? "Out: " + window.selectedPlayersList.join(", ") 
-                         : points + " Players Out";
+    // 🚨 [NEW GLOBAL TRACK FIX]: रायडरचे नाव जर्सी नंबर आणि टीम प्रिफिक्ससह कडक फॉरमॅट करा!
+    let raiderTeamPrefix = (team === 'A') ? 'A' : 'B'; // टच पॉईंट मारणाऱ्या रायडरची स्वतःची टीम
+    let cleanRaiderHeader = "";
+    if (window.currentActiveRaider) {
+        cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeamPrefix}]`;
+    } else {
+        // जर ग्लोबल मेमरी नसेल तर जुन्या नावातून प्रिफिक्स लावा
+        let raiderClean = currentRaider.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+        cleanRaiderHeader = `${raiderClean} [${raiderTeamPrefix}]`;
+    }
 
-    // ५. [LOGIC SECTION]: जुन्या बटनांचे सर्व नियम इथे सुरक्षित आहेत
+    // ४. आऊट झालेल्या खेळाडूंची यादी तयार करा (टच आणि बोनस टचसाठी नाव-नंबर ट्रॅकरसह 🎯)
+    let outPlayersInfo = "";
+    if (window.selectedPlayersList && window.selectedPlayersList.length > 0) {
+        let mappedOutPlayers = window.selectedPlayersList.map(no => {
+            // जर्सी नंबरवरून बाद झालेल्या खेळाडूची मूळ टीम ओळखा (१ ते १२ = A, २१ ते ३२ = B)
+            let pTeam = (parseInt(no) >= 21) ? 'B' : 'A';
+            let pList = (pTeam === 'A') ? teamAPlayers : teamBPlayers;
+            let pObj = pList.find(p => p.no == no);
+            
+            // फॉरमॅट ➔ #21 S. MAHADIK [B]
+            return pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${pTeam}]` : `#${no} [${pTeam}]`;
+        });
+        outPlayersInfo = "Out " + mappedOutPlayers.join(", ");
+    } else {
+        outPlayersInfo = points + " Players Out";
+    }
+
+    // ५. [LOGIC SECTION]: सर्व नियम आणि ब्युटीफिकेशन अचूक लागू केले आहे 🚀
     if (type === 'touch') {
         updateScore(team, points);
-        addRaidToSummary(team, currentRaider, 'TOUCH POINT', points, outPlayersInfo);
+        addRaidToSummary(team, cleanRaiderHeader, 'TOUCH POINT', points, outPlayersInfo);
     } 
     else if (type === 'bonus_touch') {
         updateScore(team, points); 
-        addRaidToSummary(team, currentRaider, 'BONUS + TOUCH', points, outPlayersInfo);
+        addRaidToSummary(team, cleanRaiderHeader, 'BONUS + TOUCH', points, outPlayersInfo);
     }
     else if (type === 'tackle') {
         updateScore(team, 1);
-        let defender = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : 'Defender';
-        addRaidToSummary(team, currentRaider, 'TACKLE', 1, `Caught by ${defender}`);
+        
+        // 🚨 पकडणाऱ्या डिफेंडरचा नंबर आणि नाव शोधणे
+        let defenderNo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : null;
+        let defenderInfo = "Defender";
+        if (defenderNo) {
+            let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+            let pObj = defTeamList.find(p => p.no == defenderNo);
+            defenderInfo = pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${team}]` : `#${defenderNo} [${team}]`;
+        }
+        
+        // 🚨 टॅकलमध्ये रायडर विरोधी संघातून येतो म्हणून oppositeTeam चा प्रिफिक्स लावणे
+        let tackleRaiderHeader = "";
+        if (window.currentActiveRaider) {
+            tackleRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${oppositeTeam}]`;
+        } else {
+            tackleRaiderHeader = `${currentRaider} [${oppositeTeam}]`;
+        }
+        
+        addRaidToSummary(team, tackleRaiderHeader, 'TACKLE', 1, `Caught by ${defenderInfo}`);
     }
     else if (type === 'super_tackle') {
         updateScore(team, 2);
-        let defenders = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList.join(', ') : 'Defenders';
-        addRaidToSummary(team, currentRaider, 'SUPER TACKLE', 2, `Caught by ${defenders}`);
+        
+        // 🚨 सर्व डिफेंडर्सचे नंबर आणि नावे एकत्र करणे
+        let defendersInfo = "Defenders";
+        if (window.selectedPlayersList && window.selectedPlayersList.length > 0) {
+            let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+            let mapped = window.selectedPlayersList.map(no => {
+                let pObj = defTeamList.find(p => p.no == no);
+                return pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${team}]` : `#${no} [${team}]`;
+            });
+            defendersInfo = mapped.join(', ');
+        }
+        
+        let tackleRaiderHeader = "";
+        if (window.currentActiveRaider) {
+            tackleRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${oppositeTeam}]`;
+        } else {
+            tackleRaiderHeader = `${currentRaider} [${oppositeTeam}]`;
+        }
+        
+        addRaidToSummary(team, tackleRaiderHeader, 'SUPER TACKLE', 2, `Caught by ${defendersInfo}`);
     }
     else if (type === 'bonus_tackle') {
         updateScore(team, 1);
         updateScore(oppositeTeam, 1);
-        addRaidToSummary(team, currentRaider, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
+        
+        let tackleRaiderHeader = "";
+        if (window.currentActiveRaider) {
+            tackleRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${oppositeTeam}]`;
+        } else {
+            tackleRaiderHeader = `${currentRaider} [${oppositeTeam}]`;
+        }
+        
+        addRaidToSummary(team, tackleRaiderHeader, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
     }
     else if (type === 'self_out') {
         updateScore(team, points);
-        addRaidToSummary(team, currentRaider, 'SELF OUT', points, 'Raider went out of bounds');
+        addRaidToSummary(team, cleanRaiderHeader, 'SELF OUT', points, 'Raider went out of bounds');
     }
     else if (type === 'technical') {
         updateScore(team, points);
@@ -3490,6 +4548,211 @@ function processPoints() {
 }
 
 
+function processPoints() {
+    // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
+    if (!currentAction) {
+        console.error(">>> [PROCESS_ERROR] No currentAction found to process!");
+        return;
+    }
+
+    // २. [CRITICAL ORDER]: UI रिसेट करण्यापूर्वी सर्व आवश्यक डेटा व्हेरिएबल्समध्ये काढून घ्या
+    const { team, type, points, raiderName } = currentAction;
+    const oppositeTeam = (team === 'A' ? 'B' : 'A');
+
+    // एक्टिव रेडरचे नाव मिळवा (UI वरून किंवा currentAction मधून)
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const currentRaider = raiderName || (activeRaiderEl && activeRaiderEl.innerText !== "NONE (WAITING)" 
+                          ? activeRaiderEl.innerText.split('(')[0].trim() 
+                          : "Raider");
+
+    console.log(`--- [PROCESS_START] ---`);
+    console.log(`[ACTION_INFO] Processing ${type} for Team ${team} | Raider: ${currentRaider}`);
+
+    // ३. [CLEANUP]: डेटा वाचून झाल्यावर आता UI रिसेट करा (जेणेकरून NONE चा प्रॉब्लेम येणार नाही)
+    if (activeRaiderEl) {
+        console.log(`[CLEANUP] Resetting activeRaider UI...`);
+        activeRaiderEl.innerText = "NONE (WAITING)";
+        activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
+    }
+
+    // 🚨 [NEW GLOBAL TRACK FIX]: रायडरचे नाव जर्सी नंबर आणि टीम प्रिफिक्ससह कडक फॉरमॅट करा!
+    let raiderTeamPrefix = (team === 'A') ? 'A' : 'B'; // टच पॉईंट मारणाऱ्या रायडरची स्वतःची टीम
+    let cleanRaiderHeader = "";
+    if (window.currentActiveRaider) {
+        cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeamPrefix}]`;
+    } else {
+        // जर ग्लोबल मेमरी नसेल तर जुन्या नावातून प्रिफिक्स लावा
+        let raiderClean = currentRaider.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+        cleanRaiderHeader = `${raiderClean} [${raiderTeamPrefix}]`;
+    }
+
+    // ४. आऊट झालेल्या खेळाडूंची यादी तयार करा (टच आणि बोनस टचसाठी नाव-नंबर ट्रॅकरसह 🎯)
+    let outPlayersInfo = "";
+    if (window.selectedPlayersList && window.selectedPlayersList.length > 0) {
+        let mappedOutPlayers = window.selectedPlayersList.map(no => {
+            // जर्सी नंबरवरून बाद झालेल्या खेळाडूची मूळ टीम ओळखा (१ ते १२ = A, २१ ते ३२ = B)
+            let pTeam = (parseInt(no) >= 21) ? 'B' : 'A';
+            let pList = (pTeam === 'A') ? teamAPlayers : teamBPlayers;
+            let pObj = pList.find(p => p.no == no);
+            
+            // फॉरमॅट ➔ #21 S. MAHADIK [B]
+            return pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${pTeam}]` : `#${no} [${pTeam}]`;
+        });
+        outPlayersInfo = "Out " + mappedOutPlayers.join(", ");
+    } else {
+        outPlayersInfo = points + " Players Out";
+    }
+
+    // ५. [LOGIC SECTION]: सर्व नियम आणि ब्युटीफिकेशन अचूक लागू केले आहे 🚀
+    if (type === 'touch') {
+        updateScore(team, points);
+        addRaidToSummary(team, cleanRaiderHeader, 'TOUCH POINT', points, outPlayersInfo);
+    } 
+    else if (type === 'bonus_touch') {
+        updateScore(team, points); 
+        addRaidToSummary(team, cleanRaiderHeader, 'BONUS + TOUCH', points, outPlayersInfo);
+    }
+// =========================================================================
+    // 🎁 [BONUS ONLY LOGIC]: कन्सोल लॉग्जसह कडक नेमिंग ट्रॅकर पॅच
+    // =========================================================================
+    else if (type === 'bonus' || type === 'bonus_only') {
+        updateScore(team, 1); 
+
+        // 🎯 [🔍 CONSOLE LOG 1]: बोनस ॲक्शन सुरू होताच येणारा मूळ डेटा
+        console.log(`%c📥 [DEBUG BONUS START]: Team: ${team} | Original Raider Text: "${currentRaider}"`, "color: #a855f7; font-weight: bold;");
+
+        let raiderTeamPrefix = (team === 'A' ? 'A' : 'B');
+        let cleanRaiderHeader = "";
+        
+        if (window.currentActiveRaider) {
+            cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeamPrefix}]`;
+            // 🎯 [🔍 CONSOLE LOG 2]: ग्लोबल मेमरीमधून डेटा कसा तयार झाला
+            console.log(`%c✅ [DEBUG BONUS]: Global Memory मधून नाव तयार केले ➔ "${cleanRaiderHeader}"`, "color: #16a34a; font-weight: bold;");
+        } else {
+            let raiderClean = currentRaider.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+            cleanRaiderHeader = `${raiderClean} [${raiderTeamPrefix}]`;
+            // 🎯 [🔍 CONSOLE LOG 3]: टेक्स्ट पार्सिंग करून डेटा कसा तयार झाला
+            console.log(`%c🧠 [DEBUG BONUS]: Text Parsing करून नाव तयार केले ➔ "${cleanRaiderHeader}"`, "color: #3b82f6; font-weight: bold;");
+        }
+
+        let bonusDetails = "Scored 1 Bonus Point Successfully";
+
+        // 🎯 [🔍 CONSOLE LOG 4]: फायनल डिलिव्हरी चेक - समरीला नक्की काय नाव जात आहे!
+        console.log(`%c🚀 [DEBUG BONUS SEND]: addRaidToSummary ला पाठवले जाणारे नाव ➔ "${cleanRaiderHeader}"`, "color: #ff007f; font-weight: bold; padding: 2px;");
+        
+        // 🚨 [THE ACTUAL CRITICAL FIX]: इथे आपण 'currentRaider' ऐवजी 'cleanRaiderHeader' अधिकृतपणे पाठवला! 🦾
+        addRaidToSummary(team, cleanRaiderHeader, 'BONUS POINT', 1, bonusDetails);
+    }
+    else if (type === 'tackle') {
+        updateScore(team, 1);
+        
+        // 🚨 पकडणाऱ्या傾फेंडरचा नंबर आणि नाव शोधणे
+        let defenderNo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : null;
+        let defenderInfo = "Defender";
+        if (defenderNo) {
+            let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+            let pObj = defTeamList.find(p => p.no == defenderNo);
+            defenderInfo = pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${team}]` : `#${defenderNo} [${team}]`;
+        }
+        
+        // 🚨 टॅकलमध्ये रायडर विरोधी संघातून येतो म्हणून oppositeTeam चा प्रिफिक्स लावणे
+        let tackleRaiderHeader = "";
+        if (window.currentActiveRaider) {
+            tackleRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${oppositeTeam}]`;
+        } else {
+            tackleRaiderHeader = `${currentRaider} [${oppositeTeam}]`;
+        }
+        
+        addRaidToSummary(team, tackleRaiderHeader, 'TACKLE', 1, `Caught by ${defenderInfo}`);
+    }
+    else if (type === 'super_tackle') {
+        updateScore(team, 2);
+        
+        // 🚨 सर्व डिफेंडर्सचे नंबर आणि नावे एकत्र करणे
+        let defendersInfo = "Defenders";
+        if (window.selectedPlayersList && window.selectedPlayersList.length > 0) {
+            let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+            let mapped = window.selectedPlayersList.map(no => {
+                let pObj = defTeamList.find(p => p.no == no);
+                return pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${team}]` : `#${no} [${team}]`;
+            });
+            defendersInfo = mapped.join(', ');
+        }
+        
+        let tackleRaiderHeader = "";
+        if (window.currentActiveRaider) {
+            tackleRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${oppositeTeam}]`;
+        } else {
+            tackleRaiderHeader = `${currentRaider} [${oppositeTeam}]`;
+        }
+        
+        addRaidToSummary(team, tackleRaiderHeader, 'SUPER TACKLE', 2, `Caught by ${defendersInfo}`);
+    }
+    // =========================================================================
+    // 🛑 processPoints() च्या आतील BONUS + TACKLE चा कडक सिंक विभाग
+    // =========================================================================
+    else if (type === 'bonus_tackle') {
+        updateScore(team, 1);          // टॅकल करणाऱ्या डिफेंडर टीमला १ गुण (Team B)
+        updateScore(oppositeTeam, 1);  // बोनस मारणाऱ्या रायडर टीमला १ गुण (Team A)
+        
+        // 🚨 [MISSING NAME FIX]: डिफेंडरचा नंबर selectedPlayersList मधून किंवा थेट मेमरीमधून ट्रॅक करणे
+        let defenderNo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : null;
+        
+        // जर लिस्ट रिकामी असेल तर सिस्टीममध्ये नुकताच निवडलेला खेळाडू शोधण्याचा कडक बॅकअप
+        if (!defenderNo && typeof currentSelectedPlayerNo !== 'undefined') {
+            defenderNo = currentSelectedPlayerNo;
+        }
+
+        let defenderInfo = "DEFENDER";
+        if (defenderNo) {
+            let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
+            let pObj = defTeamList.find(p => p.no == defenderNo);
+            defenderInfo = pObj ? `#${pObj.no} ${pObj.name.toUpperCase()} [${team}]` : `#${defenderNo} [${team}]`;
+        }
+        
+        // रायडरचे नाव जे आपण handleBonusTackle मधून पाठवले होते
+        let tackleRaiderHeader = raiderName || cleanRaiderHeader || `${currentRaider} [${oppositeTeam}]`;
+        
+        let finalDetailsText = `Scored 1 Bonus, but beautifully Caught by ${defenderInfo}`;
+        console.log(`%c✅ [BONUS_TACKLE SUCCESS]: Single Entry Generated ➔ Raider: ${tackleRaiderHeader} | Details: ${finalDetailsText}`, "color: #10b981; font-weight: bold;");
+
+        // 🚨 फक्त आणि फक्त इथूनच एकमेव अधिकृत कार्ड मॅच टाईमलाईन आणि डेटाबेसला पाठवले जाईल!
+        if (typeof addRaidToSummary === "function") {
+            addRaidToSummary(oppositeTeam, tackleRaiderHeader, 'BONUS + TACKLE', 1, finalDetailsText);
+        }
+    }
+    else if (type === 'self_out') {
+        updateScore(team, points);
+        addRaidToSummary(team, cleanRaiderHeader, 'SELF OUT', points, 'Raider went out of bounds');
+    }
+    else if (type === 'technical') {
+        updateScore(team, points);
+        addRaidToSummary(team, 'OFFICIALS', 'TECHNICAL POINT', points, 'Technical Violation');
+    }
+
+    // ६. [REVIVAL LOGIC]: रिवाइव्हलचे नियम (जुनेच आहेत)
+    let pointsToRevive = 0;
+    if (type === 'touch') pointsToRevive = points;
+    else if (type === 'bonus_touch') pointsToRevive = points - 1;
+    else if (type === 'tackle' || type === 'super_tackle' || type === 'bonus_tackle') pointsToRevive = 1;
+
+    if (pointsToRevive > 0 && typeof revivePlayers === "function") {
+        revivePlayers(team, pointsToRevive);
+    }
+
+    // ७. [EMPTY RAID RESET]: एम्प्टी領सिस्टिम रिसेट (🚨 बोनस इव्हेंट्स इथे ० रीसेटसाठी ॲड केले आहेत)
+    if (type === 'touch' || type === 'bonus_touch' || type === 'bonus_tackle' || type === 'bonus' || type === 'bonus_only') {
+        if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
+        if (typeof updateEmptyDots === "function") updateEmptyDots(team);
+    }
+
+    // ८. अंतिम क्लिनअप: मेमरी रिसेट करा
+    window.selectedPlayersList = []; 
+    currentAction = null;
+    
+    console.log(`--- [PROCESS_END] ---`);
+}
+/*** */
 
 function revivePlayers(team, count) {
     console.log(`>>> [REVIVE_START] Team: ${team} | Points to Revive: ${count}`);
@@ -3599,9 +4862,121 @@ function openBonusPointsModal(team) {
     });
 }
 
+//=========================================================================
+//@BONUS
+//=========================================================================
+
 let selectedPlayersCount = 0;
 let requiredPlayers = 0;
 
+// function processBonus(team, touchPoints) {
+//     const ts = Date.now();
+//     console.log(`[BONUS_DEBUG] processBonus Start | Team: ${team} | TouchPts: ${touchPoints} | TS: ${ts}`);
+    
+//     Swal.close();
+    
+//     const ptsInt = parseInt(touchPoints);
+//     window.requiredPlayers = ptsInt;
+//     window.selectedPlayersCount = 0;
+//     const oppositeTeam = (team === 'A' ? 'B' : 'A');
+
+//     const activeRaiderEl = document.getElementById('activeRaider');
+//     const raiderName = activeRaiderEl ? activeRaiderEl.innerText.split('(')[0].trim() : "Raider";
+
+//     if (ptsInt === 0) {
+//         // --- १. फक्त बोनस (+1) ---
+//         updateScore(team, 1);
+        
+//         // एम्प्टी रेड डॉट्स रिसेट (तुझे मूळ लॉजिक)
+//         if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
+//         if (typeof updateEmptyDots === "function") updateEmptyDots(team);
+        
+//         // --- २. समरी अपडेट (आता आपण हे processPoints कडे सोपवू शकतो किंवा इथेच ठेवू शकतो) ---
+//         if (typeof addRaidToSummary === "function") {
+//             addRaidToSummary(team, raiderName, 'BONUS POINT', 1, 'Technical Bonus');
+//         }
+
+//         Swal.fire({ title: 'Bonus Only!', icon: 'success', toast: true, position: 'top', timer: 1500 });
+
+//         // --- ३. सर्वात महत्त्वाचा बदल: रेड क्लोज करणे ---
+//         // खेळाडू निवडायचे नसल्यामुळे आपण इथूनच 'Cleanup' करूया
+//         if (activeRaiderEl) {
+//             console.log(`[CLEANUP] Resetting activeRaider after Only Bonus...`);
+//             activeRaiderEl.innerText = "NONE (WAITING)";
+//             activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
+//         }
+
+//         // प्रॉब्लेम सोडवण्यासाठी: जर currentAction सेट असेल तर तो null करा
+//         currentAction = null;
+//         window.selectedPlayersList = [];
+
+//         // टायमर सुरू करा (तुझे मूळ लॉजिक)
+//        // if (typeof startRaidTimer === "function") startRaidTimer();
+
+//     } else {
+//         // --- बोनस (+1) + टच पॉईंट्स (हे लॉजिक जसे आहे तसेच राहील) ---
+//         console.log(`[BONUS_DEBUG] Bonus + Touch points. Opening Modal for Team: ${oppositeTeam}`);
+        
+//         const totalPoints = 1 + ptsInt;
+
+//         currentAction = { 
+//             team: team, 
+//             type: 'bonus_touch', 
+//             points: totalPoints 
+//         };
+
+//         // डिफेन्डर निवडण्यासाठी मोडल उघडा
+//         openMultiPlayerModal(oppositeTeam, ptsInt, "Bonus Touch Out"); 
+//     }
+// }
+/** */
+// function handleBonusTackle(raiderTeam) {
+//     console.log(`[STRICT_LOG] Bonus + Tackle! Raider Team: ${raiderTeam}`);
+//     Swal.close();
+
+//     const defenderTeam = (raiderTeam === 'A' ? 'B' : 'A');
+//     const activeRaiderEl = document.getElementById('activeRaider');
+//     const raiderRaw = activeRaiderEl ? activeRaiderEl.innerText : "";
+//     const raiderName = raiderRaw.split('(')[0].trim();
+
+//     // १. एम्प्टी रेड काउंट रिसेट करा (बोनस मिळाल्यामुळे)
+//     emptyRaidCount[raiderTeam] = 0; 
+//     if (typeof updateEmptyDots === 'function') updateEmptyDots(raiderTeam);
+
+//     // २. रेडरला Out List मध्ये टाका
+//     let raiderNoMatch = raiderRaw.match(/\d+/); 
+//     if (raiderNoMatch) {
+//         console.log(`[STRICT_LOG] Raider ${raiderNoMatch[0]} identified for Out status.`);
+//         updatePlayerStatus(raiderNoMatch[0], raiderTeam, 'Out');
+//     }
+
+//     // ३. समरीमध्ये नोंद
+//     if (typeof addRaidToSummary === "function") {
+//         addRaidToSummary(raiderTeam, raiderName, 'Bonus+Tackle', 1, 'Scored Bonus then Tackled');
+//     }
+
+//     // ४. करंट ॲक्शन सेट करा (स्कोर आता processPoints मधून अपडेट होईल)
+//     currentAction = { 
+//         team: defenderTeam, 
+//         type: 'bonus_tackle', 
+//         points: 1 
+//     };
+
+//     console.log(`[FLOW] Opening Defender List for Team ${defenderTeam}`);
+//     openPlayerModal(defenderTeam, 'tackle'); 
+
+//     Swal.fire({
+//         title: 'Bonus + Tackle!',
+//         text: 'आता टॅकल करणाऱ्या डिफेंडरला निवडा.',
+//         icon: 'success',
+//         toast: true, position: 'top', timer: 2000, showConfirmButton: false
+//     });
+// }
+
+/** */
+// =========================================================================
+// 🎁 १. processBonus() - नुसता बोनस आणि बोनस+टचचा कडक नेमिंग पॅच 🎯
+// =========================================================================
 function processBonus(team, touchPoints) {
     const ts = Date.now();
     console.log(`[BONUS_DEBUG] processBonus Start | Team: ${team} | TouchPts: ${touchPoints} | TS: ${ts}`);
@@ -3614,48 +4989,59 @@ function processBonus(team, touchPoints) {
     const oppositeTeam = (team === 'A' ? 'B' : 'A');
 
     const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderRawText = activeRaiderEl ? activeRaiderEl.innerText.trim() : "";
     const raiderName = activeRaiderEl ? activeRaiderEl.innerText.split('(')[0].trim() : "Raider";
+
+    // 🚨 [PREFIX SECURITY GATE]: रायडरचे नाव जर्सी नंबर आणि [A]/[B] ब्रॅकेटसह कडक तयार करणे
+    let raiderTeamPrefix = (team === 'A' ? 'A' : 'B');
+    let cleanRaiderHeader = "";
+
+    if (window.currentActiveRaider) {
+        cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeamPrefix}]`;
+    } else {
+        let raiderClean = raiderName.replace(/[^a-zA-Z0-9 ]/g, "").replace("WAITING FOR RAIDER", "").trim();
+        cleanRaiderHeader = raiderClean.includes("#") ? `${raiderClean} [${raiderTeamPrefix}]` : `${raiderClean} [${raiderTeamPrefix}]`;
+    }
 
     if (ptsInt === 0) {
         // --- १. फक्त बोनस (+1) ---
         updateScore(team, 1);
         
-        // एम्प्टी रेड डॉट्स रिसेट (तुझे मूळ लॉजिक)
+        // एम्प्टी領डॉट्स रिसेट (तुझे मूळ लॉजिक सुरक्षित)
         if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
         if (typeof updateEmptyDots === "function") updateEmptyDots(team);
         
-        // --- २. समरी अपडेट (आता आपण हे processPoints कडे सोपवू शकतो किंवा इथेच ठेवू शकतो) ---
+        // --- २. समरी अपडेट (🚨 इथे आपण 'cleanRaiderHeader' अधिकृतपणे पास केला!) ---
         if (typeof addRaidToSummary === "function") {
-            addRaidToSummary(team, raiderName, 'BONUS POINT', 1, 'Technical Bonus');
+            console.log(`%c🚀 [BONUS_ENGINE_SEND]: addRaidToSummary ला पाठवलेले नाव ➔ "${cleanRaiderHeader}"`, "color: #10b981; font-weight: bold;");
+            addRaidToSummary(team, cleanRaiderHeader, 'BONUS POINT', 1, 'Technical Bonus');
         }
 
         Swal.fire({ title: 'Bonus Only!', icon: 'success', toast: true, position: 'top', timer: 1500 });
 
-        // --- ३. सर्वात महत्त्वाचा बदल: रेड क्लोज करणे ---
-        // खेळाडू निवडायचे नसल्यामुळे आपण इथूनच 'Cleanup' करूया
+        // --- ३. रेड क्लोज करणे आणि क्लीनअप ---
         if (activeRaiderEl) {
             console.log(`[CLEANUP] Resetting activeRaider after Only Bonus...`);
             activeRaiderEl.innerText = "NONE (WAITING)";
             activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
         }
 
-        // प्रॉब्लेम सोडवण्यासाठी: जर currentAction सेट असेल तर तो null करा
         currentAction = null;
         window.selectedPlayersList = [];
 
-        // टायमर सुरू करा (तुझे मूळ लॉजिक)
-       // if (typeof startRaidTimer === "function") startRaidTimer();
-
     } else {
-        // --- बोनस (+1) + टच पॉईंट्स (हे लॉजिक जसे आहे तसेच राहील) ---
+        // --- बोनस (+1) + टच पॉईंट्स (मूळ लॉजिक जसे आहे तसेच सुरक्षित) ---
         console.log(`[BONUS_DEBUG] Bonus + Touch points. Opening Modal for Team: ${oppositeTeam}`);
         
         const totalPoints = 1 + ptsInt;
 
+        // 🚨 [CRITICAL]: इथे देखील 'cleanRaiderHeader' आपण ॲक्शनमध्ये पॅक केला, जेणेकरून 
+        // processPoints ला पुढे जाताना ब्रॅकेट मॅचिंगमध्ये कोणतीही अडचण येणार नाही!
         currentAction = { 
             team: team, 
             type: 'bonus_touch', 
-            points: totalPoints 
+            points: totalPoints,
+            raiderName: cleanRaiderHeader
         };
 
         // डिफेन्डर निवडण्यासाठी मोडल उघडा
@@ -3663,8 +5049,68 @@ function processBonus(team, touchPoints) {
     }
 }
 
+// =========================================================================
+// 🛑 २. handleBonusTackle() - बोनस+टॅकलचा वॉटर-टाईट नेमिंग पॅच 🎯
+// =========================================================================
+// function handleBonusTackle(raiderTeam) {
+//     console.log(`[STRICT_LOG] Bonus + Tackle! Raider Team: ${raiderTeam}`);
+//     Swal.close();
+
+//     const defenderTeam = (raiderTeam === 'A' ? 'B' : 'A');
+//     const activeRaiderEl = document.getElementById('activeRaider');
+//     const raiderRaw = activeRaiderEl ? activeRaiderEl.innerText : "";
+//     const raiderName = raiderRaw.split('(')[0].trim();
+
+//     // 🚨 [PREFIX SECURITY GATE]: बोनस+टॅकलसाठी रायडरचे नाव ब्रॅकेटसह शुद्ध करणे
+//     let cleanRaiderHeader = "";
+//     if (window.currentActiveRaider) {
+//         cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeam}]`;
+//     } else {
+//         let raiderClean = raiderName.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+//         cleanRaiderHeader = raiderClean.includes("#") ? `${raiderClean} [${raiderTeam}]` : `${raiderClean} [${raiderTeam}]`;
+//     }
+
+//     // १. एम्प्टी領काउंट रिसेट (बोनस मिळाल्यामुळे)
+//     if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[raiderTeam] = 0; 
+//     if (typeof updateEmptyDots === 'function') updateEmptyDots(raiderTeam);
+
+//     // २. रेडरला Out List मध्ये टाका (मूळ कोड सुरक्षित)
+//     let raiderNoMatch = raiderRaw.match(/\d+/); 
+//     let finalRaiderNo = raiderNoMatch ? raiderNoMatch[0] : null;
+    
+//     if (finalRaiderNo) {
+//         console.log(`[STRICT_LOG] Raider ${finalRaiderNo} identified for Out status.`);
+//         updatePlayerStatus(finalRaiderNo, raiderTeam, 'Out');
+//     }
+
+//     // ३. समरीमध्ये नोंद (🚨 इथे आपण 'cleanRaiderHeader' अधिकृतपणे पास केला!)
+//     if (typeof addRaidToSummary === "function") {
+//         console.log(`%c🛑 [BONUS_TACKLE_SEND]: addRaidToSummary ला पाठवलेले नाव ➔ "${cleanRaiderHeader}"`, "color: #ef4444; font-weight: bold;");
+//         addRaidToSummary(raiderTeam, cleanRaiderHeader, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
+//     }
+
+//     // ४. करंट ॲक्शन सेट करा (स्कोर आता processPoints मधून अपडेट होईल)
+//     // 🚨 [CRITICAL]: इथल्या ॲक्शन पॅकेजमध्ये 'raiderName' चा कडक सिंक लावला!
+//     currentAction = { 
+//         team: defenderTeam, 
+//         type: 'bonus_tackle', 
+//         points: 1,
+//         raiderName: cleanRaiderHeader
+//     };
+
+//     console.log(`[FLOW] Opening Defender List for Team ${defenderTeam}`);
+//     openPlayerModal(defenderTeam, 'tackle'); 
+
+//     Swal.fire({
+//         title: 'Bonus + Tackle!',
+//         text: 'आता टॅकल करणाऱ्या डिफेंडरला निवडा.',
+//         icon: 'success',
+//         toast: true, position: 'top', timer: 2000, showConfirmButton: false
+//     });
+// }
+
 function handleBonusTackle(raiderTeam) {
-    console.log(`[STRICT_LOG] Bonus + Tackle! Raider Team: ${raiderTeam}`);
+    console.log(`[STRICT_LOG] 🛑 handleBonusTackle START | Raider Team: ${raiderTeam}`);
     Swal.close();
 
     const defenderTeam = (raiderTeam === 'A' ? 'B' : 'A');
@@ -3672,31 +5118,45 @@ function handleBonusTackle(raiderTeam) {
     const raiderRaw = activeRaiderEl ? activeRaiderEl.innerText : "";
     const raiderName = raiderRaw.split('(')[0].trim();
 
-    // १. एम्प्टी रेड काउंट रिसेट करा (बोनस मिळाल्यामुळे)
-    emptyRaidCount[raiderTeam] = 0; 
+    // 🚨 [PREFIX SECURITY GATE]: बोनस+टॅकलसाठी रायडरचे नाव ब्रॅकेटसह शुद्ध करणे
+    let cleanRaiderHeader = "";
+    if (window.currentActiveRaider) {
+        cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeam}]`;
+    } else {
+        let raiderClean = raiderName.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+        cleanRaiderHeader = raiderClean.includes("#") ? `${raiderClean} [${raiderTeam}]` : `${raiderClean} [${raiderTeam}]`;
+    }
+
+    // १. एम्प्टी काउंट रिसेट करा
+    if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[raiderTeam] = 0; 
     if (typeof updateEmptyDots === 'function') updateEmptyDots(raiderTeam);
 
-    // २. रेडरला Out List मध्ये टाका
+    // २. रायडरला आऊट करा
     let raiderNoMatch = raiderRaw.match(/\d+/); 
-    if (raiderNoMatch) {
-        console.log(`[STRICT_LOG] Raider ${raiderNoMatch[0]} identified for Out status.`);
-        updatePlayerStatus(raiderNoMatch[0], raiderTeam, 'Out');
+    let finalRaiderNo = raiderNoMatch ? raiderNoMatch[0] : null;
+    
+    if (finalRaiderNo) {
+        console.log(`[STRICT_LOG] Raider ${finalRaiderNo} marked as Out in state.`);
+        updatePlayerStatus(finalRaiderNo, raiderTeam, 'Out');
     }
 
-    // ३. समरीमध्ये नोंद
-    if (typeof addRaidToSummary === "function") {
-        addRaidToSummary(raiderTeam, raiderName, 'Bonus+Tackle', 1, 'Scored Bonus then Tackled');
-    }
+    // 🚨 [THE DOUBLE-ENTRY FIX]: इथूनaddRaidToSummary चा जुना कॉल काढून टाकला आहे, 
+    // जेणेकरून मोडलमधून डिफेंडर निवडायच्या आधीच चुकीचे कार्ड पडणार नाही! 🧼
 
-    // ४. करंट ॲक्शन सेट करा (स्कोर आता processPoints मधून अपडेट होईल)
+    // ३. करंट ॲक्शन पॅकेज तयार करणे
     currentAction = { 
-        team: defenderTeam, 
+        team: defenderTeam, // पॉईंट मिळवणाऱ्या डिफेंडरची टीम
         type: 'bonus_tackle', 
-        points: 1 
+        points: 1,
+        raiderName: cleanRaiderHeader // मूळ बाद झालेला रायडर ब्रॅकेट प्रिफिक्ससह साठवला
     };
 
-    console.log(`[FLOW] Opening Defender List for Team ${defenderTeam}`);
-    openPlayerModal(defenderTeam, 'tackle'); 
+    console.log(`[FLOW] Opening Defender List for Team ${defenderTeam} to fix missing defender name...`);
+    
+    // तुझ्या प्रोजेक्ट रचनेनुसार सिंगल प्लेयर मोडल अचूकपणे ओपन करणे
+    if (typeof openPlayerModal === "function") {
+        openPlayerModal(defenderTeam, 'tackle'); 
+    }
 
     Swal.fire({
         title: 'Bonus + Tackle!',
@@ -3707,7 +5167,7 @@ function handleBonusTackle(raiderTeam) {
 }
 
 
-
+/** */
 function renderMiniPlayers() {
     console.log(`>>> [RENDER_UI] Refreshing Mini Players and Out Lists...`);
     
@@ -3745,20 +5205,27 @@ function renderMiniPlayers() {
     }
 }
 
-
+/*** */
 
 function updatePlayerStatus(playerNo, teamPrefix, newStatus) {
-    console.log(`>>> [STATUS_CHANGE] Player: ${playerNo} | Team: ${teamPrefix} | New Status: ${newStatus}`);
+    // 🎯 [📥 SCAN LOG 3]: फंक्शनच्या सुरुवातीला एंट्री झाली का आणि काय डेटा आला?
+    console.log(`%c📥 [DEBUG updatePlayerStatus ENTER]: Received Player: ${playerNo} | Team: ${teamPrefix} | New Status: ${newStatus}`, "color: #06b6d4; font-weight: bold;");
     
     let targetList = (teamPrefix === 'A') ? teamAPlayers : teamBPlayers;
     let player = targetList.find(p => p.no == playerNo);
     
     if (player) {
+        // 🎯 [✅ SCAN LOG 4]: खेळाडू मेमरीमध्ये सापडला!
+        console.log(`%c✅ [DEBUG updatePlayerStatus]: Player No.${playerNo} found in Team ${teamPrefix}. Changing status from "${player.status}" ➔ "${newStatus}"`, "color: #16a34a; font-weight: bold;");
+        
         player.status = newStatus;
 
         if (newStatus === 'Out') {
             player.outTime = Date.now(); 
             console.log(`    [OUT_LOG] Time set for Player ${playerNo}: ${player.outTime}`);
+            
+            // 🎯 [👉 SCAN LOG 5]: आउट सिक्वेन्स फंक्शन चालण्याच्या ठीक आधी
+            console.log(`%c👉 [DEBUG updatePlayerStatus]: Calling updateOutSequence for Player #${playerNo}, Team ${teamPrefix}, Status: 'Out'`, "color: #ea580c; font-weight: bold;");
             
             // १. आउट सिक्वेन्स अपडेट करा
             updateOutSequence(playerNo, teamPrefix, 'Out');
@@ -3771,17 +5238,19 @@ function updatePlayerStatus(playerNo, teamPrefix, newStatus) {
             console.log(`    [IN_LOG] Clearing Time for Player ${playerNo}.`);
             player.outTime = null; 
 
+            // 🎯 [👉 SCAN LOG 5 - IN]: इन सिक्वेन्स फंक्शन चालण्याच्या ठीक आधी
+            console.log(`%c👉 [DEBUG updatePlayerStatus]: Calling updateOutSequence for Player #${playerNo}, Team ${teamPrefix}, Status: 'In'`, "color: #ea580c; font-weight: bold;");
+
             // ३. आउट सिक्वेन्स अपडेट करा
             updateOutSequence(playerNo, teamPrefix, 'In');
         }
 
-        // जुना प्लेयर्स लिस्ट रेंडर
         if (typeof renderMiniPlayers === "function") renderMiniPlayers();
     } else {
-        console.error(`    [ERROR] Player ${playerNo} not found in Team ${teamPrefix}!`);
+        // 🚨 जर खेळाडू लिस्टमध्ये सापडलाच नाही तर हा एरर येईल
+        console.error(`%c❌ [DEBUG updatePlayerStatus ERROR]: Player ${playerNo} not found in Team ${teamPrefix} list!`, "color: #ef4444; font-weight: bold;");
     }
 
-    // [IMPORTANT]: व्हिज्युअल आयकॉन्स अपडेट करा (Font Awesome Color Change)
     if (typeof updateVisualPlayers === "function") {
         updateVisualPlayers(); 
     }
@@ -3911,6 +5380,7 @@ function updateOutSequence(playerNo, team, status) {
 /** Empty Raid */
 let emptyRaidCount = { A: 0, B: 0 };
 
+/** 
 function handleEmptyRaid(team) {
     const activeRaiderEl = document.getElementById('activeRaider');
     const raiderText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
@@ -4009,7 +5479,148 @@ function updateEmptyDots(team) {
         console.log(`[DOT 2] Yellow - Do or Die Condition`);
     }
 }
+*/
 
+function handleEmptyRaid(team) {
+    // १. एम्प्टी रेड बटण क्लिक होताच चालू रेड टायमर थांबवणे! ⏱️🛑
+    if (typeof stopRaidTimer === "function") {
+        stopRaidTimer();
+    }
+
+    const activeRaiderEl = document.getElementById('activeRaider');
+    const raiderText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
+
+    // 🎯 [🔍 CONSOLE LOG 1]: एम्प्टी रेड बटन दाबताच स्क्रीनवर काय टेक्स्ट आहे ते तपासणे
+    console.log(`%c📥 [DEBUG handleEmptyRaid ENTER]: UI Text found: "${raiderText}" | Team: ${team}`, "color: #a855f7; font-weight: bold;");
+
+    if (raiderText === "" || raiderText.includes("WAITING") || (!raiderText.includes(`(${team})`) && !raiderText.includes(`[${team}]`))) {
+        console.warn(`%c⚠️ [DEBUG handleEmptyRaid]: Raider योग्य नाही किंवा WAITING मोडवर आहे. Modal उघडत आहे.`, "color: #f97316; font-weight: bold;");
+        window.pendingAction = { type: 'empty', team: team };
+        openRaiderSelectionModal(team);
+        return;
+    }
+
+    // 🚨 जर्सी नंबर मेमरीवरून किंवा टेक्स्टवरून अचूक काढणे
+    let raiderNo = null;
+    if (window.currentActiveRaider && window.currentActiveRaider.no) {
+        raiderNo = window.currentActiveRaider.no;
+        console.log(`%c✅ [DEBUG handleEmptyRaid]: Global Memory मधून नंबर सापडला ➔ #${raiderNo}`, "color: #16a34a; font-weight: bold;");
+    } else {
+        let noMatch = raiderText.match(/\d+/);
+        raiderNo = noMatch ? noMatch[0] : (raiderText.split(' ')[1] || raiderText.split('(')[0].trim());
+        console.log(`%c🧠 [DEBUG handleEmptyRaid]: Regex/Split मधून नंबर शोधला ➔ #${raiderNo}`, "color: #3b82f6; font-weight: bold;");
+    }
+
+    let displayName = raiderText.split('(')[0].trim(); 
+
+    // 🎯 [THE DOUBLE ENTRY FIX]: समरीची पहिली एन्ट्री फक्त १ ल्या आणि २ ऱ्या रेडसाठीच द्या!
+    console.log(`%c📊 [DEBUG handleEmptyRaid]: Current Count before increment: ${emptyRaidCount[team]}/3`, "color: #06b6d4; font-weight: bold;");
+    
+    if (emptyRaidCount[team] < 2) {
+        if (typeof addRaidToSummary === "function") {
+            let finalSummaryName = (window.currentActiveRaider) ? `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${team}]` : displayName;
+            let emptyDetails = `Empty Raid (${emptyRaidCount[team] + 1}/3)`;
+            
+            console.log(`%c👉 [DEBUG handleEmptyRaid]: सलग ३री रेड नाहीये (${emptyRaidCount[team] + 1}/3). Normal Empty Raid समरी पाठवत आहे.`, "color: #22c55e; font-weight: bold;");
+            addRaidToSummary(team, finalSummaryName, 'Empty Raid', 0, emptyDetails);
+        }
+    } else {
+        console.log(`%c🚨 [DEBUG handleEmptyRaid]: पुढचा काउंट ३ होणार आहे! Double Entry टाळण्यासाठी सामान्य समरी इथून ब्लॉक केली.`, "color: #ef4444; font-weight: bold;");
+    }
+    
+    // ३. मूळ लॉजिक चालू ठेवा (या टप्प्यातून ३ऱ्या रेडची अधिकृत सिंगल एन्ट्री जाईल)
+    processEmptyRaidLogic(team, "DIRECT_CLICK", raiderNo);
+}
+
+function processEmptyRaidLogic(team, source, raiderNo) {
+    // 🎯 [🔍 CONSOLE LOG 2]: मूळ लॉजिक फंक्शन चालू झाल्यावर डेटा तपासणे
+    console.log(`%c📥 [DEBUG processEmptyRaidLogic ENTER]: Raider No: "${raiderNo}" | Team: ${team} | Source: ${source}`, "color: #0284c7; font-weight: bold;");
+    
+    emptyRaidCount[team]++;
+    console.log(`%c📈 [DEBUG processEmptyRaidLogic]: Increment झालेला नवीन काउंट ➔ Team ${team}: ${emptyRaidCount[team]}/3`, "color: #0284c7; font-weight: bold;");
+
+    if (emptyRaidCount[team] === 3) {
+        console.error(`%c🎯 [DEBUG DO-OR-DIE ACTIVATED]: 3rd Empty Raid FAIL! Auto-Out Raider: #${raiderNo}`, "color: #fff; background: #ef4444; padding: 4px; font-weight: bold;");
+        
+        let oppositeTeam = (team === 'A' ? 'B' : 'A');
+        
+        // १. रेडरला OUT करा
+        if (typeof updatePlayerStatus === "function" && raiderNo) {
+            console.log(`%c🚀 [DEBUG processEmptyRaidLogic]: Calling updatePlayerStatus for Raider #${raiderNo} as 'Out'`, "color: #2563eb; font-weight: bold;");
+            updatePlayerStatus(raiderNo, team, 'Out');
+        }
+
+        // २. समोरच्या टीमला १ पॉईंट द्या
+        if (typeof updateScore === "function") {
+            console.log(`%c🚀 [DEBUG processEmptyRaidLogic]: Adding +1 Point to Team ${oppositeTeam}`, "color: #2563eb; font-weight: bold;");
+            updateScore(oppositeTeam, 1);
+        }
+
+        // ३. समोरच्या टीमचा खेळाडू रिवाइव्ह करा
+        if (typeof revivePlayers === "function") {
+            console.log(`%c🚀 [DEBUG processEmptyRaidLogic]: Calling revivePlayers for Team ${oppositeTeam}`, "color: #2563eb; font-weight: bold;");
+            revivePlayers(oppositeTeam, 1); 
+        }
+
+        // ४. काउंट रिसेट करा
+        emptyRaidCount[team] = 0;
+        console.log(`%c🧹 [DEBUG processEmptyRaidLogic]: Counter Reset to 0 for Team ${team}`, "color: #64748b; font-weight: bold;");
+        
+        // 🎯 विरोधी संघाचा १ गुण कन्सोल आणि समरीमध्ये स्पष्ट रेंडर करणे!
+        if (typeof addRaidToSummary === "function") {
+            let raiderLabel = (window.currentActiveRaider) ? `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${team}]` : `Player #${raiderNo} [${team}]`;
+            let doOrDieDetails = `🚨 DO-OR-DIE CRASHED! सलग ३ऱ्या एम्प्टी रेडमुळे रायडर बाद. (+1 Point to Team ${oppositeTeam})`;
+            
+            console.log(`%c👉 [DEBUG processEmptyRaidLogic]: Sending Single Do-or-Die Out summary...`, "color: #22c55e; font-weight: bold;");
+            addRaidToSummary(oppositeTeam, raiderLabel, 'DO-OR-DIE OUT', 1, doOrDieDetails);
+        }
+
+        const activeRaiderEl = document.getElementById('activeRaider');
+        if (activeRaiderEl) activeRaiderEl.innerText = "WAITING FOR RAIDER...";
+        
+    } else {
+        console.log(`%c🟢 [DEBUG processEmptyRaidLogic]: ३ रेड पूर्ण नाहीत. फक्त खेळाडू रिसेट करत आहे.`, "color: #16a34a; font-weight: bold;");
+        const activeRaiderEl = document.getElementById('activeRaider');
+        if (activeRaiderEl) activeRaiderEl.innerText = "WAITING FOR RAIDER...";
+    }
+    
+    if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
+    console.log(`%c--- [DEBUG processEmptyRaidLogic END] ---`, "color: #0284c7; font-weight: bold;");
+}
+
+function updateEmptyDots(team) {
+    const dotsContainer = document.getElementById(`empty${team}`);
+    
+    if (!dotsContainer) {
+        console.error(`[ERROR] Container 'empty${team}' not found in HTML!`);
+        return;
+    }
+
+    const dots = dotsContainer.children;
+    console.log(`[DOTS UPDATE] Found ${dots.length} dots for Team ${team}`);
+
+    if (dots.length < 3) {
+        console.error(`[ERROR] Container 'empty${team}' must have 3 span elements!`);
+        return;
+    }
+
+    const count = emptyRaidCount[team];
+
+    // सर्व डॉट्स रिसेट (Grey)
+    for (let i = 0; i < 3; i++) {
+        dots[i].className = "w-2.5 h-2.5 rounded-full bg-gray-700";
+    }
+
+    // रेड नुसार रंग बदलणे
+    if (count >= 1) {
+        dots[0].className = "w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_yellow]";
+        console.log(`[DOT 1] Yellow`);
+    }
+    if (count >= 2) {
+        dots[1].className = "w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_yellow]";
+        console.log(`[DOT 2] Yellow - Do or Die Condition`);
+    }
+}
 
 
 function handleAllOut(team) {
@@ -4085,7 +5696,7 @@ function openRaiderSelectionForBonus(team) {
     modal.classList.replace('hidden', 'flex');
 }
 
-
+/** */
 
 function selectMultiplePlayers(playerNo, team) {
     console.log("--- [TOUCH_MODE_START] ---");
@@ -4283,7 +5894,7 @@ function initializeMatchPlayers() {
 
 // २. ॲक्शन बटण दाबल्यावर (Tackle, Super Tackle, Self Out इ. साठी)
 function handleAction(team, type, points) {
-    console.log(`>>> [ACTION_START] Team: ${team} | Type: ${type} | Points: ${points}`);
+    console.log(`%c>>> [ACTION_START] Team: ${team} | Type: ${type} | Points: ${points}`, "color: #a855f7; font-weight: bold;");
 
     // १. टेक्निकल पॉईंटसाठीचा तुझा मूळ ब्लॉक (जसा आहे तसाच ठेवा)
     if (type === 'technical') {
@@ -4322,7 +5933,7 @@ function handleAction(team, type, points) {
     const raiderRawText = activeRaiderEl ? activeRaiderEl.innerText.trim().toUpperCase() : "";
     const isRaiderWaiting = raiderRawText === "" || raiderRawText.includes("WAITING") || raiderRawText.includes("NONE");
 
-    // २. रेडर नसेल तर निवडायला सांगणे (तुझा मूळ कोड)
+    // २.ूळ कोड)
     if (isRaiderWaiting) {
         window.pendingAction = { team: team, points: parseInt(points), type: type };
         if (typeof Swal !== 'undefined') {
@@ -4354,10 +5965,10 @@ function handleAction(team, type, points) {
         return; 
     }
 
-    // --- ४. टॅकल आणि सुपर टॅकल लॉजिक (इथे नवीन बदल केले आहेत) ---
+    // --- ४. टॅकल आणि सुपर टॅकल लॉजिक ---
     console.log(`[STRICT_LOG] Raider found: ${raiderRawText}. Moving to Out Logic.`);
 
-    // [NEW CHANGE]: सुपर टॅकल नियम तपासणे (३ किंवा कमी खेळाडू आहेत का?)
+    // [NEW CHANGE]: सुपर टॅकल नियम तपासणे
     if (type === 'super_tackle') {
         let defendersList = (team === 'A') ? teamAPlayers : teamBPlayers;
         let playersInCourt = defendersList.filter(p => p.status === 'In').length;
@@ -4373,29 +5984,36 @@ function handleAction(team, type, points) {
                 });
             }
 
-            // [FIX]: नियम मोडला तरी रेड संपली आहे, म्हणून रेडर क्लिअर करा
             if (activeRaiderEl) {
                 console.log(`[CLEANUP] Rule violated, resetting activeRaider UI...`);
                 activeRaiderEl.innerText = "NONE (WAITING)";
                 activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
             }
             
-            // डेटा रिसेट
             currentAction = null;
             window.selectedPlayersList = [];
-
-            return; // नियम मोडला असेल तर प्रक्रिया इथेच थांबवा
+            return; 
         }
     }
 
     let raiderNoMatch = raiderRawText.match(/\d+/);
-    let raiderNo = raiderNoMatch ? raiderNoMatch[0] : null;
+    //let raiderNo = raiderNoMatch ? raiderNoMatch[0] : null;
+    let raiderNo = (window.currentActiveRaider && window.currentActiveRaider.no) ? window.currentActiveRaider.no : null;
+    
+    // 🎯 [🔍 SCAN LOG 1]: टॅकल चालू झाल्यावर रायडरचा नंबर काय मिळाला ते तपासा
+    console.log(`%c🔍 [DEBUG handleAction]: UI Text: "${raiderRawText}" ➔ Extracted Raider No: ${raiderNo} | Target Team to Out: ${oppositeTeam}`, "color: #eab308; font-weight: bold;");
 
     if (type === 'tackle' || type === 'super_tackle') {
         if (raiderNo && typeof updatePlayerStatus === "function") {
+            
+            // 🎯 [🚀 SCAN LOG 2]: updatePlayerStatus ला कॉल मारण्यापूर्वीचा कडक पुरावा
+            console.log(`%c🚀 [DEBUG handleAction]: Triggering updatePlayerStatus for Raider #${raiderNo} on Team ${oppositeTeam} as 'Out'`, "color: #2563eb; font-weight: bold;");
+            
             updatePlayerStatus(raiderNo, oppositeTeam, 'Out');
+        } else {
+            // 🚨 जर काहीतरी मिसिंग असेल तर हा एरर येईल
+            console.warn(`%c⚠️ [DEBUG handleAction FAILED]: Cannot trigger updatePlayerStatus! raiderNo: ${raiderNo} | Function exists: ${typeof updatePlayerStatus === "function"}`, "color: #ef4444; font-weight: bold;");
         }
-        // [INFO]: addRaidToSummary इथून कमेंट केली आहे कारण आता ती processPoints मध्ये आहे
     }
 
     currentAction = { 
@@ -4409,7 +6027,6 @@ function handleAction(team, type, points) {
     window.requiredPlayers = 1; 
     window.selectedPlayersCount = 0;
 
-    // [NEW CHANGE]: मोडलचे टायटल परिस्थितीनुसार बदला
     let modalHeader = (type === 'super_tackle') ? "Super Tackle By" : "Tackled By";
     openMultiPlayerModal(team, 1, modalHeader);
 }
@@ -4489,11 +6106,59 @@ function checkAllOut(team) {
 }
 
 // ऑल-आऊटची प्रत्यक्ष अंमलबजावणी
+// function executeAllOut(allOutTeam, scoringTeam) {
+//     console.log(`>>> [ALL_OUT_START] Team: ${allOutTeam} is All-Out. Scoring Team: ${scoringTeam}`);
+
+//     updateScore(scoringTeam, 2); // २ ऑल-आऊट पॉईंट्स
+//     console.log(`    [SCORE] +2 Points added to Team ${scoringTeam}`);
+
+//     let players = (allOutTeam === 'A') ? teamAPlayers : teamBPlayers;
+    
+//     // १. आउट सिक्वेन्स पूर्णपणे रिकामी करा (RESET)
+//     if (allOutTeam === 'A') {
+//         outSequenceA = [];
+//         const elA = document.getElementById('outSequenceA');
+//         if (elA) elA.innerText = 'NONE';
+//     } else {
+//         outSequenceB = [];
+//         const elB = document.getElementById('outSequenceB');
+//         if (elB) elB.innerText = 'NONE';
+//     }
+//     console.log(`    [SEQ_RESET] Out sequence for Team ${allOutTeam} cleared.`);
+
+//     // २. प्लेइंग ७ ला पुन्हा मैदानात आणा
+//     players.forEach(p => {
+//         if (p.playingStatus === "Playing") {
+//             p.status = "In"; // तुझ्या आधीच्या फंक्शनमध्ये courtStatus होतं, ते 'status' आहे का एकदा चेक कर.
+//             p.outTime = null;
+//             console.log(`    [REVIVE] Player ${p.no} (${p.name}) is back In.`);
+//         } else {
+//             p.status = "Out"; 
+//             console.log(`    [BENCH] Player ${p.no} remains on Bench.`);
+//         }
+//     });
+
+//     renderMiniPlayers();
+//     console.log(`<<< [ALL_OUT_COMPLETE] Team ${allOutTeam} is fully revived.`);
+// }
+
+// ऑल-आऊटची प्रत्यक्ष अंमलबजावणी (सुधारित आणि सुरक्षित)
 function executeAllOut(allOutTeam, scoringTeam) {
     console.log(`>>> [ALL_OUT_START] Team: ${allOutTeam} is All-Out. Scoring Team: ${scoringTeam}`);
 
-    updateScore(scoringTeam, 2); // २ ऑल-आऊट पॉईंट्स
+    updateScore(scoringTeam, 2); // २ ऑल-आऊट पॉईंट्स जोडले
     console.log(`    [SCORE] +2 Points added to Team ${scoringTeam}`);
+
+    // -----------------------------------------------------------------
+    // 🎯 [RAID SUMMARY & TIMELINE ENTRY]: ऑल-आऊटचा कडक इतिहास नोंदवणे 🚀
+    // -----------------------------------------------------------------
+    let allOutLabel = `TEAM ${allOutTeam} [${allOutTeam}]`;
+    let allOutDetails = `+2 All-Out Points awarded to Team ${scoringTeam}`;
+    
+    // addRaidToSummary(पॉईंट मिळवणारी टीम, हेडिंग नाव, इव्हेंट प्रकार, पॉइंट्स, डिटेल्स)
+    if (typeof addRaidToSummary === "function") {
+        addRaidToSummary(scoringTeam, allOutLabel, 'ALL OUT', 2, allOutDetails);
+    }
 
     let players = (allOutTeam === 'A') ? teamAPlayers : teamBPlayers;
     
@@ -4512,7 +6177,7 @@ function executeAllOut(allOutTeam, scoringTeam) {
     // २. प्लेइंग ७ ला पुन्हा मैदानात आणा
     players.forEach(p => {
         if (p.playingStatus === "Playing") {
-            p.status = "In"; // तुझ्या आधीच्या फंक्शनमध्ये courtStatus होतं, ते 'status' आहे का एकदा चेक कर.
+            p.status = "In"; // तुझा मूळ 'status' कोड जसाच्या तसा सुरक्षित
             p.outTime = null;
             console.log(`    [REVIVE] Player ${p.no} (${p.name}) is back In.`);
         } else {
@@ -4521,7 +6186,11 @@ function executeAllOut(allOutTeam, scoringTeam) {
         }
     });
 
-    renderMiniPlayers();
+    if (typeof renderMiniPlayers === "function") renderMiniPlayers();
+    
+    // व्हिज्युअल प्लेयर्स अपडेट करा जेणेकरून कोर्टवरील आयकॉन्सचे रंग पुन्हा हिरवे होतील
+    if (typeof updateVisualPlayers === "function") updateVisualPlayers();
+
     console.log(`<<< [ALL_OUT_COMPLETE] Team ${allOutTeam} is fully revived.`);
 }
 
@@ -4620,67 +6289,294 @@ function handleCheckboxChange(playerNo) {
 
 let raidCounter = 0;
 
-function addRaidToSummary(team, raiderName, result, points, details) {
-    const raidFeed = document.getElementById('raidFeed');
-    const modalRaidList = document.getElementById('modalRaidList');
+
+// function addRaidToSummary(team, raiderName, result, points, details, isLoadedFromDB = false) {
+//     const raidFeed = document.getElementById('raidFeed');
+//     const modalRaidList = document.getElementById('modalRaidList');
+//     const noRaidText = document.getElementById('noRaidText');
+//     const modalEmptyText = document.getElementById('modalEmptyText');
+
+//     if (noRaidText) noRaidText.remove(); 
+//     if (modalEmptyText) modalEmptyText.remove(); 
+
+//     raidCounter++;
+//     const totalRaidsEl = document.getElementById('totalRaids');
+//     if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
+
+//     // --- तुझे मूळ स्टाइलिंग लॉजिक (Raid Feed साठी) ---
+//     const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
+//     let actionBg = "bg-gray-900"; 
+//     let indicatorIcon = "•"; 
+//     if (result.toUpperCase().includes('TACKLE')) { actionBg = "bg-red-900/30"; indicatorIcon = "🛑"; }
+//     else if (result.toUpperCase().includes('BONUS')) { actionBg = "bg-blue-900/30"; indicatorIcon = "✨"; }
+//     else if (points > 0) { actionBg = "bg-green-900/30"; indicatorIcon = "🎯"; }
+
+//     const displayDetails = (details && details !== "") ? details : "";
+
+//     // १. आडवा स्क्रोलर (Small Card) - जसाच्या तसा
+//     const raidEntry = document.createElement('div');
+//     raidEntry.className = `flex-shrink-0 w-40 ${actionBg} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
+//     raidEntry.innerHTML = `
+//         <div class="flex justify-between items-start mb-0.5">
+//             <span class="text-[10px] font-black text-white truncate w-28 uppercase">${raiderName}</span>
+//             <span class="text-[10px] font-bold ${points > 0 ? 'text-green-400' : 'text-red-400'}">+${points}</span>
+//         </div>
+//         <div class="flex items-center gap-1 mb-1 opacity-90"><span class="text-[8px] text-gray-200 font-black uppercase tracking-tighter">${indicatorIcon} ${result}</span></div>
+//         <div class="border-t border-white/10 pt-1 mt-1"><div class="text-[8px] text-white/80 leading-snug font-medium italic">${displayDetails}</div></div>
+//     `;
+//     if (raidFeed) raidFeed.prepend(raidEntry);
+
+//     // २. मॉडेलमधील कॉमेंट्री स्टाईल लिस्ट - जशीच्या तशी
+//     if (modalRaidList) {
+//         const modalEntry = document.createElement('div');
+//         modalEntry.className = "py-2.5 border-b border-gray-100 flex gap-3 items-start bg-white";
+        
+//         const ptsBg = points > 0 ? 'bg-green-600' : 'bg-red-600';
+//         const teamName = (team === 'A') ? (document.getElementById('teamAName')?.innerText || 'Team A') : (document.getElementById('teamBName')?.innerText || 'Team B');
+
+//         modalEntry.innerHTML = `
+//             <div class="shrink-0 w-6 h-6 ${ptsBg} text-white text-[10px] font-black flex items-center justify-center rounded shadow-sm">
+//                 ${points}
+//             </div>
+//             <div class="flex-1 text-[11px] leading-relaxed text-gray-800">
+//                 <span class="font-bold text-black uppercase">${raiderName}</span> 
+//                 <span class="text-gray-400 text-[9px] font-bold">[${teamName}]</span>: 
+//                 <span class="font-bold text-blue-800 uppercase tracking-tighter">${result}</span>. 
+//                 <span class="text-gray-500 italic ml-1">${displayDetails}</span>
+//             </div>
+//         `;
+//         modalRaidList.prepend(modalEntry);
+//     }
+
+//     // 🔒 [LOCAL MEMORY & SECURE STORAGE SYNC]: फ्रेश रेड असल्यास डेटाबेसला कॉल न मारता साठवा!
+//     if (!isLoadedFromDB && typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId) {
+//         if (!window.activeRaidsList) window.activeRaidsList = [];
+
+//         window.activeRaidsList.push({
+//             team: team,
+//             raiderName: raiderName,
+//             result: result,
+//             points: Number(points),
+//             details: details || "",
+//             timestamp: new Date().getTime()
+//         });
+
+//         // Base64 सुरक्षित कोडींग (मराठी फॉन्ट सेफ्टीसह)
+//         try {
+//             const rawString = JSON.stringify(window.activeRaidsList);
+//             const encodedData = btoa(unescape(encodeURIComponent(rawString)));
+//             localStorage.setItem(`raids_secure_log_${matchSetupData.mId}`, encodedData);
+//             console.log(`💾 [Local Sync]: रेड सुरक्षितरित्या साठवली. (एकूण: ${window.activeRaidsList.length})`);
+//         } catch (err) {
+//             console.error("🚨 LocalStorage Save Error:", err);
+//         }
+//     }
+// }
+
+// function addRaidToSummary(team, raiderName, result, points, details) {
+//     const raidFeed = document.getElementById('raidFeed'); // होम स्क्रीन फीड
+//     const modalRaidList = document.getElementById('modalRaidList'); // मॅच टाईमलाईन लिस्ट
+//     const noRaidText = document.getElementById('noRaidText');
+//     const modalEmptyText = document.getElementById('modalEmptyText');
+
+//     if (noRaidText) noRaidText.remove(); 
+//     if (modalEmptyText) modalEmptyText.remove(); 
+
+//     raidCounter++;
+//     const totalRaidsEl = document.getElementById('totalRaids');
+//     if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
+
+//     // --- 🎨 १. होम स्क्रीन फीड स्टाईलिंग (Horizontal Scroll) ---
+//     const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
+//     let actionBg = "bg-gray-900"; 
+//     let indicatorIcon = "•"; 
+//     if (result.toUpperCase().includes('TACKLE')) { actionBg = "bg-red-900/30"; indicatorIcon = "🛑"; }
+//     else if (result.toUpperCase().includes('BONUS')) { actionBg = "bg-blue-900/30"; indicatorIcon = "✨"; }
+//     else if (points > 0) { actionBg = "bg-green-900/30"; indicatorIcon = "🎯"; }
+
+//     const displayDetails = (details && details !== "") ? details : "";
+
+//     const raidEntry = document.createElement('div');
+//     raidEntry.className = `flex-shrink-0 w-40 ${actionBg} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
+//     raidEntry.innerHTML = `
+//         <div class="flex justify-between items-start mb-0.5">
+//             <span class="text-[10px] font-black text-white truncate w-28 uppercase">${raiderName}</span>
+//             <span class="text-[10px] font-bold ${points > 0 ? 'text-green-400' : 'text-red-400'}">+${points}</span>
+//         </div>
+//         <div class="flex items-center gap-1 mb-1 opacity-90"><span class="text-[8px] text-gray-200 font-black uppercase tracking-tighter">${indicatorIcon} ${result}</span></div>
+//         <div class="border-t border-white/10 pt-1 mt-1"><div class="text-[8px] text-white/80 leading-snug font-medium italic">${displayDetails}</div></div>
+//     `;
+//     if (raidFeed) raidFeed.prepend(raidEntry);
+
+//     // --- 🎨 २. [BEAUTIFIED MATCH TIMELINE]: मॅच टाईमलाईनचा कडक प्रो लुक ---
+//     if (modalRaidList) {
+//         const modalEntry = document.createElement('div');
+        
+//         // 📊 टीम वाईज कडक मॉडर्न कलर शेड्स (बॅकग्राउंड आणि बॉर्डर)
+//         // टीम A साठी हलकी हिरवी शेड, टीम B साठी हलकी निळी शेड 🟢🔵
+//         const cardBg = (team === 'A') ? 'bg-green-500/5 border-l-4 border-green-500' : 'bg-blue-500/5 border-l-4 border-blue-500';
+//         const ptsBg = (team === 'A') ? 'bg-green-600' : 'bg-blue-600';
+        
+//         // 🚨 [TEAM NAME BUG FIX]: रायडरची खरी टीम ओळखणे
+//         // जर पॉईंट टीम A ला मिळालाय आणि तो टॅकल आहे, तर रायडर नक्कीच टीम B चा असणार!
+//         let raiderTrueTeam = "";
+//         if (result.toUpperCase().includes('TACKLE')) {
+//             raiderTrueTeam = (team === 'A') ? "Team B" : "Team A";
+//         } else {
+//             raiderTrueTeam = (team === 'A') ? "Team A" : "Team B";
+//         }
+
+//         modalEntry.className = `p-3 mb-2 mx-1 rounded-r-xl flex gap-3 items-center shadow-sm transition-all ${cardBg}`;
+//         modalEntry.innerHTML = `
+//             <div class="shrink-0 w-7 h-7 ${ptsBg} text-white text-[11px] font-black flex items-center justify-center rounded-full shadow">
+//                 +${points}
+//             </div>
+            
+//             <div class="flex-1 text-[11px] leading-relaxed text-gray-300">
+//                 <div class="flex items-center gap-1.5 flex-wrap">
+//                     <span class="font-black text-white uppercase tracking-wide">${raiderName}</span> 
+//                     <span class="px-1 py-0.2 bg-white/10 text-gray-400 text-[8px] font-extrabold rounded uppercase tracking-tight">[${raiderTrueTeam}]</span>
+//                     <span class="text-gray-400 font-medium">➔</span>
+//                     <span class="font-black text-orange-400 uppercase tracking-tight">${result}</span>
+//                 </div>
+//                 ${displayDetails ? `<div class="text-[9.5px] text-gray-400 font-semibold italic mt-0.5 flex items-center gap-1">⚡ ${displayDetails}</div>` : ''}
+//             </div>
+//         `;
+//         modalRaidList.prepend(modalEntry);
+//     }
+// }
+/** */
+function addRaidToSummary(team, raiderName, result, points, details, isLoadedFromDB = false) {
+    const raidFeed = document.getElementById('raidFeed'); 
+    const modalRaidList = document.getElementById('modalRaidList'); 
     const noRaidText = document.getElementById('noRaidText');
     const modalEmptyText = document.getElementById('modalEmptyText');
 
     if (noRaidText) noRaidText.remove(); 
     if (modalEmptyText) modalEmptyText.remove(); 
 
-    raidCounter++;
-    document.getElementById('totalRaids').innerText = `Raids: ${raidCounter}`;
+    if (!isLoadedFromDB) {
+        raidCounter++;
+        const totalRaidsEl = document.getElementById('totalRaids');
+        if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
+    }
 
-    // --- तुझे मूळ स्टाइलिंग लॉजिक (Raid Feed साठी) ---
+    // 🚨 [ALL OUT EXCLUSIVE TEXT FIX]: ऑल-आऊटसाठी मजकूर तुझ्या रचनेनुसार सेट करणे
+    let finalHeaderName = raiderName;
+    let finalDetailsText = (details && details !== "") ? details : "";
+
+    if (result.toUpperCase() === 'ALL OUT') {
+        // जर ऑल-आऊट इव्हेंट असेल, तर हेडिंग 'Team A  +2' करा
+        finalHeaderName = `TEAM ${team}  +2`;
+        // डिटेल्स खाली सुटसुटीत 'Team X All out' करा (allOutTeam चे नाव डिटेल्समधून काढून फक्त नाव घ्या)
+        if (details.toLowerCase().includes("awarded to")) {
+            let targetAllOutTeam = team === 'A' ? 'B' : 'A';
+            finalDetailsText = `Team ${targetAllOutTeam} All out`;
+        }
+    }
+
+    // --- 🎨 १. होम स्क्रीन होरिझॉन्टल फीड (Dynamic Styling) ---
     const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
     let actionBg = "bg-gray-900"; 
     let indicatorIcon = "•"; 
-    if (result.toUpperCase().includes('TACKLE')) { actionBg = "bg-red-900/30"; indicatorIcon = "🛑"; }
-    else if (result.toUpperCase().includes('BONUS')) { actionBg = "bg-blue-900/30"; indicatorIcon = "✨"; }
-    else if (points > 0) { actionBg = "bg-green-900/30"; indicatorIcon = "🎯"; }
+    let cardCustomStyle = ""; // ऑल-आऊटसाठी स्पेशल स्टाईल शीट
 
-    const displayDetails = (details && details !== "") ? details : "";
+    // 🚨 [COLOR BREAKTHROUGH]: ऑल-आऊट कार्डचा रंग पूर्णपणे वेगळा आणि प्रीमियम (Amber/Orange Glow) करणे 🔥
+    if (result.toUpperCase() === 'ALL OUT') {
+        actionBg = "bg-gradient-to-br from-amber-600/30 via-orange-950/40 to-black";
+        indicatorIcon = "🚨";
+        cardCustomStyle = "border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-pulse";
+    } 
+    else if (result.toUpperCase().includes('TACKLE')) { 
+        actionBg = "bg-red-900/30"; 
+        indicatorIcon = "🛑"; 
+    }
+    else if (result.toUpperCase().includes('BONUS')) { 
+        actionBg = "bg-blue-900/30"; 
+        indicatorIcon = "✨"; 
+    }
+    else if (points > 0) { 
+        actionBg = "bg-green-900/30"; 
+        indicatorIcon = "🎯"; 
+    }
 
-    // १. आडवा स्क्रोलर (Small Card) - हे बदलू नकोस
     const raidEntry = document.createElement('div');
-    raidEntry.className = `flex-shrink-0 w-40 ${actionBg} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
+    // जर ऑल-आऊट असेल तर कस्टम स्टाईल आणि बॉर्डर लावा, नाहीतर तुझा मूळ बॉर्डर क्लास
+    raidEntry.className = `flex-shrink-0 w-48 ${actionBg} p-2 rounded-md shadow-md relative border-l-2 ${result.toUpperCase() === 'ALL OUT' ? cardCustomStyle : borderColor}`;
     raidEntry.innerHTML = `
         <div class="flex justify-between items-start mb-0.5">
-            <span class="text-[10px] font-black text-white truncate w-28 uppercase">${raiderName}</span>
-            <span class="text-[10px] font-bold ${points > 0 ? 'text-green-400' : 'text-red-400'}">+${points}</span>
+            <span class="text-[10px] font-black text-white truncate w-36 uppercase tracking-wide">${finalHeaderName}</span>
         </div>
-        <div class="flex items-center gap-1 mb-1 opacity-90"><span class="text-[8px] text-gray-200 font-black uppercase tracking-tighter">${indicatorIcon} ${result}</span></div>
-        <div class="border-t border-white/10 pt-1 mt-1"><div class="text-[8px] text-white/80 leading-snug font-medium italic">${displayDetails}</div></div>
+        <div class="flex items-center gap-1 mb-1 opacity-90">
+            <span class="text-[9px] text-amber-400 font-black uppercase tracking-tight">${indicatorIcon} ${result}</span>
+        </div>
+        <div class="border-t border-white/10 pt-1 mt-1">
+            <div class="text-[8.5px] text-gray-300 leading-snug font-bold italic uppercase tracking-tighter">${finalDetailsText}</div>
+        </div>
     `;
-    raidFeed.prepend(raidEntry);
+    if (raidFeed) raidFeed.prepend(raidEntry);
 
-    // २. [NEW STYLE]: मॉडेलमधील कॉमेंट्री स्टाईल लिस्ट
+    // --- 🎨 २. [MATCH TIMELINE]: मॅच टाईमलाईनवरील ऑल-आऊट रचना ---
     if (modalRaidList) {
         const modalEntry = document.createElement('div');
-        // क्रिकेट कॉमेंट्री सारखा लुक
-        modalEntry.className = "py-2.5 border-b border-gray-100 flex gap-3 items-start bg-white";
         
-        // पॉइंट्सचा रंग (हिरवा किंवा लाल)
-        const ptsBg = points > 0 ? 'bg-green-600' : 'bg-red-600';
-        const teamName = (team === 'A') ? (document.getElementById('teamAName')?.innerText || 'Team A') : (document.getElementById('teamBName')?.innerText || 'Team B');
+        // टाईमलाईनवर देखील ऑल-आऊट कार्डला कडक ऑरेंज ग्लो बॉर्डर द्या
+        const cardBg = (result.toUpperCase() === 'ALL OUT') 
+                     ? 'bg-amber-500/10 border-l-4 border-amber-500 shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]' 
+                     : ((team === 'A') ? 'bg-green-500/5 border-l-4 border-green-500' : 'bg-blue-500/5 border-l-4 border-blue-500');
+                     
+        const ptsBg = (result.toUpperCase() === 'ALL OUT') ? 'bg-amber-500 text-black' : ((team === 'A') ? 'bg-green-600 text-white' : 'bg-blue-600 text-white');
 
+        modalEntry.className = `p-3 mb-2 mx-1 rounded-r-xl flex gap-3 items-center shadow-sm ${cardBg}`;
         modalEntry.innerHTML = `
-            <div class="shrink-0 w-6 h-6 ${ptsBg} text-white text-[10px] font-black flex items-center justify-center rounded shadow-sm">
-                ${points}
+            <div class="shrink-0 w-7 h-7 ${ptsBg} text-[11px] font-black flex items-center justify-center rounded-full shadow">
+                +${points}
             </div>
-            <div class="flex-1 text-[11px] leading-relaxed text-gray-800">
-                <span class="font-bold text-black uppercase">${raiderName}</span> 
-                <span class="text-gray-400 text-[9px] font-bold">[${teamName}]</span>: 
-                <span class="font-bold text-blue-800 uppercase tracking-tighter">${result}</span>. 
-                <span class="text-gray-500 italic ml-1">${displayDetails}</span>
+            <div class="flex-1 text-[11px] leading-relaxed text-gray-300">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-black text-white uppercase tracking-wide">${finalHeaderName}</span> 
+                    <span class="text-gray-500 font-medium">➔</span>
+                    <span class="font-black text-amber-400 uppercase tracking-tight">${result}</span>
+                </div>
+                ${finalDetailsText ? `<div class="text-[9.5px] text-amber-500/80 font-bold italic mt-0.5 flex items-center gap-1">🚨 ${finalDetailsText}</div>` : ''}
             </div>
         `;
         modalRaidList.prepend(modalEntry);
     }
+
+    // --- 🔒 LOCAL STORAGE SYNC ---
+    if (!isLoadedFromDB && typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId) {
+        if (!window.activeRaidsList) window.activeRaidsList = [];
+
+        window.activeRaidsList.push({
+            team: team,
+            raiderName: finalHeaderName, 
+            result: result,
+            points: Number(points),
+            details: finalDetailsText,
+            timestamp: new Date().getTime()
+        });
+
+        try {
+            const rawString = JSON.stringify(window.activeRaidsList);
+            const encodedData = btoa(unescape(encodeURIComponent(rawString)));
+            localStorage.setItem(`raids_secure_log_${matchSetupData.mId}`, encodedData);
+            console.log(`💾 [Local Sync Success]: ऑल-आऊट स्पेशल कार्ड लोकल स्टोरेजमध्ये लॉक केले!`);
+        } catch (err) {
+            console.error("🚨 LocalStorage Save Error:", err);
+        }
+    }
+
+    // 🎯 [LIVE OVERLAY TRIGGER]: प्रत्येक रेड सबमिट झाल्यावर लाइव्ह आकडे रिफ्रेश करा! ⚡
+    if (typeof calculateTopStats === "function") {
+        calculateTopStats();
+    }
 }
 
+
+/**
 // १. मॉडेल उघडण्यासाठी
+//  */
 function openSummaryModal() {
     console.log("--- [ULTIMATE_FIX_START] ---");
     const modal = document.getElementById('summaryModal');
@@ -4852,6 +6748,7 @@ function setupLiveMatchNames() {
 let matchTotalSeconds = 20 * 60; 
 let matchInterval = null;
 let isMatchPaused = true; 
+let isFirstTimeStart = true;   // मॅच पहिल्यांदाच सुरू होणार आहे की आधी पॉज केली होती याचा ट्रॅकर 🚀
 
 // १. टायमर फॉरमॅट करणे
 function formatMatchTime(seconds) {
@@ -4900,55 +6797,140 @@ function formatMatchTime(seconds) {
 /**अपडेटेड toggleMatchTimer (Locking सह) 🚀
 यामध्ये मी तुझे मूळ लॉजिक तसेच ठेवले आहे, फक्त बटण अनलॉक करण्याचे आणि नेव्हिगेशन लॉक करण्याचे काम वाढवले आहे.
  */
+// ⏱️ १. मुख्य टायमर टॉगल फंक्शन (PAUSE / RESUME चे मॅन्युअल बटण)
 function toggleMatchTimer() {
     const btn = document.getElementById('mainMatchBtn'); 
-    const scoringArea = document.getElementById('scoringButtonsContainer'); // तुझ्या बटणांच्या कंटेनरचा ID
+    const scoringArea = document.getElementById('scoringButtonsContainer'); 
 
+    // 🎯 कोणत्याही परिस्थितीत आधी चालू असलेला टायमर लूप सुरक्षित क्लिअर करा
     clearInterval(matchInterval);
 
-    if (isMatchPaused) {
-        // --- [NEW] मॅच पहिल्यांदा सुरू होत असेल तर अनलॉक करा 🚀 ---
-        isMatchPaused = false;
+    // 🟢 [केस A]: जर मॅच खरोखर पॉज आहे ➔ खेळ सुरू किंवा रिझ्युम करा!
+    if (window.isMatchPaused) {
+        window.isMatchPaused = false; // मेमरी अनलॉक 🔓
+        console.log("%c⏱️ [Engine]: टायमर सुरू / रिझ्युम करत आहे...", "color: #22c55e; font-weight: bold;");
         
-        // १. स्कोअरिंग बटणे अनलॉक करा (जर लॉक असतील तर)
         if (scoringArea) {
             scoringArea.style.pointerEvents = "auto";
-            scoringArea.style.opacity = "1";
+            scoringArea.style.opacity = "1"; // स्कोअरिंग कंट्रोल्स अनलॉक
         }
 
-        // २. नेव्हिगेशन लॉक करा (मॅच सोडून जाता येऊ नये)
-        lockUserOnScoringPage(true); 
+        if (typeof lockUserOnScoringPage === 'function') lockUserOnScoringPage(true); 
 
         if (btn) {
             btn.innerText = "PAUSE MATCH";
-            btn.classList.remove('bg-gray-800'); // जुना कलर काढून रेड करा
-            btn.classList.add('bg-red-600');
+            btn.className = "w-full bg-red-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-700 shadow-xl active:scale-95 text-white";
         }
 
+        if (window.isFirstTimeStart) {
+            console.log("%c🔥 [LIVE]: पहिली शिटी वाजली! खेळ सुरू झाला.", "color: #22c55e; font-weight: bold;");
+            window.isFirstTimeStart = false; 
+        }
+
+        // क्लाउडवर टायमर चालू (Live) असल्याचा सिंक पाठवा (isMatchPaused: false)
+        syncTimerToFirestore(matchTotalSeconds, false);
+
+        // ⏱️ टायमरचे मुख्य इंजिन (कन्सोल कचरा विरहित 🧼)
         matchInterval = setInterval(() => {
             if (matchTotalSeconds > 0) {
                 matchTotalSeconds--;
-                updateMatchUI();
+                if (typeof updateMatchUI === "function") updateMatchUI(); 
                 localStorage.setItem('savedMatchTime', matchTotalSeconds);
-                
-                // [NEW-HYBRID] प्रत्येक सेकंदाला नको, पण ठराविक वेळी Firebase सिंक करू शकतोस
             } else {
                 clearInterval(matchInterval);
-                handleMatchTimeEnd();
+                if (typeof handleMatchTimeEnd === 'function') handleMatchTimeEnd();
             }
         }, 1000);
 
-    } else {
-        // ३. मॅच पॉज करा
-        isMatchPaused = true;
+    } 
+    // 🔴 [केस B]: जर मॅच ऑलरेडी सुरू आहे ➔ खेळ जागीच लॉक (Pause) करा!
+    else {
+        window.isMatchPaused = true; // मेमरी लॉक 🔒
+        console.log("%c⏸️ [Engine]: मॅच मॅन्युअली पॉज केली.", "color: #ef4444; font-weight: bold;");
+        
         if (btn) {
             btn.innerText = "RESUME MATCH";
-            btn.classList.replace('bg-red-600', 'bg-green-600');
+            btn.className = "w-full bg-green-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl active:scale-95 text-white animate-pulse";
         }
-        clearInterval(matchInterval);
+
+        if (scoringArea) {
+            scoringArea.style.pointerEvents = "none";
+            scoringArea.style.opacity = "0.4"; // स्कोअरिंग कंट्रोल्स कडक लॉक
+        }
+
+        // ☁️ क्लाउडवर टायमर पॉज झाल्याचा सिंक पाठवा (isMatchPaused: true)
+        syncTimerToFirestore(matchTotalSeconds, true);
     }
 }
 
+// ☁️ [THE CLOUD TRACKER]: फायरस्टोअरमध्ये टाईम पॅरामीटर ढकलणारे स्वतंत्र मदतनीस फंक्शन
+function syncTimerToFirestore(seconds, isPaused) {
+    const matchRef = window.currentMatchData || window.currentEditingMatch || window.matchSetupData;
+
+    if (matchRef && matchRef.tId && matchRef.mId) {
+        console.log(`%c☁️ [Firestore Sync] ➔ सेकंद: ${seconds} | Paused: ${isPaused} डेटाबेसवर जतन होत आहे...`, "color: #a855f7; font-weight: bold;");
+        
+        db.collection("tournaments").doc(matchRef.tId)
+          .collection("matches").doc(matchRef.mId).update({
+              savedMatchTime: seconds,
+              isMatchPaused: isPaused,
+              isFirstTimeStart: window.isFirstTimeStart, 
+              lastUpdated: new Date().getTime()
+          })
+          .then(() => {
+              console.log("%c✅ [Sync Success]: क्लाउडवर टायमर स्नॅपशॉट यशस्वीरित्या लॉक झाला!", "color: #22c55e;");
+          })
+          .catch(err => {
+              console.error("🚨 [Sync Fatal Error]: फायरस्टोअर अपडेट फेल झाले:", err);
+          });
+    } else {
+        console.warn("⚠️ [Sync Skipped]: मॅचचा tId किंवा mId मेमरीमध्ये न मिळाल्यामुळे क्लाउड सिंक स्किप केला.");
+    }
+}
+
+// ⏱️ १. नवीन स्वतंत्र टायमर स्टार्टर फंक्शन (Case 1, 2, 3 सार्थकी लावण्यासाठी)
+
+function triggerMatchTimerStart() {
+    const mainBtn = document.getElementById('mainMatchBtn');
+    const scoringArea = document.getElementById('scoringButtonsContainer');
+
+    window.isMatchPaused = false;
+    
+    // स्कोअरिंग पॅनल पूर्ण अनलॉक करा
+    if (scoringArea) {
+        scoringArea.style.pointerEvents = "auto";
+        scoringArea.style.opacity = "1";
+    }
+
+    // बटण थेट लाल करा (PAUSE MATCH साठी)
+    if (mainBtn) {
+        mainBtn.innerText = "PAUSE MATCH";
+        mainBtn.className = "w-full bg-red-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-700 shadow-xl text-white";
+    }
+
+    // जुना कोणताही लूप सुरू असेल तर आधी नष्ट करा आणि फ्रेश सुरू करा
+    clearInterval(matchInterval);
+    matchInterval = setInterval(() => {
+        if (matchTotalSeconds > 0) {
+            matchTotalSeconds--;
+            if (typeof updateMatchUI === "function") updateMatchUI();
+            localStorage.setItem('savedMatchTime', matchTotalSeconds);
+        } else {
+            clearInterval(matchInterval);
+            if (typeof handleMatchTimeEnd === 'function') handleMatchTimeEnd();
+        }
+    }, 1000);
+
+    // ☁️ डेटाबेसमध्ये तात्काळ सिंक करा की मॅच आता चालू (LIVE) झाली आहे
+    if (matchSetupData && matchSetupData.tId && matchSetupData.mId) {
+        db.collection("tournaments").doc(matchSetupData.tId)
+          .collection("matches").doc(matchSetupData.mId).update({
+              isMatchPaused: false,
+              savedMatchTime: matchTotalSeconds,
+              status: "Live"
+          }).catch(err => console.error("🚨 [Timer Sync Error]:", err));
+    }
+}
 
 // २. बॅक बटण लॉक करण्यासाठी सिम्पल फंक्शन 🔒
 //जे वरच्या toggleMatchTimer फंक्शनमध्ये कॉल होतंय.
@@ -4975,12 +6957,49 @@ function lockUserOnScoringPage(shouldLock) {
 // ३. UI अपडेट करणे (फक्त 'matchTimer' आयडी वापरून)
 function updateMatchUI() {
     const display = document.getElementById('matchTimer');
+    
+    // 🔍 [CRITICAL DEBUG LOG]: स्क्रीन रेंडर होताना नक्की काय व्हॅल्यूज आहेत ते तपासा
+    // console.log(
+    //     `%c🔍 [UI Render Check] ➔ isMatchPaused: ${window.isMatchPaused} | isFirstTimeStart: ${window.isFirstTimeStart} | Seconds: ${matchTotalSeconds}`, 
+    //     "color: #06b6d4; font-weight: bold; background: #083344; padding: 2px 6px; rounded: 4px;"
+    // )
+    ;
+
     if (display) {
         display.innerText = formatMatchTime(matchTotalSeconds);
-        
-        // १ मिनिटापेक्षा कमी वेळ असेल तर लाल रंग (Optional)
         if (matchTotalSeconds <= 60) {
             display.classList.add('text-red-500');
+        } else {
+            display.classList.remove('text-red-500');
+        }
+    }
+
+    const btn = document.getElementById('mainMatchBtn');
+    const scoringArea = document.getElementById('scoringButtonsContainer');
+
+    // 🚨 जर हा व्हेरिएबल चुकीने false असेल, तरच बटन "PAUSE MATCH" दाखवेल
+    if (window.isMatchPaused) {
+        if (btn) {
+            btn.innerText = window.isFirstTimeStart ? "Start Match" : "RESUME MATCH";
+            if (window.isFirstTimeStart) {
+                btn.className = "w-full bg-gray-800 py-4 rounded-2xl text-[10px] font-black uppercase border border-gray-700 shadow-xl active:scale-95 text-orange-500 animate-pulse";
+            } else {
+                btn.className = "w-full bg-green-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl active:scale-95 text-white animate-pulse";
+            }
+        }
+        if (window.isFirstTimeStart && scoringArea) {
+            scoringArea.style.pointerEvents = "none";
+            scoringArea.style.opacity = "0.4";
+        }
+    } else {
+        // 🛑 जर कन्सोलमध्ये "PAUSE MATCH" दिसत असेल, तर सिस्टीम या एल्स (Else) ब्लॉकच्या आत आली आहे!
+        if (btn) {
+            btn.innerText = "PAUSE MATCH";
+            btn.className = "w-full bg-red-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-700 shadow-xl active:scale-95 text-white";
+        }
+        if (scoringArea) {
+            scoringArea.style.pointerEvents = "auto";
+            scoringArea.style.opacity = "1";
         }
     }
 }
@@ -4988,7 +7007,7 @@ function updateMatchUI() {
 
 
 
-/*Refresh reload**/
+/*Refresh reload*
 
 // १. पेज लोड होताच जुना डेटा चेक करा
 window.addEventListener('DOMContentLoaded', () => {
@@ -5041,7 +7060,112 @@ window.addEventListener('blur', () => {
         toggleMatchTimer(); // हे फंक्शन मॅच पॉज करेल
     }
 });
+*/
 
+/* ==========================================
+   🔄 REFRESH / RELOAD MANAGEMENT (SAFE INTEGRATION)
+   ========================================== */
+
+// १. पेज लोड होताच जुना डेटा चेक करा - [तुझा मूळ कोड सुरक्षित]
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTime = localStorage.getItem('savedMatchTime');
+    const savedStatus = localStorage.getItem('isMatchPaused');
+
+    if (savedTime !== null) {
+        matchTotalSeconds = parseInt(savedTime);
+        updateMatchUI();
+    }
+
+    // [STRICT RULE]: पुन्हा आल्यावर मॅच नेहमी 'PAUSE'モードमध्येच असावी
+    isMatchPaused = true; 
+    const btn = document.getElementById('mainMatchBtn');
+    if (btn) {
+        btn.innerText = "RESUME MATCH";
+        btn.classList.replace('bg-red-900/40', 'bg-green-900/40');
+    }
+    if (typeof matchInterval !== 'undefined') clearInterval(matchInterval); 
+
+    // 🎯 [LIVE OVERLAY RECOVERY]: पेज रिफ्रेश करून परत आल्यावर जुन्या इतिहासावरून लाइव्ह आकडे लगेच दाखवा!
+    setTimeout(() => {
+        if (typeof calculateTopStats === "function") {
+            calculateTopStats();
+        }
+    }, 500); // ४००-५००ms चा छोटा डिले द्या जेणेकरून लोकल स्टोरेजचा डेटा आधी मेमरीमध्ये लोड होईल
+
+
+});
+
+// २. वेळ सेव्ह करण्यासाठी फंक्शन (टायमर रन होत असताना हे कॉल होईल) - [तुझा मूळ कोड सुरक्षित]
+function saveMatchProgress() {
+    localStorage.setItem('savedMatchTime', matchTotalSeconds);
+    localStorage.setItem('isMatchPaused', isMatchPaused);
+}
+
+// ३. मॅच आपोआप पॉज करणे (जेव्हा युजर पेज सोडून जातो) - [तुझा मूळ कोड सुरक्षित]
+window.addEventListener('blur', () => {
+    if (!isMatchPaused && typeof toggleMatchTimer === "function") {
+        toggleMatchTimer(); // हे फंक्शन मॅच पॉज करेल
+    }
+});
+
+// ४. पेज रिफ्रेश करताना वॉर्निंग आणि 🚨 [CRITICAL DATABASE FORCE SYNC]
+window.onbeforeunload = function(event) {
+    // १. जाताना लोकल मेमरी सेव्ह करा
+    saveMatchProgress();
+
+    // २. जर मॅच सुरू असेल, तर पॉज करा
+    if (!isMatchPaused) {
+        isMatchPaused = true;
+        if (typeof matchInterval !== 'undefined') clearInterval(matchInterval);
+    }
+
+    // 🚨 [PRO BACKEND SYNC]: पेज सुटताना डेटाबेसच्या 'raidsHistory' मध्ये बॅकअप सक्तीने ढकला!
+    if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId) {
+        const matchId = matchSetupData.mId;
+        const tournamentId = matchSetupData.tId || "default_tournament";
+        
+        // लोकल स्टोरेजमधून तुझा तो सुरक्षित एन्क्रिप्टेड Base64 लॉग ओढा 🔐
+        const localData = localStorage.getItem(`raids_secure_log_${matchId}`);
+        
+        if (localData) {
+            try {
+                const decodedString = decodeURIComponent(escape(atob(localData)));
+                const finalRaidsList = JSON.parse(decodedString);
+                
+                if (finalRaidsList && finalRaidsList.length > 0 && typeof db !== 'undefined') {
+                    console.log(`💾 [Safety Sync]: रीलोडपूर्वी ${finalRaidsList.length} रेड्स डेटाबेसवर ढकलत आहे...`);
+                    
+                    // थेट कडक फायरस्टोअर अपडेट मेमरीवर न ठेवता बॅकग्राउंडला पाठवणे
+                    db.collection("tournaments").doc(tournamentId)
+                      .collection("matches").doc(matchId).update({
+                          raidsHistory: finalRaidsList,
+                          lastSyncedAt: new Date().getTime(),
+                          teamAScore: typeof teamAScore !== 'undefined' ? teamAScore : 0,
+                          teamBScore: typeof teamBScore !== 'undefined' ? teamBScore : 0
+                      }).then(() => {
+                          console.log("✅ [Safety Sync Success]: रीलोड डेटा पूर्णपणे साठवला!");
+                      }).catch(err => {
+                          console.error("❌ [Safety Sync Error]:", err);
+                      });
+                }
+            } catch (e) {
+                console.error("🚨 [Safety Sync Crash]:", e);
+            }
+        }
+    }
+
+    // ३. युजरला वॉर्निंग द्या - [तुझा मूळ कोड सुरक्षित]
+    if (matchTotalSeconds > 0 && matchTotalSeconds < 1200) {
+        const warningMsg = "Match is in progress. Your data is saved and match is paused.";
+        if (event) event.returnValue = warningMsg; // मॉडर्न ब्राउझर सेफ्टी
+        return warningMsg;
+    }
+};
+
+
+/* ==========================================
+    Login MANAGEMENT (SAFE INTEGRATION)
+   ========================================== */
 
 /**Login */
 
@@ -5591,77 +7715,183 @@ function syncDataOnly(tId, mId) {
 }
 
 
-// १. ग्लोबल स्टेज सेट करा (फंक्शनच्या बाहेर)
+// १. ग्लोबल स्टेज सेट करा (फंक्शनच्या बाहेर) // 🌍 ग्लोबल लेव्हलला हा व्हेरिएबल असाच राहू दे
+
 let matchStage = "1ST_HALF"; 
 
+
 async function handleMainAction() {
-    const actionBtn = document.getElementById('mainActionBtn');
+    const actionBtn = document.getElementById('mainActionBtn'); // उजवे स्टेज बटण
+    const mainBtn = document.getElementById('mainMatchBtn');       // डावे टायमर बटण
+
+    // 🚨 [FATAL CHECK]: मॅचचा आयडी आणि टूर्नामेंट आयडी मेमरीमध्ये उपलब्ध आहेत का ते तपासा
+    if (!matchSetupData || !matchSetupData.tId || !matchSetupData.mId) {
+        console.error("🚨 [Fatal Error]: matchSetupData मध्ये tId किंवा mId सापडला नाही!");
+        return;
+    }
     const { tId, mId } = matchSetupData;
 
-    // --- टप्पा १: पहिला हाफ संपवणे ---
+    console.log(`%c==================================================`, "color: #a855f7; font-weight: bold;");
+    console.log(`%c🎬 [ACTION CLICK]: #mainActionBtn दाबला! ➔ चालू स्टेज (Memory): "${matchStage}"`, "color: #a855f7; font-weight: bold;");
+    console.log(`%c==================================================`, "color: #a855f7; font-weight: bold;");
+
+    // =========================================================================
+    // 🎯 [टप्पा १]: पहला हाफ संपवणे (1ST_HALF ➔ INTERVAL)
+    // =========================================================================
     if (matchStage === "1ST_HALF") {
         const result = await Swal.fire({
             title: '1st Half संपवायचा का?',
-            text: "यानंतर ब्रेक सुरू होईल.",
+            text: "यानंतर टायमर 00:00 वर लॉक होईल आणि ब्रेक सुरू होईल.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'हो, संपवा',
+            cancelButtonText: 'नाही',
             background: '#111',
-            color: '#fff'
+            color: '#fff',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#4b5563'
         });
 
         if (result.isConfirmed) {
-            // टायमर पॉज करा (जर सुरू असेल तर)
-            if (!isMatchPaused) toggleMatchTimer(); 
-            
-            matchStage = "INTERVAL";
-            actionBtn.innerText = "Start 2nd Half";
-            
-            // बटणाचा लुक बदला (हिरवा करा जेणेकरून सुरू करायचंय हे कळेल)
-            actionBtn.classList.replace('bg-red-900/20', 'bg-green-600');
-            actionBtn.classList.replace('text-red-500', 'text-white');
+            console.log("%c🛑 [Stage Transition]: 1st Half संपवण्याची प्रक्रिया सुरू...", "color: #ef4444; font-weight: bold;");
 
-            // DB मध्ये स्टेटस अपडेट करा
+            // १. टायमरचा चालू लूप बॅकग्राउंडला पूर्णपणे नष्ट करा
+            clearInterval(matchInterval);
+            window.isMatchPaused = true;
+            window.isFirstTimeStart = true; 
+            matchStage = "INTERVAL"; // मेमरी स्टेट बदलला
+
+            // २. उजव्या ॲक्शन बटणाचा लुक बदला ("Start 2nd Half" करा)
+            if (actionBtn) {
+                actionBtn.innerText = "Start 2nd Half";
+                actionBtn.className = "w-full bg-green-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl active:scale-95 text-white";
+            }
+
+            // 🚨 ३. [THE ULTIMATE HIDE FIX]: डावे "Start Match" बटण पूर्णपणे गायब (Hide) करा!
+            if (mainBtn) {
+                mainBtn.classList.add('hidden'); // स्क्रीनवर दोन बटणे दिसण्याचा घोळ कायमचा बंद!
+                console.log("🔒 [UI Lock]: डावे mainMatchBtn यशस्वीरित्या hidden केले.");
+            }
+
+            // ४. टायमरची वेळ सक्तीने शून्य (00:00) करा
+            matchTotalSeconds = 0; 
+            localStorage.setItem('savedMatchTime', 0);
+
+            // ५. चुकीचे स्कोअरिंग टाळण्यासाठी स्कोअरिंग पॅनल तात्पुरते锁 करा
+            const scoringArea = document.getElementById('scoringButtonsContainer');
+            if (scoringArea) {
+                scoringArea.style.pointerEvents = "none";
+                scoringArea.style.opacity = "0.4";
+            }
+
+            // ६. टायमर स्क्रीनवर अपडेट करून घ्या (00:00 रेंडर होईल)
+            if (typeof updateMatchUI === "function") updateMatchUI();
+
+            // ☁️ ७. [DATABASE LOCK]: क्लाउडवर 1st_Half_End आणि वेळ 0 सुरक्षित लॉक करा
             await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
-                status: "Half-Time"
+                status: "1st_Half_End",      
+                savedMatchTime: 0,            
+                isMatchPaused: true,
+                isFirstTimeStart: true,
+                lastUpdated: new Date().getTime()
             });
+            
+            console.log("%c✅ [Sync Success]: 1st Half अधिकृतपणे क्लाउडवर लॉक झाला!", "color: #22c55e; font-weight: bold;");
         }
     } 
 
-    // --- टप्पा २: दुसरा हाफ सुरू करणे ---
+    // =========================================================================
+    // 🎯 [टप्पा २]: दुसरा हाफ सुरू करणे (INTERVAL ➔ 2ND_HALF)
+    // =========================================================================
     else if (matchStage === "INTERVAL") {
-        // २० मिनिटे रिसेट करा (२० * ६० सेकंद)
+        console.log("%c🔥 [Stage Transition]: २रा हाफ सुरू करण्याची प्रक्रिया सुरू...", "color: #22c55e; font-weight: bold;");
+
+        // १. २ऱ्या हाफसाठी पूर्ण २० मिनिटे रिसेट करा (२० * ६० = १२०० सेकंद) ⏱️
         matchTotalSeconds = 20 * 60; 
-        updateMatchUI();
+        localStorage.setItem('savedMatchTime', matchTotalSeconds);
         
-        matchStage = "2ND_HALF";
-        actionBtn.innerText = "End Match";
-        
-        // बटण पुन्हा लाल करा
-        actionBtn.classList.replace('bg-green-600', 'bg-red-900/20');
-        actionBtn.classList.replace('text-white', 'text-red-500');
+        window.isMatchPaused = false; // 🎯 खेळ आता थेट सुरू होत आहे, म्हणून फ्लॅग False!
+        window.isFirstTimeStart = false; 
+        matchStage = "2ND_HALF"; // मेमरी स्टेट बदलला
 
-        // २nd Half साठी टाईमआऊट रिसेट (Firestore मध्ये)
-        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
-            timeoutsA: 0,
-            timeoutsB: 0,
-            status: "Live"
-        });
+        // २. उजवे ॲक्शन बटन पुन्हा लाल करा ("End Match" च्या टप्प्यासाठी)
+        if (actionBtn) {
+            actionBtn.innerText = "End Match";
+            actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+        }
 
-        // टायमर पुन्हा सुरू करा
-        if (isMatchPaused) toggleMatchTimer();
+        // 🚨 ३. डावे टायमर बटण पुन्हा समोर आणा आणि थेट लाल रंगात "PAUSE MATCH" म्हणून अनलॉक करा!
+        if (mainBtn) {
+            mainBtn.classList.remove('hidden'); // 'hidden' क्लास काढून प्रकट केले 👁️
+            mainBtn.innerText = "PAUSE MATCH";
+            mainBtn.className = "w-full bg-red-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-700 shadow-xl active:scale-95 text-white";
+        }
+
+        // ४. स्कोअरिंग पॅनल पूर्णपणे अनलॉक करा (स्कोअरर आता गुणे देऊ शकतो)
+        const scoringArea = document.getElementById('scoringButtonsContainer');
+        if (scoringArea) {
+            scoringArea.style.pointerEvents = "auto";
+            scoringArea.style.opacity = "1";
+        }
+
+        // 📺 ५. हेडरमधील टेक्स्ट बदलून "2nd Half" करा!
+        const halfTextElement = document.getElementById('matchHalfText') || document.getElementById('periodDisplay');
+        if (halfTextElement) halfTextElement.innerText = "2nd Half";
+
+        // स्क्रीनवर २०:०० टाईम रेंडर करा
+        if (typeof updateMatchUI === "function") updateMatchUI();
+
+        // ⏱️ ६. [CRITICAL DIRECT START]: टायमरचा लूप इथेच थेट ऑटो-स्टार्ट करा!
+        console.log("%c⏱️ [Timer Engine]: २ऱ्या हाफचा टायमर थेट ऑटो-स्टार्ट केला!", "color: #06b6d4; font-weight: bold;");
+        clearInterval(matchInterval);
+        matchInterval = setInterval(() => {
+            if (matchTotalSeconds > 0) {
+                matchTotalSeconds--;
+                if (typeof updateMatchUI === "function") updateMatchUI();
+                localStorage.setItem('savedMatchTime', matchTotalSeconds);
+            } else {
+                clearInterval(matchInterval);
+                if (typeof handleMatchTimeEnd === 'function') handleMatchTimeEnd();
+            }
+        }, 1000);
+
+        // ☁️ ७. [DATABASE SYNC]: २रा हाफ सुरू झाल्यावरही स्टेटस '1st_Half_End' च ठेवा! 🎯
+        if (typeof syncTimerToFirestore === 'function') {
+            syncTimerToFirestore(matchTotalSeconds, false);
+        } else {
+            await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+                timeoutsA: 0,
+                timeoutsB: 0,
+                status: "1st_Half_End",        // 🎯 स्टेटस तुझा मूळ '1st_Half_End' च लॉक ठेवला!
+                savedMatchTime: matchTotalSeconds,
+                isMatchPaused: false,
+                isFirstTimeStart: false,
+                lastUpdated: new Date().getTime()
+            });
+        }
+
+        console.log("%c✅ [Sync Success]: २रा हाफ सुरू झाला आणि टायमर क्लाउडवर धावत आहे!", "color: #22c55e; font-weight: bold;");
     } 
 
-    // --- टप्पा ३: पूर्ण मॅच संपवणे ---
+    // =========================================================================
+    // 🎯 [टप्पा ३]: पूर्ण मॅच संपवणे (2ND_HALF ➔ END)
+    // =========================================================================
     else if (matchStage === "2ND_HALF") {
-        // तुझं जे मूळ मॅच संपवण्याचं फंक्शन आहे ते इथे कॉल करा
+        console.log("%c🏁 [Stage Transition]: पूर्ण मॅच संपवण्याची प्रक्रिया सुरू...", "color: #f97316; font-weight: bold;");
+        
+        // मॅच पूर्ण संपवण्यापूर्वी टायमर थांबवणे सुरक्षित राहील
+        if (!window.isMatchPaused) {
+            window.isMatchPaused = true;
+            clearInterval(matchInterval);
+        }
+
         if (typeof confirmEndMatch === "function") {
             confirmEndMatch();
         } else {
             console.log("Match Ended!");
-            // इथे मॅच संपवण्याचे लॉजिक येईल
         }
     }
+    console.log(`%c==================================================`, "color: #a855f7; font-weight: bold;");
 }
 
 
@@ -5675,40 +7905,61 @@ async function confirmEndMatch() {
         confirmButtonText: 'हो, मॅच संपवा!',
         cancelButtonText: 'चूक झाली',
         background: '#111',
-        color: '#fff'
+        color: '#fff',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#4b5563'
     });
 
     if (result.isConfirmed) {
         const { tId, mId } = matchSetupData;
-        const sA = Number(currentMatchData.scoreA || 0);
-        const sB = Number(currentMatchData.scoreB || 0);
+
+        // 🚨 [CRITICAL FIX]: थेट स्क्रीनवर असलेल्या एलिमेंट्समधून लेटेस्ट चालू स्कोअर गोळा करा! ⚡
+        const elA = document.getElementById('scoreA');
+        const elB = document.getElementById('scoreB');
+
+        const sA = elA ? Number(elA.innerText || 0) : Number(currentMatchData.scoreA || 0);
+        const sB = elB ? Number(elB.innerText || 0) : Number(currentMatchData.scoreB || 0);
         
+        console.log(`%c🏁 [Winner Decision]: तपासणी सुरू ➔ Team A Score: ${sA} | Team B Score: ${sB}`, "color: #06b6d4; font-weight: bold;");
+
         let winnerText = "";
         let winnerTeam = "";
+        let winnerTeamId = ""; // डेटाबेसमध्ये आयडी सेव्ह करण्यासाठी
 
-        // २. विजेता ठरवा
+        // २. लेटेस्ट स्कोअरनुसार अचूक विजेता ठरवा
         if (sA > sB) {
-            winnerTeam = currentMatchData.teamA;
+            winnerTeam = currentMatchData.teamA || "Team A";
+            winnerTeamId = currentMatchData.teamA_id || "TM_A";
             winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
         } else if (sB > sA) {
-            winnerTeam = currentMatchData.teamB;
+            winnerTeam = currentMatchData.teamB || "Team B";
+            winnerTeamId = currentMatchData.teamB_id || "TM_B";
             winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
         } else {
+            winnerTeam = "Tie";
+            winnerTeamId = "TIE";
             winnerText = "मॅच टाय (Tie) झाली आहे! 🤝";
         }
 
         try {
-            // ३. डेटाबेसमध्ये स्टेटस 'Finished' करा
+            // ३. डेटाबेसमध्ये स्टेटस 'Finished', अंतिम स्कोअर आणि विजेत्याची अचूक माहिती अपडेट करा
             await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
                 status: "Finished",
-                winner: winnerTeam,
-                finalScore: `${sA}-${sB}`
+                scoreA: sA,                       // 🎯 डेटाबेसमधील अंतिम स्कोअर पण सिंक करून घ्या
+                scoreB: sB,
+                winner: winnerTeam,               // विजेत्या संघाचे नाव
+                winner_id: winnerTeamId,          // 📊 पुढे पॉइंट्स टेबल जनरेट करताना हा आयडी खूप कामाला येईल!
+                finalScore: `${sA}-${sB}`,
+                isMatchPaused: true,
+                lastUpdated: new Date().getTime()
             });
 
-            // ४. स्कोअरिंग लॉक करा (Disable Buttons)
-            lockScoringUI();
+            console.log(`%c✅ [Firestore Updated]: मॅच यशस्वीरित्या Finished झाली. विजेता: ${winnerTeam}`, "color: #22c55e; font-weight: bold;");
 
-            // ५. निकाल दाखवा (Result Alert)
+            // ४. स्कोअरिंग लॉक करा (Disable Buttons)
+            if (typeof lockScoringUI === "function") lockScoringUI();
+
+            // ५. निकाल दाखवा (Result Alert - हुबेहूब तुझा मूळ डिझाईन पॅटर्न)
             Swal.fire({
                 title: 'MATCH FINISHED!',
                 html: `<div class="text-xl font-bold text-orange-500">${winnerText}</div>
@@ -5718,12 +7969,13 @@ async function confirmEndMatch() {
                 background: '#111',
                 color: '#fff'
             }).then(() => {
-                // मॅच संपल्यावर बॅक जा किंवा रिफ्रेश करा
+                // मॅच संपल्यावर बॅक जाणे किंवा रिफ्रेश करणे
                 window.location.reload(); 
             });
 
         } catch (e) {
-            console.error("End Match Error:", e);
+            console.error("🚨 [End Match Critical Error]:", e);
+            Swal.fire("त्रुटी", "डेटाबेस अपडेट करताना तांत्रिक चूक झाली.", "error");
         }
     }
 }
@@ -8063,4 +10315,676 @@ function clearSquadSearch() {
     });
     
     console.log("[सर्च रिसेट]: खेळाडूंची पूर्ण यादी पुन्हा पूर्ववत केली.");
+}
+
+
+/* ==========================================
+    Live Action / MATCH SUMMARY Calculation
+   ========================================== */
+// calculateTopStats() (लाईव्ह ओव्हरलेसाठी)
+//हा तुझ्या ओव्हरलेवरील दोन आयडी (liveTopRaiders आणि liveTopDefenders) ऑटोमॅटिक अपडेट करेल.
+
+// =========================================================================
+// 📊 अद्ययावत (UPDATED) calculateTopStats - सर्व बोनस आणि टॅकल नियमांसह 🚀
+// =========================================================================
+function calculateTopStats() {
+    const rEl = document.getElementById('liveTopRaiders');
+    const dEl = document.getElementById('liveTopDefenders');
+    if (!rEl && !dEl) return;
+
+    console.log("%c📊 [TOP STATS ENGINE START] ----------------------------------", "color: #ff007f; font-weight: bold; font-size: 12px;");
+
+    if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
+        if (rEl) rEl.innerHTML = "No Data"; 
+        if (dEl) dEl.innerHTML = "No Data"; 
+        return;
+    }
+
+    let raiderScores = {}; 
+    let defenderScores = {};
+
+    window.activeRaidsList.forEach((raid, index) => {
+        const resultUpper = raid.result ? raid.result.toUpperCase() : "";
+        const points = Number(raid.points) || 0;
+        let rTeam = raid.team;
+        let dTeam = (rTeam === 'A') ? 'B' : 'A';
+
+        let cleanRaider = raid.raiderName ? raid.raiderName.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim() : "UNKNOWN";
+
+        // 🏃‍♂️ १. रायडर पॉइंट्स कॅल्क्युलेशन
+        if (cleanRaider !== "OFFICIALS" && !resultUpper.includes("ALL OUT") && !resultUpper.includes("TECHNICAL")) {
+            if (!raiderScores[cleanRaider]) raiderScores[cleanRaider] = 0;
+            
+            if (resultUpper === "TOUCH POINT" || resultUpper === "TOUCH") {
+                raiderScores[cleanRaider] += points;
+            } 
+            else if (resultUpper === "BONUS + TOUCH") {
+                raiderScores[cleanRaider] += points;
+            } 
+            else if (resultUpper.includes("BONUS")) {
+                raiderScores[cleanRaider] += 1; 
+            }
+        }
+
+        // 🛡️ २. डिफेंडर पॉइंट्स कॅल्क्युलेशन
+        if (raid.details && (resultUpper.includes("TACKLE") || resultUpper.includes("SUPER TACKLE"))) {
+            let detailsText = raid.details.toUpperCase();
+            if (detailsText.includes("CAUGHT BY")) {
+                let defenderPart = raid.details.split(/caught by/i)[1];
+                if (defenderPart) {
+                    defenderPart.split(',').forEach(defRaw => {
+                        let cleanDef = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+                        
+                        let actualDefTeam = dTeam;
+                        let defNoMatch = defRaw.match(/\d+/);
+                        let dNo = defNoMatch ? parseInt(defNoMatch[0]) : null;
+                        
+                        if (dNo !== null) {
+                            actualDefTeam = (dNo >= 21) ? 'B' : 'A';
+                        } else {
+                            if (defRaw.includes("[A]") || defRaw.includes("(A)")) actualDefTeam = 'A';
+                            if (defRaw.includes("[B]") || defRaw.includes("(B)")) actualDefTeam = 'B';
+                        }
+
+                        if (cleanDef && cleanDef !== cleanRaider && cleanDef !== "DEFENDER") {
+                            if (!defenderScores[cleanDef]) defenderScores[cleanDef] = 0;
+                            defenderScores[cleanDef] += 1;
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    let topR = Object.keys(raiderScores).map(n => ({ name: n, score: raiderScores[n] })).sort((a,b) => b.score - a.score);
+    let topD = Object.keys(defenderScores).map(n => ({ name: n, score: defenderScores[n] })).sort((a,b) => b.score - a.score);
+
+    // 🚨 [THE ULTIMATE INNERHTML FIX]: एकाखाली एक कडक रेंडर करण्यासाठी <br> आणि innerHTML चा परफेक्ट मेळ! 🦾
+    let finalRaiderText = topR.length > 0 ? topR.slice(0, 2).map(r => `${r.name}: ${r.score}`).join('<br>') : "No Data";
+    let finalDefenderText = topD.length > 0 ? topD.slice(0, 2).map(d => `${d.name}: ${d.score}`).join('<br>') : "No Data";
+
+    // इथल्या जुन्या .innerText ओळी आपण .innerHTML ने बदलल्या आहेत!
+    if (rEl) rEl.innerHTML = finalRaiderText;
+    if (dEl) dEl.innerHTML = finalDefenderText;
+
+    console.log(`%c🚀 [UI HTML RENDER COMPLETE]`, "color: #10b981; font-weight: bold;");
+    console.log("%c📊 [TOP STATS ENGINE END] ------------------------------------", "color: #ff007f; font-weight: bold;");
+}
+
+/**
+ * buildMatchSummaryTab() (खेळाडूंची कुंडली काढण्यासाठी)
+जेव्हा युझर मोडलमधील 'Match Summary' टॅबवर क्लिक करेल, 
+तेव्हा हा संपूर्ण ॲनालिसिस डेटा काढून HTML चे सुंदर टेबल बनवणारे हे मुख्य फंक्शन:
+ */
+
+// function buildMatchSummaryTab() {
+//     const containerA = document.getElementById('teamASummaryTableContainer');
+//     const containerB = document.getElementById('teamBSummaryTableContainer');
+//     if (!containerA || !containerB) return;
+
+//     console.log("%c📊 [SUMMARY ENGINE START] ----------------------------------", "color: #00bfff; font-weight: bold; font-size: 12px;");
+
+//     if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
+//         console.warn("⚠️ [SUMMARY]: activeRaidsList रिकामी आहे.");
+//         let emptyHtml = `<div class="text-center p-8 text-gray-500 font-bold">अजून एकही रेड झालेली नाही!</div>`;
+//         containerA.innerHTML = emptyHtml; containerB.innerHTML = emptyHtml; return;
+//     }
+
+//     let stats = { A: {}, B: {} };
+
+//     function initStatsObj(team, name) {
+//         if (!stats[team][name]) {
+//             stats[team][name] = { totalRaids: 0, touch: 0, bonus: 0, empty: 0, out: 0, tackle: 0, superT: 0 };
+//         }
+//     }
+
+//     // 🔍 मुख्य लूप - प्रत्येक रेडचे अचूक गॅरंटीड वर्गीकरण
+//     window.activeRaidsList.forEach((raid, idx) => {
+//         const resultUpper = raid.result ? raid.result.toUpperCase() : "";
+//         const points = Number(raid.points) || 0;
+        
+//         let rTeam = raid.team; // रायडरची टीम ('A' किंवा 'B')
+//         let dTeam = (rTeam === 'A') ? 'B' : 'A'; // डिफेंडरची विरोधी टीम
+
+//         let cleanRaider = raid.raiderName.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+
+//         // 🏃‍♂️ A. रायडर डेटा कॅल्क्युलेशन (🚨 STRICT SINGLE-ENTRY IF-ELSE)
+//         if (cleanRaider !== "OFFICIALS" && !resultUpper.includes("ALL OUT") && !resultUpper.includes("TECHNICAL")) {
+//             initStatsObj(rTeam, cleanRaider);
+//             stats[rTeam][cleanRaider].totalRaids += 1;
+
+//             if (resultUpper === "TOUCH POINT" || resultUpper === "TOUCH") {
+//                 stats[rTeam][cleanRaider].touch += points;
+//             }
+//             else if (resultUpper === "BONUS + TOUCH") {
+//                 stats[rTeam][cleanRaider].bonus += 1;
+//                 stats[rTeam][cleanRaider].touch += (points - 1);
+//             }
+//             else if (resultUpper === "BONUS + TACKLE") {
+//                 stats[rTeam][cleanRaider].bonus += 1;
+//                 stats[rTeam][cleanRaider].out += 1; // रायडरला बोनस मिळाला पण तो बाद झाला
+//             }
+//             else if (resultUpper === "BONUS" || resultUpper === "BONUS POINT") {
+//                 stats[rTeam][cleanRaider].bonus += 1;
+//             }
+//             else if (resultUpper === "EMPTY RAID" || resultUpper === "EMPTY") {
+//                 stats[rTeam][cleanRaider].empty += 1;
+//             }
+//             else if (resultUpper.includes("TACKLE") || resultUpper.includes("OUT")) {
+//                 stats[rTeam][cleanRaider].out += 1; // इतर साधी टॅकल असेल तर फक्त आऊट काउंट वाढवा
+//             }
+//         }
+
+//         // 🛡️ B. डिफेंडर डेटा कॅल्क्युलेशन
+//         if (raid.details && (resultUpper.includes("TACKLE") || resultUpper.includes("SUPER TACKLE"))) {
+//             let detailsText = raid.details.toUpperCase();
+//             if (detailsText.includes("CAUGHT BY")) {
+//                 let defenderPart = raid.details.split(/caught by/i)[1];
+//                 if (defenderPart) {
+//                     defenderPart.split(',').forEach(defRaw => {
+//                         let cleanDef = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+                        
+//                         if (cleanDef && cleanDef !== cleanRaider && cleanDef !== "DEFENDER") { 
+//                             initStatsObj(dTeam, cleanDef);
+                            
+//                             if (resultUpper.includes("SUPER TACKLE")) {
+//                                 stats[dTeam][cleanDef].superT += 1;
+//                                 stats[dTeam][cleanDef].tackle += 1;
+//                             } else {
+//                                 stats[dTeam][cleanDef].tackle += 1;
+//                             }
+//                         }
+//                     });
+//                 }
+//             }
+//         }
+//     });
+
+//     // ३. HTML टेबल जनरेशन हेल्पर
+//     function generateTableHTML(teamData, themeColor) {
+//         if (Object.keys(teamData).length === 0) {
+//             return `<div class="text-center p-6 text-gray-600 italic text-[11px]">अद्याप कोणतीही नोंद नाही.</div>`;
+//         }
+
+//         let html = `
+//             <div class="overflow-x-auto border border-gray-800/60 rounded-xl bg-black/20">
+//                 <table class="w-full text-left text-[11px] text-gray-300">
+//                     <thead class="bg-gray-900/80 text-${themeColor}-400 uppercase text-[8.5px] font-black tracking-wider border-b border-gray-800">
+//                         <tr>
+//                             <th class="p-2.5">Player Name</th>
+//                             <th class="p-2.5 text-center">Raids</th>
+//                             <th class="p-2.5 text-center text-green-400">Touch</th>
+//                             <th class="p-2.5 text-center text-blue-400">Bonus</th>
+//                             <th class="p-2.5 text-center text-gray-500">Empty</th>
+//                             <th class="p-2.5 text-center text-red-400">Out</th>
+//                             <th class="p-2.5 text-center text-orange-400">Tackles</th>
+//                         </tr>
+//                     </thead>
+//                     <tbody class="divide-y divide-gray-850">`;
+
+//         Object.keys(teamData).forEach(name => {
+//             let p = teamData[name];
+//             html += `
+//                 <tr class="hover:bg-white/5 transition-colors">
+//                     <td class="p-2.5 font-black text-white uppercase tracking-tight">${name}</td>
+//                     <td class="p-2.5 text-center font-bold">${p.totalRaids}</td>
+//                     <td class="p-2.5 text-center font-black text-green-400">${p.touch}</td>
+//                     <td class="p-2.5 text-center font-black text-blue-400">${p.bonus}</td>
+//                     <td class="p-2.5 text-center text-gray-400">${p.empty}</td>
+//                     <td class="p-2.5 text-center font-black text-red-500">${p.out}</td>
+//                     <td class="p-2.5 text-center font-black text-orange-400">${p.tackle}</td>
+//                 </tr>`;
+//         });
+
+//         html += `</tbody></table></div>`; return html;
+//     }
+
+//     let nameA = (typeof matchSetupData !== 'undefined' && matchSetupData.tAName) ? matchSetupData.tAName.toUpperCase() : "TEAM A";
+//     let nameB = (typeof matchSetupData !== 'undefined' && matchSetupData.tBName) ? matchSetupData.tBName.toUpperCase() : "TEAM B";
+
+//     document.getElementById('btnSubTabTeamA').innerText = `${nameA} STATS`;
+//     document.getElementById('btnSubTabTeamB').innerText = `${nameB} STATS`;
+
+//     containerA.innerHTML = generateTableHTML(stats.A, 'green');
+//     containerB.innerHTML = generateTableHTML(stats.B, 'blue');
+
+//     console.log("%c✅ [SUMMARY ENGINE COMPLETED]: HTML Tables Re-rendered successfully.", "color: #10b981; font-weight: bold;");
+//     console.log("%c📊 [SUMMARY ENGINE END] ------------------------------------", "color: #00bfff; font-weight: bold;");
+// }
+
+
+function buildMatchSummaryTab() {
+    const containerA = document.getElementById('teamASummaryTableContainer');
+    const containerB = document.getElementById('teamBSummaryTableContainer');
+    if (!containerA || !containerB) return;
+
+    console.log("%c📊 [ADVANCED ANALYTICS ENGINE START] ----------------------------------", "color: #ff007f; font-weight: bold; font-size: 12px;");
+
+    if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
+        let emptyHtml = `<div class="text-center p-8 text-gray-500 font-bold">अजून एकही रेड झालेली नाही!</div>`;
+        containerA.innerHTML = emptyHtml; containerB.innerHTML = emptyHtml; return;
+    }
+
+    let stats = { A: {}, B: {} };
+
+    function initStatsObj(team, name) {
+        if (!stats[team][name]) {
+            stats[team][name] = { R: 0, TP: 0, B: 0, E: 0, RO: 0, DO: 0, TK: 0, STK: 0 };
+        }
+    }
+
+    function detectRealTeamOfPlayer(fullName, defaultTeam) {
+        let nameUpper = fullName.toUpperCase();
+        if (nameUpper.includes("[A]") || nameUpper.includes("(A)")) return 'A';
+        if (nameUpper.includes("[B]") || nameUpper.includes("(B)")) return 'B';
+        
+        let jerseyMatch = nameUpper.match(/\d+/);
+        if (jerseyMatch) {
+            let jNo = parseInt(jerseyMatch[0]);
+            return (jNo >= 21) ? 'B' : 'A';
+        }
+        return defaultTeam;
+    }
+
+    window.activeRaidsList.forEach((raid, idx) => {
+        const resultUpper = raid.result ? raid.result.toUpperCase() : "";
+        const points = Number(raid.points) || 0;
+
+        let cleanRaider = raid.raiderName.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+        let rTeam = detectRealTeamOfPlayer(raid.raiderName, raid.team);
+        let dTeam = (rTeam === 'A') ? 'B' : 'A';
+
+        if (cleanRaider !== "OFFICIALS" && !resultUpper.includes("ALL OUT") && !resultUpper.includes("TECHNICAL")) {
+            initStatsObj(rTeam, cleanRaider);
+            stats[rTeam][cleanRaider].R += 1;
+
+            if (resultUpper === "TOUCH POINT" || resultUpper === "TOUCH") {
+                stats[rTeam][cleanRaider].TP += points;
+            }
+            else if (resultUpper === "BONUS + TOUCH") {
+                stats[rTeam][cleanRaider].B += 1;
+                stats[rTeam][cleanRaider].TP += (points - 1);
+            }
+            else if (resultUpper === "BONUS + TACKLE") {
+                stats[rTeam][cleanRaider].B += 1;
+                stats[rTeam][cleanRaider].RO += 1;
+            }
+            else if (resultUpper === "BONUS" || resultUpper === "BONUS POINT") {
+                stats[rTeam][cleanRaider].B += 1;
+            }
+            else if (resultUpper === "EMPTY RAID" || resultUpper === "EMPTY") {
+                stats[rTeam][cleanRaider].E += 1;
+            }
+            else if (resultUpper.includes("TACKLE") || resultUpper.includes("OUT")) {
+                stats[rTeam][cleanRaider].RO += 1;
+            }
+        }
+
+        if (raid.details && (resultUpper === "TOUCH POINT" || resultUpper === "TOUCH" || resultUpper === "BONUS + TOUCH")) {
+            let detailsText = raid.details.toUpperCase();
+            if (detailsText.includes("OUT ")) {
+                let outPart = raid.details.split(/out /i)[1];
+                if (outPart) {
+                    outPart.split(',').forEach(defRaw => {
+                        let cleanDef = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+                        let actualDefTeam = detectRealTeamOfPlayer(defRaw, dTeam);
+                        
+                        if (cleanDef && cleanDef !== cleanRaider && cleanDef !== "PLAYER") {
+                            initStatsObj(actualDefTeam, cleanDef);
+                            stats[actualDefTeam][cleanDef].DO += 1;
+                        }
+                    });
+                }
+            }
+        }
+
+        if (raid.details && (resultUpper.includes("TACKLE") || resultUpper.includes("SUPER TACKLE"))) {
+            let detailsText = raid.details.toUpperCase();
+            if (detailsText.includes("CAUGHT BY")) {
+                let defenderPart = raid.details.split(/caught by/i)[1];
+                if (defenderPart) {
+                    defenderPart.split(',').forEach(defRaw => {
+                        let cleanDef = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+                        let actualDefTeam = detectRealTeamOfPlayer(defRaw, dTeam);
+                        
+                        if (cleanDef && cleanDef !== cleanRaider && cleanDef !== "DEFENDER") { 
+                            initStatsObj(actualDefTeam, cleanDef);
+                            
+                            if (resultUpper.includes("SUPER TACKLE")) {
+                                stats[actualDefTeam][cleanDef].STK += 1;
+                            } else {
+                                stats[actualDefTeam][cleanDef].TK += 1;
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+  function generateTableHTML(teamData, themeColor) {
+        if (Object.keys(teamData).length === 0) {
+            return `<div class="text-center p-6 text-gray-600 italic text-[11px]">अद्याप कोणतीही नोंद नाही.</div>`;
+        }
+
+        // 🚨 बदल: min-w काढून टाकले जेणेकरून टेबल एकाच व्ह्यूमध्ये फिट बसेल. table-fixed अनिवार्य ठेवले.
+        let html = `
+            <div class="w-full overflow-hidden border border-gray-800/60 rounded-xl bg-black/20">
+                <table class="w-full text-left text-[11px] text-gray-300 table-fixed border-collapse">
+                    <thead class="bg-gray-900/80 text-${themeColor}-400 uppercase text-[8px] font-black tracking-tight border-b border-gray-800 text-center">
+                        <tr>
+                            <th class="p-2 text-left w-[32%] tracking-tighter">Player Name</th>
+                            <th class="p-1 w-[7.5%]">R</th>
+                            <th class="p-1 w-[7.5%] text-green-400">TP</th>
+                            <th class="p-1 w-[7.5%] text-blue-400">B</th>
+                            <th class="p-1 w-[7.5%] text-gray-500">E</th>
+                            <th class="p-1 w-[7.5%] text-red-400">RO</th>
+                            <th class="p-1 w-[7.5%] text-red-300">DO</th>
+                            <th class="p-1 w-[7.5%] text-orange-400">TK</th>
+                            <th class="p-1 w-[8.5%] text-purple-400">STK</th>
+                            <th class="p-1 w-[9%] text-yellow-400 font-black bg-yellow-500/5">PT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-850 text-center font-bold text-[10px]">`;
+
+        Object.keys(teamData).forEach(name => {
+            let p = teamData[name];
+            let totalPoints = p.TP + p.B + p.TK + (p.STK * 2);
+
+            html += `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="p-2 text-left font-black text-white uppercase tracking-tighter whitespace-normal break-words leading-tight border-r border-gray-850/30">${name}</td>
+                    <td class="p-1">${p.R}</td>
+                    <td class="p-1 text-green-400 font-black">${p.TP}</td>
+                    <td class="p-1 text-blue-400 font-black">${p.B}</td>
+                    <td class="p-1 text-gray-400">${p.E}</td>
+                    <td class="p-1 text-red-400">${p.RO}</td>
+                    <td class="p-1 text-red-300">${p.DO}</td>
+                    <td class="p-1 text-orange-400">${p.TK}</td>
+                    <td class="p-1 text-purple-400">${p.STK}</td>
+                    <td class="p-1 font-black text-yellow-400 bg-yellow-500/5">${totalPoints}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div>
+            <div class="mt-2.5 p-2 bg-gray-900/60 rounded-lg flex flex-wrap gap-x-1.5 gap-y-1 text-[8.5px] text-gray-400 border border-gray-800 justify-center font-bold uppercase tracking-tighter">
+                <span><b>R:</b> Raid</span> | <span><b class="text-green-400">TP:</b> Touch</span> | <span><b class="text-blue-400">B:</b> Bonus</span> | <span><b>E:</b> Empty</span> | 
+                <span><b class="text-red-400">RO:</b> Raid Out</span> | <span><b class="text-red-300">DO:</b> Def Out</span> | <span><b class="text-orange-400">TK:</b> Tackle</span> | <span><b class="text-purple-400">STK:</b> Super Tackle</span> | <span><b class="text-yellow-400">PT:</b> Points</span>
+            </div>`; 
+            
+        return html;
+    }
+
+    // 🚨 रियल टीम नावे बटनांवर सेट करणे
+    let nameA = (typeof matchSetupData !== 'undefined' && matchSetupData.tAName) ? matchSetupData.tAName.toUpperCase() : "TEAM A";
+    let nameB = (typeof matchSetupData !== 'undefined' && matchSetupData.tBName) ? matchSetupData.tBName.toUpperCase() : "TEAM B";
+
+    document.getElementById('btnSubTabTeamA').innerText = `${nameA} STATS`;
+    document.getElementById('btnSubTabTeamB').innerText = `${nameB} STATS`;
+
+    containerA.innerHTML = generateTableHTML(stats.A, 'green');
+    containerB.innerHTML = generateTableHTML(stats.B, 'blue');
+
+    console.log("%c✅ [SUMMARY ENGINE ADVANCED COMPLETED]", "color: #10b981; font-weight: bold;");
+}
+/**
+ * switchTimelineTab(tabName) (टॅब्स अदलाबदल करण्यासाठी)
+मोडल उघडल्यावर 'Timeline' आणि 'Player Summary' या दोन बटणामध्ये टॉगल करण्यासाठी हे सोपं नेव्हिगेटर फंक्शन:
+ */
+
+function switchTimelineTab(tabName) {
+    const tabTimeline = document.getElementById('modalRaidList');
+    const tabPlayerSummary = document.getElementById('modalSummaryTabContent');
+    const tabMatchSummary = document.getElementById('modalMatchSummaryTabContent');
+    
+    const btnTimeline = document.getElementById('btnTabTimeline');
+    const btnPlayerSummary = document.getElementById('btnTabPlayerSummary');
+    const btnMatchSummary = document.getElementById('btnTabMatchSummary');
+
+    // १. सर्व कंटेनर्स आधी हायड करा
+    if (tabTimeline) tabTimeline.classList.add('hidden');
+    if (tabPlayerSummary) tabPlayerSummary.classList.add('hidden');
+    if (tabMatchSummary) tabMatchSummary.classList.add('hidden');
+
+    // २. सर्व बटनांचे स्टाईल्स ग्रे रीसेट करा
+    [btnTimeline, btnPlayerSummary, btnMatchSummary].forEach(btn => {
+        if (btn) {
+            btn.classList.remove('bg-orange-600', 'text-black');
+            btn.classList.add('bg-gray-900', 'text-gray-400', 'border', 'border-gray-800');
+        }
+    });
+
+    // ३. जो टॅब सिलेक्ट केलाय त्याला ऑरेंज (Active) करा
+    if (tabName === 'timeline') {
+        if (tabTimeline) tabTimeline.classList.remove('hidden');
+        if (btnTimeline) {
+            btnTimeline.classList.add('bg-orange-600', 'text-black');
+            btnTimeline.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
+        }
+    } 
+    else if (tabName === 'player_summary') {
+        if (tabPlayerSummary) tabPlayerSummary.classList.remove('hidden');
+        if (btnPlayerSummary) {
+            btnPlayerSummary.classList.add('bg-orange-600', 'text-black');
+            btnPlayerSummary.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
+        }
+        // प्लेयर समरी तक्ता जनरेट करा
+        if (typeof buildMatchSummaryTab === "function") buildMatchSummaryTab();
+    } 
+    else if (tabName === 'match_summary') {
+        if (tabMatchSummary) tabMatchSummary.classList.remove('hidden');
+        if (btnMatchSummary) {
+            btnMatchSummary.classList.add('bg-orange-600', 'text-black');
+            btnMatchSummary.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
+        }
+        // नवीन मॅच ओव्हरव्ह्यू/समरी रेंडर करा!
+        renderMatchSummaryOverview();
+    }
+}
+
+/**
+ * switchTeamSummarySubTab(teamLetter) फंक्शन
+सब-टॅब्स बटनांवर क्लिक केल्यावर एका टीमचं टेबल दाखवून दुसऱ्या टीमचं लपवण्यासाठी हे अगदी सोपं आणि कडक नेव्हिगेटर फंक्शन:
+ * 
+ */
+function switchTeamSummarySubTab(teamLetter) {
+    const tableA = document.getElementById('teamASummaryTableContainer');
+    const tableB = document.getElementById('teamBSummaryTableContainer');
+    
+    const btnA = document.getElementById('btnSubTabTeamA');
+    const btnB = document.getElementById('btnSubTabTeamB');
+
+    if (teamLetter === 'B') {
+        // टीम B चे टेबल उघडा 🔵
+        if (tableA) tableA.classList.add('hidden');
+        if (tableB) tableB.classList.remove('hidden');
+        
+        btnB.className = "flex-1 py-1.5 text-center text-[10px] font-black bg-blue-600 text-white rounded-lg transition-all uppercase tracking-tight shadow";
+        btnA.className = "flex-1 py-1.5 text-center text-[10px] font-black bg-gray-900 text-gray-500 rounded-lg transition-all border border-gray-850 uppercase tracking-tight hover:text-white";
+    } else {
+        // टीम A चे टेबल उघडा 🟢
+        if (tableB) tableB.classList.add('hidden');
+        if (tableA) tableA.classList.remove('hidden');
+        
+        btnA.className = "flex-1 py-1.5 text-center text-[10px] font-black bg-green-600 text-white rounded-lg transition-all uppercase tracking-tight shadow";
+        btnB.className = "flex-1 py-1.5 text-center text-[10px] font-black bg-gray-900 text-gray-500 rounded-lg transition-all border border-gray-850 uppercase tracking-tight hover:text-white";
+    }
+}
+
+
+function renderMatchSummaryOverview() {
+    const container = document.getElementById('modalMatchSummaryTabContent');
+    if (!container) return;
+
+    // १. चालू सामन्याचे लाईव्ह आकडे ओढणे
+    let sA = Number(document.getElementById('modalTeamAScore')?.innerText) || Number(document.getElementById('scoreA')?.innerText) || 0;
+    let sB = Number(document.getElementById('modalTeamBScore')?.innerText) || Number(document.getElementById('scoreB')?.innerText) || 0;
+    let tA = document.getElementById('modalTeamAName')?.innerText || "TEAM A";
+    let tB = document.getElementById('modalTeamBName')?.innerText || "TEAM B";
+
+    // २. विनर लॉजिक आणि बॅनर कलर्स निश्चित करणे
+    let winText = "MATCH IN PROGRESS";
+    let subWinText = "सामना अद्याप सुरू आहे";
+    let badgeColor = "from-orange-600 to-amber-600 text-white shadow-orange-900/30";
+    
+    if (sA > sB) { 
+        winText = `${tA.toUpperCase()}`; 
+        subWinText = `won by ${sA - sB} points 👑`;
+        badgeColor = "from-green-600 to-emerald-600 text-white shadow-green-900/30";
+    } else if (sB > sA) { 
+        winText = `${tB.toUpperCase()}`; 
+        subWinText = `won by ${sB - sA} points 👑`;
+        badgeColor = "from-green-600 to-emerald-600 text-white shadow-green-900/30";
+    } else if (sA === sB && sA > 0) { 
+        winText = "MATCH TIED 🤝"; 
+        subWinText = "दोन्ही संघ बरोबरीत सुटले";
+        badgeColor = "from-blue-600 to-indigo-600 text-white shadow-blue-900/30";
+    }
+
+    // ३. डेटा विश्लेषण करून दोन्ही संघांचे टॉप रेडर्स आणि डिफेंडर्स शोधणे
+    let raiders = { A: [], B: [] };
+    let defenders = { A: [], B: [] };
+
+    function getTeamOfPlayer(fullName, defaultTeam) {
+        let nameUpper = fullName.toUpperCase();
+        if (nameUpper.includes("[A]") || nameUpper.includes("(A)")) return 'A';
+        if (nameUpper.includes("[B]") || nameUpper.includes("(B)")) return 'B';
+        let j = fullName.match(/\d+/);
+        if (j) return (parseInt(j[0]) >= 21) ? 'B' : 'A';
+        return defaultTeam;
+    }
+
+    if (window.activeRaidsList && window.activeRaidsList.length > 0) {
+        let rScores = {}; let dScores = {};
+
+        window.activeRaidsList.forEach(raid => {
+            const res = raid.result ? raid.result.toUpperCase() : "";
+            const pts = Number(raid.points) || 0;
+            let rTeam = getTeamOfPlayer(raid.raiderName, raid.team);
+            let dTeam = (rTeam === 'A') ? 'B' : 'A';
+            let name = raid.raiderName.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+            let no = raid.raiderName.match(/\d+/) ? `#${raid.raiderName.match(/\d+/)[0]}` : "";
+
+            if (name !== "OFFICIALS" && !res.includes("ALL OUT") && !res.includes("TECHNICAL")) {
+                if (!rScores[name]) rScores[name] = { score: 0, no: no, team: rTeam };
+                if (res === "TOUCH POINT" || res === "TOUCH" || res === "BONUS + TOUCH") rScores[name].score += pts;
+                else if (res.includes("BONUS")) rScores[name].score += 1;
+            }
+
+            if (raid.details && (res.includes("TACKLE") || res.includes("SUPER TACKLE"))) {
+                let defPart = raid.details.split(/caught by/i)[1];
+                if (defPart) {
+                    defPart.split(',').forEach(defRaw => {
+                        let dName = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+                        let dNo = defRaw.match(/\d+/) ? `#${defRaw.match(/\d+/)[0]}` : "";
+                        let actTeam = getTeamOfPlayer(defRaw, dTeam);
+                        if (dName && dName !== name && dName !== "DEFENDER") {
+                            if (!dScores[dName]) dScores[dName] = { score: 0, no: dNo, team: actTeam };
+                            dScores[dName].score += 1;
+                        }
+                    });
+                }
+            }
+        });
+
+        // सॉर्टिंग
+        let sortedR = Object.keys(rScores).map(n => ({ name: n, ...rScores[n] })).sort((a,b) => b.score - a.score);
+        let sortedD = Object.keys(dScores).map(n => ({ name: n, ...dScores[n] })).sort((a,b) => b.score - a.score);
+
+        raiders.A = sortedR.filter(r => r.team === 'A').slice(0, 1);
+        raiders.B = sortedR.filter(r => r.team === 'B').slice(0, 1);
+        defenders.A = sortedD.filter(d => d.team === 'A').slice(0, 1);
+        defenders.B = sortedD.filter(d => d.team === 'B').slice(0, 1);
+    }
+
+    // मदतनीस: जर परफॉर्मर नसेल तर ब्लँक कार्ड मॅनेजमेंट
+    let heroRA = raiders.A[0] ? `${raiders.A[0].name} (${raiders.A[0].score} Pts)` : "No Data";
+    let heroRB = raiders.B[0] ? `${raiders.B[0].name} (${raiders.B[0].score} Pts)` : "No Data";
+    let heroDA = defenders.A[0] ? `${defenders.A[0].name} (${defenders.A[0].score} Tk)` : "No Data";
+    let heroDB = defenders.B[0] ? `${defenders.B[0].name} (${defenders.B[0].score} Tk)` : "No Data";
+
+    // 🎨 ४. ब्रँड न्यू क्रिकहिरोज स्टाईल प्रिमियम HTML लेआउट जनरेशन
+    container.innerHTML = `
+        <div class="w-full space-y-4 font-sans text-gray-200 antialiased anim-fade-in animate-duration-300">
+            
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden backdrop-blur-sm">
+                <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
+                
+                <p class="text-[9px] font-black tracking-widest text-yellow-500/80 uppercase mb-2">✨ MATCH RESULT ✨</p>
+                <div class="bg-gradient-to-br ${badgeColor} px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-tight shadow-lg min-w-[220px]">
+                    <div class="text-[13px] leading-tight truncate max-w-[240px] mx-auto">${winText}</div>
+                    <div class="text-[10px] text-white/90 font-medium tracking-normal lowercase mt-0.5">${subWinText}</div>
+                </div>
+                
+                <div class="mt-3 text-[10px] text-slate-500 font-bold tracking-tight">
+                    Total Raids Witnessed: <span class="text-slate-300 font-mono">${window.activeRaidsList ? window.activeRaidsList.length : 0}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg">
+                    <div class="border-b border-slate-850/60 pb-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)] mr-1.5 align-middle"></span>
+                        <span class="text-[11px] font-black text-white uppercase tracking-tight align-middle truncate inline-block max-w-[80%]">${tA}</span>
+                    </div>
+                    <div class="py-4 text-left">
+                        <span class="text-4xl font-black text-white font-mono tracking-tighter">${sA}</span>
+                        <span class="text-[10px] font-black text-slate-500 tracking-wider block mt-1">TOTAL POINTS</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg">
+                    <div class="border-b border-slate-850/60 pb-2 text-right">
+                        <span class="text-[11px] font-black text-white uppercase tracking-tight align-middle truncate inline-block max-w-[80%]">${tB}</span>
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] ml-1.5 align-middle"></span>
+                    </div>
+                    <div class="py-4 text-right">
+                        <span class="text-4xl font-black text-white font-mono tracking-tighter">${sB}</span>
+                        <span class="text-[10px] font-black text-slate-500 tracking-wider block mt-1">TOTAL POINTS</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3.5">
+                <p class="text-[10px] font-black tracking-wider text-slate-400 uppercase border-b border-slate-850 pb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy text-yellow-500"></i> Match Top Performers
+                </p>
+                
+                <div class="grid grid-cols-2 gap-4 text-[11px] relative">
+                    <div class="absolute inset-y-0 left-1/2 w-[1px] bg-slate-850/80 -translate-x-1/2"></div>
+                    
+                    <div class="space-y-3 pr-1">
+                        <div>
+                            <span class="text-[9px] font-bold text-green-400 block uppercase mb-1"><i class="fa-solid fa-bolt mr-1"></i> Top Raider</span>
+                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroRA}</span>
+                        </div>
+                        <div class="pt-1.5">
+                            <span class="text-[9px] font-bold text-orange-400 block uppercase mb-1"><i class="fa-solid fa-shield mr-1"></i> Top Defender</span>
+                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroDA}</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pl-3 text-right">
+                        <div>
+                            <span class="text-[9px] font-bold text-blue-400 block uppercase mb-1">Top Raider <i class="fa-solid fa-bolt ml-1"></i></span>
+                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroRB}</span>
+                        </div>
+                        <div class="pt-1.5">
+                            <span class="text-[9px] font-bold text-orange-400 block uppercase mb-1">Top Defender <i class="fa-solid fa-shield ml-1"></i></span>
+                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroDB}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+                <button onclick="shareKabaddiMatch('report')" class="py-3 px-4 bg-white hover:bg-slate-100 text-black font-black text-[11px] rounded-xl tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md">
+                    <i class="fa-solid fa-file-pdf text-xs text-red-600"></i> SHARE SUMMARY REPORT
+                </button>
+                <button onclick="shareKabaddiMatch('summary')" class="py-3 px-4 bg-slate-800 hover:bg-slate-750 text-white font-black text-[11px] rounded-xl tracking-tight flex items-center justify-center gap-2 border border-slate-700 active:scale-[0.98] transition-all shadow-md">
+                    <i class="fa-brands fa-whatsapp text-xs text-green-400"></i> WHATSAPP SHARE
+                </button>
+            </div>
+
+        </div>`;
 }

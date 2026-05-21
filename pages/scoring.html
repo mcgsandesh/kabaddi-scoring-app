@@ -58,12 +58,12 @@
         <div class="flex justify-between gap-4">
             <div class="flex-1">
                 <p class="text-[8px] text-orange-500 font-black uppercase mb-1">Top Raiders</p>
-                <p class="text-[10px] font-bold text-gray-300">Aslam: 10 | Mohit: 8</p>
+                <p id="liveTopRaiders" class="text-[10px] font-bold text-gray-300">Loading...</p>
             </div>
             <div class="w-px bg-gray-800"></div>
             <div class="flex-1 text-right">
                 <p class="text-[8px] text-blue-400 font-black uppercase mb-1">Top Defenders</p>
-                <p class="text-[10px] font-bold text-gray-300">Sombir: 4 | Fazel: 3</p>
+                <p id="liveTopDefenders" class="text-[10px] font-bold text-gray-300">Loading...</p>
             </div>
         </div>
     </div>
@@ -147,6 +147,7 @@
     <div class="flex-grow"></div>
 </div>
 
+<!--timeoutOverlay -->
 <div id="timeoutOverlay" class="fixed inset-0 bg-black/95 z-[1000] hidden flex flex-col items-center justify-center">
     <h2 id="timeoutClock" class="text-9xl font-black text-white leading-none">30</h2>
     <p id="timeoutStatus" class="text-orange-500 font-bold uppercase tracking-widest text-xs mt-4">Official Timeout</p>
@@ -165,6 +166,7 @@
     </div>
 </div>
 
+<!--subModal -->
 <div id="subModal" class="fixed inset-0 bg-black/95 z-[1100] hidden flex flex-col items-center justify-center p-4">
     <div class="bg-gray-900 w-full max-w-lg rounded-3xl overflow-hidden border border-gray-800 shadow-2xl">
         <div class="bg-blue-600 p-3 text-center">
@@ -190,7 +192,7 @@
         </div>
     </div>
 </div>
-
+<!--playerSelectModal -->
 <div id="playerSelectModal" class="fixed inset-0 bg-black/90 z-[500] hidden flex-col items-center justify-end">
     <div class="bg-gray-900 w-full max-w-md rounded-t-3xl p-6 border-t border-gray-800 shadow-2xl">
         <div class="flex justify-between items-center mb-6">
@@ -202,6 +204,7 @@
     </div>
 </div>
 
+<!-- summaryModal only timeline
 <div id="summaryModal" class="fixed inset-0 z-[100] hidden flex-col bg-[#0f172a]">
     <div class="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-20">
         <div class="flex justify-between items-center mb-4">
@@ -228,5 +231,76 @@
             <i class="fa-solid fa-print"></i> Print Match Report
         </button>
         <button onclick="closeSummaryModal()" class="flex-1 bg-gray-800 text-white font-bold py-3 rounded-lg">Close</button>
+    </div>
+</div>
+-->
+
+<!---summaryModal with timeline and match summayr -->
+<div id="summaryModal" class="fixed inset-0 z-[100] hidden flex-col bg-[#0f172a]">
+    <div class="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-20">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-yellow-500 font-black italic tracking-tighter text-lg uppercase">Match Centre</h2>
+            <button onclick="closeSummaryModal()" class="text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="flex justify-around items-center bg-black/40 rounded-xl py-3 border border-gray-800 mb-4">
+            <div class="text-center">
+                <p id="modalTeamAName" class="text-[10px] text-gray-500 font-bold uppercase">Team A</p>
+                <p id="modalTeamAScore" class="text-3xl font-black text-white">0</p>
+            </div>
+            <div class="text-gray-700 font-bold text-xl px-4">VS</div>
+            <div class="text-center">
+                <p id="modalTeamBName" class="text-[10px] text-gray-500 font-bold uppercase">Team B</p>
+                <p id="modalTeamBScore" class="text-3xl font-black text-white">0</p>
+            </div>
+        </div>
+
+        <div class="flex bg-black/60 p-1 rounded-xl border border-gray-800/80 gap-1 overflow-x-auto whitespace-nowrap scrollbar-none">
+            <button id="btnTabTimeline" onclick="switchTimelineTab('timeline')" 
+                class="inline-block min-w-[140px] px-4 py-2 text-center text-[10px] font-black bg-orange-600 text-black rounded-lg transition-all uppercase tracking-wider flex-shrink-0">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> Match Timeline
+            </button>
+            <button id="btnTabPlayerSummary" onclick="switchTimelineTab('player_summary')" 
+                class="inline-block min-w-[140px] px-4 py-2 text-center text-[10px] font-black bg-gray-900 text-gray-400 rounded-lg transition-all border border-gray-800 uppercase tracking-wider hover:text-white flex-shrink-0">
+                <i class="fa-solid fa-user mr-1"></i> Player Summary
+            </button>
+            <button id="btnTabMatchSummary" onclick="switchTimelineTab('match_summary')" 
+                class="inline-block min-w-[140px] px-4 py-2 text-center text-[10px] font-black bg-gray-900 text-gray-400 rounded-lg transition-all border border-gray-800 uppercase tracking-wider hover:text-white flex-shrink-0">
+                <i class="fa-solid fa-chart-simple mr-1"></i> Match Summary
+            </button>
+        </div>
+    </div>
+
+    <div id="modalRaidList" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
+        <p id="modalEmptyText" class="text-center text-gray-600 mt-10 italic">No raids recorded yet.</p>
+    </div>
+
+    <div id="modalSummaryTabContent" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hidden">
+        <div class="flex bg-black/40 p-1 rounded-xl border border-gray-800 gap-2 mb-3">
+            <button id="btnSubTabTeamA" onclick="switchTeamSummarySubTab('A')" 
+                class="flex-1 py-1.5 text-center text-[10px] font-black bg-gray-800 text-white rounded-lg transition-all uppercase tracking-tight truncate max-w-[50%]">
+                Team A Stats
+            </button>
+            <button id="btnSubTabTeamB" onclick="switchTeamSummarySubTab('B')" 
+                class="flex-1 py-1.5 text-center text-[10px] font-black bg-gray-900 text-gray-500 rounded-lg transition-all border border-gray-850 uppercase tracking-tight hover:text-white truncate max-w-[50%]">
+                Team B Stats
+            </button>
+        </div>
+        <div id="teamASummaryTableContainer"></div>
+        <div id="teamBSummaryTableContainer" class="hidden"></div>
+    </div>
+
+    <div id="modalMatchSummaryTabContent" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hidden">
+        </div>
+
+    <div class="p-4 bg-gray-900 border-t border-gray-800 flex gap-3 sticky bottom-0 z-20">
+        <button onclick="window.print()" class="flex-1 bg-white text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2 text-xs uppercase tracking-tight active:bg-gray-200">
+            <i class="fa-solid fa-print"></i> Print Match Report
+        </button>
+        <button onclick="closeSummaryModal()" class="flex-1 bg-gray-800 text-white font-bold py-3 rounded-lg text-xs uppercase tracking-tight active:bg-gray-700">
+            Close
+        </button>
     </div>
 </div>

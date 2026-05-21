@@ -79,3 +79,11 @@ body {
 .drawer-item:active {
     background-color: rgba(249, 115, 22, 0.2);
 }
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
