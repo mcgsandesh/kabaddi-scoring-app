@@ -78,29 +78,177 @@ function loadPage(page) {
 }
 */
 /** loadPage async */
+
 // async function loadPage(page) {
+//   // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
+//   if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId && page !== 'scoring') {
+      
+//       console.log(`%c🛑 [Navigation Block]: युझर स्कोअरिंग सोडून "${page}" वर जाण्याचा प्रयत्न करत आहे. वॉर्निंग दाखवत आहे...`, "color: #ef4444; font-weight: bold;");
 
+//       const result = await Swal.fire({
+//           title: 'स्कोअरिंग सोडून बाहेर जायचे का?',
+//           text: "चालू मॅचचा टायमर पॉज केला जाईल आणि संपूर्ण रेड इतिहास सुरक्षित सेव्ह केला जाईल.",
+//           icon: 'warning',
+//           showCancelButton: true,
+//           confirmButtonText: 'हो, बाहेर पडा',
+//           cancelButtonText: 'नाही, इथेच राहा',
+//           background: '#111',
+//           color: '#fff',
+//           confirmButtonColor: '#ef4444',
+//           cancelButtonColor: '#4b5563'
+//       });
+
+//       // ❌ जर युझरने 'नाही' (Cancel) क्लिक केले, तर पेज बदलू नका, इथल्या इथेच फ्लो थांबवा!
+//       if (!result.isConfirmed) {
+//           console.log("😇 [Navigation Cancelled]: युझर स्कोअरिंग स्क्रीनवरच थांबला.");
+//           return; 
+//       }
+
+//       // ✅ जर युझरने 'हो' (Confirm) केले, तर डेटा सुरक्षित क्लाउडवर पाठवा!
+//       console.log("☁️ [Exit Sync]: शिल्लक वेळ आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
+      
+//       if (window.matchInterval) clearInterval(window.matchInterval);
+//       window.isMatchPaused = true;
+
+//       // 🔒 लोकल मेमरी किंवा लोकल स्टोरेजमधून ताजी रेड समरी गोळा करा
+//       let finalRaidsArray = window.activeRaidsList || [];
+//       if (finalRaidsArray.length === 0) {
+//           const storedData = localStorage.getItem(`raids_secure_log_${matchSetupData.mId}`);
+//           if (storedData) {
+//               try {
+//                   finalRaidsArray = JSON.parse(decodeURIComponent(escape(atob(storedData))));
+//               } catch (e) { console.error("Error decoding storage on exit:", e); }
+//           }
+//       }
+
+//       try {
+//           // ☁️ [ONE-TIME SYNC CALL]: सर्व डेटा एकाच वेळी 'raidsHistory' मध्ये जतन!
+//           await db.collection("tournaments").doc(matchSetupData.tId)
+//             .collection("matches").doc(matchSetupData.mId).update({
+//                 savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
+//                 isMatchPaused: true,
+//                 raidsHistory: finalRaidsArray,    // 🎯 तुझा संपूर्ण रेड इतिहास एकाच फील्डमध्ये साठवला!
+//                 lastUpdated: new Date().getTime()
+//             });
+//           console.log(`✅ [Exit Sync Success]: शिल्लक वेळ आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर जतन केल्या!`);
+          
+//           // 🧹 बाहेर पडताना चालू मेमरी साफ करा
+//           matchSetupData = null; 
+//           currentMatchData = null;
+//           window.activeRaidsList = [];
+          
+//       } catch (err) {
+//           console.error("🚨 [Exit Sync Error]: डेटाबेस अपडेट फेल झाले!", err);
+//           Swal.fire("त्रुटी", "डेटा सेव्ह करताना अडचण आली, तरीही पेज बदलत आहे.", "error");
+//       }
+//   }
+
+//   // -------------------------------------------------------------
+//   // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
+//   // -------------------------------------------------------------
 //   const app = document.getElementById('app');
-
-//   // 🔥 १. हे नाव फायनल (UI अपडेट करण्यासाठी)
 //   setActiveNav(page);   
 
-//   // 🔥 fetch page
 //   const res = await fetch(`pages/${page}.html`);
 //   const html = await res.text();
 
-//   // 🔥 render
 //   app.innerHTML = html;
-
-//   // 🔥 page-specific init
 //   initPage(page);
-
-//   // 🔥 close menu
 //   closeMenu();
 // }
 
-//
 
+// async function loadPage(page) {
+//   // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
+//   if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId && page !== 'scoring') {
+      
+//       console.log(`%c🛑 [Navigation Block]: युझर स्कोअरिंग सोडून "${page}" वर जाण्याचा प्रयत्न करत आहे. वॉर्निंग दाखवत आहे...`, "color: #ef4444; font-weight: bold;");
+
+//       const result = await Swal.fire({
+//           title: 'स्कोअरिंग सोडून बाहेर जायचे का?',
+//           text: "चालू मॅचचा टायमर पॉज केला जाईल आणि संपूर्ण रेड इतिहास सुरक्षित सेव्ह केला जाईल.",
+//           icon: 'warning',
+//           showCancelButton: true,
+//           confirmButtonText: 'हो, बाहेर पडा',
+//           cancelButtonText: 'नाही, इथेच राहा',
+//           background: '#111',
+//           color: '#fff',
+//           confirmButtonColor: '#ef4444',
+//           cancelButtonColor: '#4b5563'
+//       });
+
+//       // ❌ जर युझरने 'नाही' (Cancel) क्लिक केले, तर पेज बदलू नका, इथल्या इथेच फ्लो थांबवा!
+//       if (!result.isConfirmed) {
+//           console.log("😇 [Navigation Cancelled]: युझर स्कोअरिंग स्क्रीनवरच थांबला.");
+//           return; 
+//       }
+
+//       // ✅ जर युझरने 'हो' (Confirm) केले, तर डेटा सुरक्षित क्लाउडवर पाठवा!
+//       console.log("☁️ [Exit Sync]: शिल्लक वेळ, चालू स्कोअर आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
+      
+//       if (window.matchInterval) clearInterval(window.matchInterval);
+//       window.isMatchPaused = true;
+
+//       // 🔒 लोकल मेमरी किंवा लोकल स्टोरेजमधून ताजी रेड समरी गोळा करा
+//       let finalRaidsArray = window.activeRaidsList || [];
+//       if (finalRaidsArray.length === 0) {
+//           const storedData = localStorage.getItem(`raids_secure_log_${matchSetupData.mId}`);
+//           if (storedData) {
+//               try {
+//                   finalRaidsArray = JSON.parse(decodeURIComponent(escape(atob(storedData))));
+//               } catch (e) { console.error("Error decoding storage on exit:", e); }
+//           }
+//       }
+
+//       // 🎯 [LIVE SCORE CAPTURE]: स्क्रीनवरून आत्ताचा ताजा स्कोअर ओढून घेणे
+//       const currentScoreA = parseInt(document.getElementById('scoreA')?.innerText) || 0;
+//       const currentScoreB = parseInt(document.getElementById('scoreB')?.innerText) || 0;
+
+//       try {
+//           // ☁️ [ONE-TIME SYNC CALL]: स्कोअरसह सर्व डेटा एकाच वेळी जतन!
+//           await db.collection("tournaments").doc(matchSetupData.tId)
+//             .collection("matches").doc(matchSetupData.mId).update({
+//                 savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
+//                 isMatchPaused: true,
+//                 scoreA: currentScoreA,             // 🟢 फिक्स: टीम A चा ताजा स्कोअर सेव्ह केला!
+//                 scoreB: currentScoreB,             // 🟢 फिक्स: टीम B चा ताजा स्कोअर सेव्ह केला!
+//                 raidsHistory: finalRaidsArray,     // संपूर्ण रेड इतिहास
+//                 lastUpdated: new Date().getTime()
+//             });
+          
+//           console.log(`✅ [Exit Sync Success]: स्कोअर (A:${currentScoreA} vs B:${currentScoreB}) आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर जतन केल्या!`);
+          
+//           // 🧹 बाहेर पडताना चालू मेमरी साफ करा
+//           matchSetupData = null; 
+//           currentMatchData = null;
+//           window.activeRaidsList = [];
+          
+//       } catch (err) {
+//           console.error("🚨 [Exit Sync Error]: डेटाबेस अपडेट फेल झाले!", err);
+//           Swal.fire("त्रुटी", "डेटा सेव्ह करताना अडचण आली, तरीही पेज बदलत आहे.", "error");
+//       }
+//   }
+
+//   // -------------------------------------------------------------
+//   // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
+//   // -------------------------------------------------------------
+//   const app = document.getElementById('app');
+//   setActiveNav(page);   
+
+//   const res = await fetch(`pages/${page}.html`);
+//   const html = await res.text();
+
+//   app.innerHTML = html;
+//   initPage(page);
+//   closeMenu();
+// }
+
+/**
+ * सुधारित loadPage फंक्शन (नव्या मास्टर ऑब्जेक्टसह)
+आपण ठरवल्याप्रमाणे तुझा मूळचा स्वीटअलर्ट (Swal), बेस६४ डिकोडिंग लॉजिक, पेज फेचिंग (fetch) आणि 
+मेमरी क्लीनअपचा कडक फ्लो जसाच्या तसा सुरक्षित ठेवला आहे. 
+फक्त स्कोअर गोळा करताना आणि फायरबेस अपडेट करताना आपण आपला मास्टर scoreCard ऑब्जेक्ट तिथे बसवला आहे.
+ */
 
 async function loadPage(page) {
   // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
@@ -128,7 +276,7 @@ async function loadPage(page) {
       }
 
       // ✅ जर युझरने 'हो' (Confirm) केले, तर डेटा सुरक्षित क्लाउडवर पाठवा!
-      console.log("☁️ [Exit Sync]: शिल्लक वेळ आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
+      console.log("☁️ [Exit Sync]: शिल्लक वेळ, चालू स्कोअर आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
       
       if (window.matchInterval) clearInterval(window.matchInterval);
       window.isMatchPaused = true;
@@ -144,16 +292,30 @@ async function loadPage(page) {
           }
       }
 
+      // 🎯 [💥 MASTER SCORECARD EXIT CAPTURE]
+      // बाहेर पडताना लोकल स्टोरेजमधून ताजी आणि अधिकृत स्कोअरकार्डची प्रत ओढणे
+      let localCard = localStorage.getItem('global_score_card');
+      let currentScoreCard = localCard ? JSON.parse(localCard) : {
+          mainMatch:  { teamA: 0, teamB: 0 },
+          fiveRaid:   { teamA: 0, teamB: 0 },
+          goldenRaid: { teamA: 0, teamB: 0 }
+      };
+
       try {
-          // ☁️ [ONE-TIME SYNC CALL]: सर्व डेटा एकाच वेळी 'raidsHistory' मध्ये जतन!
+          // ☁️ [ONE-TIME SYNC CALL]: जुन्या फील्ड्स काढून थेट मास्टर scoreCard एकाच वेळी जतन!
           await db.collection("tournaments").doc(matchSetupData.tId)
             .collection("matches").doc(matchSetupData.mId).update({
                 savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
                 isMatchPaused: true,
-                raidsHistory: finalRaidsArray,    // 🎯 तुझा संपूर्ण रेड इतिहास एकाच फील्डमध्ये साठवला!
-                lastUpdated: new Date().getTime()
+                raidsHistory: finalRaidsArray,     // संपूर्ण रेड इतिहास
+                lastUpdated: new Date().getTime(),
+                
+                // 🎯 [SINGLE SOURCE OF TRUTH]: डेटाबेसमध्ये मास्टर ऑब्जेक्ट ढकलला!
+                scoreCard: currentScoreCard
             });
-          console.log(`✅ [Exit Sync Success]: शिल्लक वेळ आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर जतन केल्या!`);
+          
+          console.log(`✅ [Exit Sync Success]: मास्टर scoreCard आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर यशस्वीरित्या जतन केल्या!`);
+          console.dir(currentScoreCard);
           
           // 🧹 बाहेर पडताना चालू मेमरी साफ करा
           matchSetupData = null; 
@@ -170,17 +332,15 @@ async function loadPage(page) {
   // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
   // -------------------------------------------------------------
   const app = document.getElementById('app');
-  setActiveNav(page);   
+  if (typeof setActiveNav === "function") setActiveNav(page);   
 
   const res = await fetch(`pages/${page}.html`);
   const html = await res.text();
 
   app.innerHTML = html;
-  initPage(page);
-  closeMenu();
+  if (typeof initPage === "function") initPage(page);
+  if (typeof closeMenu === "function") closeMenu();
 }
-
-
 
 /** Pages */
 async function initPage(page) {
@@ -209,7 +369,9 @@ async function initPage(page) {
         if (userRole === 'viewer') {
             renderLiveMatchesForViewers(); 
         } else {
-            renderAdminDashboard();
+           // renderAdminDashboard();
+
+            renderLiveMatchesForViewers(); 
         }
     }
 
@@ -283,6 +445,7 @@ function closeCreateTeam() {
   document.getElementById('teamModal').classList.add('hidden');
 }
 
+/** */
 function createTeam() {
   const name = document.getElementById('teamName').value;
 
@@ -311,6 +474,7 @@ function renderTeams() {
   });
 }
 
+/** */
 function deleteTeam(index) {
   teams.splice(index, 1);
   renderTeams();
@@ -328,7 +492,7 @@ function addTeam(id) {
 
 
 
-/**Tournaments */
+//------------------**Tournaments *-----------------------------//
 
 let tournaments = [];
 let selectedTeams = [];
@@ -360,136 +524,8 @@ function handleLevelChange() {
 /**
  * renderTournaments
 */
-// async function renderTournaments() {
-//   const list = document.getElementById('tournamentList');
-//   if (!list) return;
 
-//   list.innerHTML = "<p class='text-center text-gray-500 text-xs'>लोड होत आहे...</p>";
 
-//   try {
-//     const snapshot = await db.collection("tournaments").orderBy("createdAt", "desc").get();
-//     list.innerHTML = "";
-
-//     snapshot.forEach((doc) => {
-//       const t = doc.data();
-//       const tId = doc.id; // Firebase Document ID
-
-//     list.innerHTML += `
-//     <div onclick="viewTournamentDetails('${tId}')" class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-lg mb-3 cursor-pointer hover:border-green-600 transition-all">
-//         <div class="flex justify-between items-start">
-//         <div>
-//             <div class="font-bold text-lg text-green-400">${t.name}</div>
-//             <div class="text-[10px] text-gray-400">${t.season} | ${t.level} - ${t.association || ''}</div>
-            
-//             <div class="text-[10px] text-blue-400 mt-1 font-medium">
-//             📅 ${t.startDate || 'TBD'} ते ${t.endDate || 'TBD'}
-//             </div>
-            
-//             <div class="text-[10px] text-gray-500 mt-1">${t.type} | ${t.group} | ${t.surface}</div>
-//         </div>
-        
-//         <div class="flex flex-col gap-2">
-//             <span class="bg-gray-800 text-[10px] px-2 py-1 rounded text-center">${t.format}</span>
-            
-//             <button onclick="event.stopPropagation(); editTournament('${tId}')" class="bg-blue-600 text-[10px] px-2 py-1 rounded text-white font-bold">
-//             Edit
-//             </button>
-//         </div>
-//         </div>
-        
-//         <div class="mt-2 text-[9px] text-gray-500 italic">
-//         Teams: ${t.teams ? t.teams.length : 0} registered
-//         </div>
-//     </div>
-//     `;
-//     });
-//   } catch (error) {
-//     console.error("Error fetching data:", error);
-//     list.innerHTML = "डेटा लोड करता आला नाही.";
-//   }
-// }
-
-/** 
-async function createTournament() {
-  console.log("[Process]: Starting tournament creation...");
-  
-  const tName = document.getElementById('tName')?.value.trim();
-  const organizer = document.getElementById('tOrganizer')?.value.trim();
-  const season = document.getElementById('tSeason')?.value;
-  const startDate = document.getElementById('tStartDate')?.value;
-  const endDate = document.getElementById('tEndDate')?.value;
-  const level = document.getElementById('tLevel')?.value;
-  const association = document.getElementById('tAssociation')?.value || "";
-  const surface = document.getElementById('tSurface')?.value;
-  const type = document.getElementById('tType')?.value;
-  const category = document.getElementById('tCategory')?.value;
-  const group = document.getElementById('tGroup')?.value;
-  const format = document.getElementById('tFormat')?.value;
-  const teamLimit = parseInt(document.getElementById('tLimit')?.value) || 16;
-
-  // १. अनिवार्य व्हॅलिडेशन चेक
-  if (!tName || !organizer || !season || !startDate || !endDate) {
-    Swal.fire({ icon: 'warning', title: 'माहिती अपूर्ण!', text: 'कृपया स्पर्धेचे नाव, आयोजक, सीझन आणि तारखा अचूक भरा.' });
-    return;
-  }
-
-  try {
-    // २. युनिक नेम चेक (Restriction)
-    const querySnapshot = await db.collection("tournaments").where("name", "==", tName).get();
-    if (!querySnapshot.empty) {
-      Swal.fire({ icon: 'error', title: 'ओहो...', text: 'या नावाची स्पर्धा आधीच तयार केली आहे!' });
-      return;
-    }
-
-    // ३. लॉगिन असलेला करंट युजर मिळवा
-    const user = firebase.auth().currentUser;
-    if (!user) {
-      Swal.fire({ icon: 'error', title: 'अथेंटिकेशन एरर!', text: 'कृपया सिस्टीममध्ये पुन्हा लॉगिन करा.' });
-      return;
-    }
-
-    // ४. नवीन डेटा स्ट्रक्चर (Cleaned)
-    const tData = {
-      name: tName,
-      organizer: organizer,
-      season: season,
-      startDate: startDate, 
-      endDate: endDate,     
-      level: level,
-      association: association,
-      surface: surface,
-      type: type,
-      category: category,
-      group: group,
-      format: format,
-      teamLimit: teamLimit,
-      
-      teams: [],                  // 🔥 आता सुरुवातीला संघ यादी पूर्णपणे ब्लँक राहील!
-      createdBy: user.email,      // टूर्नामेंटचा मालक (Admin)
-      assignedScorers: [],        // नेमलेल्या स्कोअरर्सची लिस्ट
-      createdAt: new Date().getTime()
-    };
-
-    console.log("[Firestore]: Saving tournament data...", tData);
-    await db.collection("tournaments").add(tData);
-    
-    Swal.fire({
-      icon: 'success',
-      title: 'स्पर्धा तयार झाली!',
-      text: 'नवीन टूर्नामेंट यशस्वीरित्या जतन केली आहे.',
-      timer: 1500,
-      showConfirmButton: false
-    });
-
-    closeTournamentModal();
-    renderTournaments(); // मुख्य लिस्ट रिफ्रेश करा
-
-  } catch (error) {
-    console.error("[Fatal Error] createTournament failed:", error);
-    Swal.fire({ icon: 'error', title: 'चूक झाली!', text: 'डेटा जतन करताना तांत्रिक अडचण आली.' });
-  }
-}
-*/ 
 async function createTournament() {
   console.log("[Process]: Starting tournament creation...");
   
@@ -814,83 +850,87 @@ function renderDetailsTab(t, id) {
 * जेव्हा युजर बटण दाबतो, तेव्हा आपण रँडमली जोड्या लावून मॅचेस 'Pending' म्हणून सेव्ह करूया
 * handleFixtureGeneration
  */
-async function handleFixtureGeneration(tId) {
-  const targetId = tId || currentTid;
+// async function handleFixtureGeneration(tId) {
+//   const targetId = tId || currentTid;
   
-  try {
-    const tDoc = await db.collection("tournaments").doc(targetId).get();
-    const limit = parseInt(tDoc.data().teamLimit) || 16;
+//   try {
+//     const tDoc = await db.collection("tournaments").doc(targetId).get();
+//     const limit = parseInt(tDoc.data().teamLimit) || 16;
     
-    // १. जवळची 'Power of 2' शोधा (उदा. २० साठी ३२)
-    const powerOfTwo = Math.pow(2, Math.ceil(Math.log2(limit)));
+//     // १. जवळची 'Power of 2' शोधा (उदा. २० साठी ३२)
+//     const powerOfTwo = Math.pow(2, Math.ceil(Math.log2(limit)));
     
-    // २. पहिल्या राऊंडमध्ये किती टीम्स खेळतील?
-    // सूत्र: (Total Teams - (Power of 2 / 2)) * 2
-    // २० टीम्ससाठी: (20 - 16) * 2 = 8 टीम्स (म्हणजे ४ मॅचेस)
-    const teamsInRound1 = (limit - (powerOfTwo / 2)) * 2;
-    const round1Matches = teamsInRound1 > 0 ? teamsInRound1 / 2 : 0;
+//     // २. पहिल्या राऊंडमध्ये किती टीम्स खेळतील?
+//     // सूत्र: (Total Teams - (Power of 2 / 2)) * 2
+//     // २० टीम्ससाठी: (20 - 16) * 2 = 8 टीम्स (म्हणजे ४ मॅचेस)
+//     const teamsInRound1 = (limit - (powerOfTwo / 2)) * 2;
+//     const round1Matches = teamsInRound1 > 0 ? teamsInRound1 / 2 : 0;
 
-    // ३. एकूण मॅचेस = (Limit - 1)
-    const totalActualMatches = limit - 1;
+//     // ३. एकूण मॅचेस = (Limit - 1)
+//     const totalActualMatches = limit - 1;
 
-    const check = await db.collection("tournaments").doc(targetId).collection("matches").limit(1).get();
-    if (!check.empty) {
-      Swal.fire("माहिती", "फिक्स्चर्स आधीच तयार आहेत.", "info");
-      return;
-    }
+//     const check = await db.collection("tournaments").doc(targetId).collection("matches").limit(1).get();
+//     if (!check.empty) {
+//       Swal.fire("माहिती", "फिक्स्चर्स आधीच तयार आहेत.", "info");
+//       return;
+//     }
 
-    Swal.fire({
-      title: 'ऑटोमेटेड फिक्स्चर!',
-      text: `${limit} टीम्ससाठी ${totalActualMatches} मॅचेस तयार होतील. (BYE वगळून)`,
-      icon: 'info',
-      showCancelButton: true,
-      confirmButtonText: 'हो, तयार करा'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const batch = db.batch();
-        let matchCounter = 1;
+//     Swal.fire({
+//       title: 'ऑटोमेटेड फिक्स्चर!',
+//       text: `${limit} टीम्ससाठी ${totalActualMatches} मॅचेस तयार होतील. (BYE वगळून)`,
+//       icon: 'info',
+//       showCancelButton: true,
+//       confirmButtonText: 'हो, तयार करा'
+//     }).then(async (result) => {
+//       if (result.isConfirmed) {
+//         const batch = db.batch();
+//         let matchCounter = 1;
 
-        // --- ROUND 1 (फक्त आवश्यक मॅचेस) ---
-        for (let i = 1; i <= round1Matches; i++) {
-          createMatchEntry(batch, targetId, matchCounter++, "Round 1");
-        }
+//         // --- ROUND 1 (फक्त आवश्यक मॅचेस) ---
+//         for (let i = 1; i <= round1Matches; i++) {
+//           createMatchEntry(batch, targetId, matchCounter++, "Round 1");
+//         }
 
-        // --- ROUND 2 (Pre-Quarter / Round of 16) ---
-        for (let i = 1; i <= 8; i++) {
-          createMatchEntry(batch, targetId, matchCounter++, (limit <= 16 && matchCounter <= 8) ? "Round 1" : "Pre-Quarter");
-        }
+//         // --- ROUND 2 (Pre-Quarter / Round of 16) ---
+//         for (let i = 1; i <= 8; i++) {
+//           createMatchEntry(batch, targetId, matchCounter++, (limit <= 16 && matchCounter <= 8) ? "Round 1" : "Pre-Quarter");
+//         }
 
-        // --- QUARTER, SEMI, FINAL ---
-        const rounds = [
-          { name: "Quarter Final", count: 4 },
-          { name: "Semi Final", count: 2 },
-          { name: "FINAL", count: 1 }
-        ];
+//         // --- QUARTER, SEMI, FINAL ---
+//         const rounds = [
+//           { name: "Quarter Final", count: 4 },
+//           { name: "Semi Final", count: 2 },
+//           { name: "FINAL", count: 1 }
+//         ];
 
-        rounds.forEach(r => {
-          for (let i = 1; i <= r.count; i++) {
-            // जर एकूण मॅचेसच्या बाहेर जात असेल तर थांबा
-            if (matchCounter <= totalActualMatches) {
-              createMatchEntry(batch, targetId, matchCounter++, r.name);
-            }
-          }
-        });
+//         rounds.forEach(r => {
+//           for (let i = 1; i <= r.count; i++) {
+//             // जर एकूण मॅचेसच्या बाहेर जात असेल तर थांबा
+//             if (matchCounter <= totalActualMatches) {
+//               createMatchEntry(batch, targetId, matchCounter++, r.name);
+//             }
+//           }
+//         });
 
-        await batch.commit();
-        Swal.fire("यशस्वी!", "सर्व मॅचेस तयार झाल्या!", "success");
-        switchTab('fixtures', targetId);
-      }
-    });
-  } catch (err) { console.error(err); }
-}
+//         await batch.commit();
+//         Swal.fire("यशस्वी!", "सर्व मॅचेस तयार झाल्या!", "success");
+//         switchTab('fixtures', targetId);
+//       }
+//     });
+//   } catch (err) { console.error(err); }
+// }
 
-// मॅच एन्ट्री तयार करण्यासाठी हेल्पपर फंक्शन
+
+// मॅच एन्ट्री तयार करण्यासाठी फ्युचर-प्रूफ हेल्पपर फंक्शन
 // function createMatchEntry(batch, tId, mNo, roundName) {
 //   const mRef = db.collection("tournaments").doc(tId).collection("matches").doc(`M${mNo}`);
+  
 //   batch.set(mRef, {
 //     matchNo: mNo,
 //     teamA: "TBD",
 //     teamB: "TBD",
+//     teamA_id: "TBD", // 🟢 नवीन युनिक आयडी फील्ड भविष्यातील सुरक्षेसाठी
+//     teamB_id: "TBD", // 🟢 नवीन युनिक आयडी फील्ड भविष्यातील सुरक्षेसाठी
 //     status: "Pending",
 //     scoreA: 0,
 //     scoreB: 0,
@@ -898,7 +938,92 @@ async function handleFixtureGeneration(tId) {
 //   });
 // }
 
-// मॅच एन्ट्री तयार करण्यासाठी फ्युचर-प्रूफ हेल्पपर फंक्शन
+/** scoreCard object
+ * handleFixtureGeneration चे नवीन डिझाईन (डायनॅमिक गणितासह)
+आता या मुख्य फंक्शनमध्ये मॅथेमॅटिकल गणितानुसार लूप्स चालवूया. जर संघ संख्या कमी असेल (उदा. ४ किंवा ८), 
+तर नको असलेले राऊंड्स आपोआप गाळले (Skip) जातील आणि तंतोतंत अचूक मॅचेस तयार होतील.
+ */
+async function handleFixtureGeneration(tId) {
+  const targetId = tId || currentTid;
+  console.log("%c--- 📅 [DYNAMIC FIXTURE GENERATION START] ---", "color: #3b82f6; font-weight: bold;");
+  
+  try {
+    const tDoc = await db.collection("tournaments").doc(targetId).get();
+    const limit = parseInt(tDoc.data().teamLimit) || 16;
+    
+    // १. एकूण लागणाऱ्या मॅचेसचा अंतिम नियम: (Teams - 1)
+    const totalActualMatches = limit - 1;
+    
+    // २. बाय (BYE) आणि राऊंड १ चे गणित
+    const powerOfTwo = Math.pow(2, Math.ceil(Math.log2(limit)));
+    const teamsInRound1 = (limit - (powerOfTwo / 2)) * 2;
+    const round1Matches = teamsInRound1 > 0 ? teamsInRound1 / 2 : 0;
+
+    // आधीच फिक्स्चर बनले आहे का तपासणी
+    const check = await db.collection("tournaments").doc(targetId).collection("matches").limit(1).get();
+    if (!check.empty) {
+      Swal.fire("माहिती", "फिक्स्चर्स आधीच तयार आहेत.", "info");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: 'ऑटोमेटेड फिक्स्चर!',
+      text: `${limit} टीम्ससाठी अचूक ${totalActualMatches} मॅचेस तयार होतील.`,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: 'हो, तयार करा',
+      background: '#111', color: '#fff', confirmButtonColor: '#f97316'
+    });
+
+    if (result.isConfirmed) {
+      const batch = db.batch();
+
+      console.log(`📊 [CALCULATING]: Total Matches to Create: ${totalActualMatches}`);
+
+      // 🎯 [THE ULTIMATE DYNAMIC ROUND NAMING ENGINE]
+      // प्रत्येक मॅच नंबरसाठी नाव काय असावं हे कॉम्प्युटर स्वतः मोजणार!
+      for (let mNo = 1; mNo <= totalActualMatches; mNo++) {
+        let roundName = "Round 1";
+
+        // शेवटची मॅच नेहमी 'FINAL' असणार
+        if (mNo === totalActualMatches) {
+          roundName = "FINAL";
+        }
+        // शेवटच्या मॅचच्या आधीच्या २ मॅचेस नेहमी 'Semi Final' असणार
+        else if (mNo === totalActualMatches - 1 || mNo === totalActualMatches - 2) {
+          roundName = "Semi Final";
+        }
+        // त्याच्या आधीच्या ४ मॅचेस नेहमी 'Quarter Final' असणार (जर ८ किंवा जास्त टीम्स असतील तरच इथे नंबर येईल)
+        else if (mNo >= totalActualMatches - 6 && mNo <= totalActualMatches - 3) {
+          roundName = "Quarter Final";
+        }
+        // जर १६ किंवा २० टीम्स असतील तर क्वार्टरच्या आधीच्या मॅचेस 'Pre-Quarter' किंवा 'Round 1' असतील
+        else {
+          if (limit > 16 && mNo <= round1Matches) {
+            roundName = "Round 1";
+          } else {
+            roundName = (limit <= 16) ? "Round 1" : "Pre-Quarter";
+          }
+        }
+
+        // आता अचूक मोजलेल्या नावासह कोरी मॅच एंट्री तयार करा
+        createMatchEntry(batch, targetId, mNo, roundName);
+      }
+
+      // सर्व मॅचेस एकाच वेळी फायरबेसवर जतन करणे
+      await batch.commit();
+      console.log(`%c✅ [SUCCESS]: एकूण ${totalActualMatches} मॅचेes नवीन scoreCard रचने सह सेव्ह झाल्या!`, "color: #22c55e; font-weight: bold;");
+      
+      await Swal.fire({ title: "यशस्वी!", text: "सर्व मॅचेस अचूक राऊंड नावासह तयार झाल्या!", icon: "success", background: '#111', color: '#fff' });
+      switchTab('fixtures', targetId);
+    }
+  } catch (err) { 
+    console.error("🚨 [Fixture Generation Error]:", err); 
+  }
+}
+
+/** scoreCard object */
+
 function createMatchEntry(batch, tId, mNo, roundName) {
   const mRef = db.collection("tournaments").doc(tId).collection("matches").doc(`M${mNo}`);
   
@@ -906,16 +1031,22 @@ function createMatchEntry(batch, tId, mNo, roundName) {
     matchNo: mNo,
     teamA: "TBD",
     teamB: "TBD",
-    teamA_id: "TBD", // 🟢 नवीन युनिक आयडी फील्ड भविष्यातील सुरक्षेसाठी
-    teamB_id: "TBD", // 🟢 नवीन युनिक आयडी फील्ड भविष्यातील सुरक्षेसाठी
+    teamA_id: "TBD", 
+    teamB_id: "TBD", 
     status: "Pending",
-    scoreA: 0,
-    scoreB: 0,
-    round: roundName
+    round: roundName,
+    lastUpdated: new Date().getTime(),
+
+    // 🎯 [SINGLE SOURCE OF TRUTH]: कोऱ्या मॅचमध्ये सुरुवातीलाच नवीन मास्टर ऑब्जेक्ट लॉक केला!
+    scoreCard: {
+        mainMatch:  { teamA: 0, teamB: 0 },
+        fiveRaid:   { teamA: 0, teamB: 0 },
+        goldenRaid: { teamA: 0, teamB: 0 }
+    }
   });
 }
 
-
+/** */
 function getRoundName(matchNo, powerOfTwo) {
   let totalMatchesInBracket = powerOfTwo - 1;
   let currentRangeStart = 1;
@@ -943,52 +1074,8 @@ let currentTid = null; // ग्लोबल व्हेरिएबल
 /**switchTab फंक्शन (app.js मध्ये जोडा)
 हे फंक्शन टॅब बदलण्याचे आणि त्या टॅबनुसार डेटा दाखवण्याचे काम करेल
  */
-// async function switchTab(tabName, tId) {
-//   // १. जर आयडी आला असेल तर तो सेव्ह करा, नसेल तर सेव्ह केलेला वापरा
-//   if (tId) {
-//     currentTid = tId;
-//     localStorage.setItem('lastTournamentId', tId); // ब्राउझरमध्ये सेव्ह करा
-//   } else {
-//     currentTid = localStorage.getItem('lastTournamentId'); // रिफ्रेश केल्यावर इथून मिळेल
-//   }
 
-//   const targetId = currentTid;
-//   const content = document.getElementById('tabContent');
-
-//   // जर आयडीच नसेल, तर पुढे जाऊ नका
-//   if (!targetId || !content) {
-//     console.error("Tournament ID missing!");
-//     return;
-//   }
-
-//   // २. सर्व टॅब बटणांचे ॲक्टिव्ह स्टाइल रिसेट करा
-//   const tabs = document.querySelectorAll('button[onclick^="switchTab"]');
-//   tabs.forEach(tab => {
-//     tab.classList.remove('border-green-600', 'text-green-500');
-//     tab.classList.add('border-transparent', 'text-gray-400');
-    
-//     // जो टॅब क्लिक केलाय त्याला हायलाईट करा
-//     if (tab.getAttribute('onclick').includes(`'${tabName}'`)) {
-//       tab.classList.add('border-green-600', 'text-green-500');
-//       tab.classList.remove('border-transparent', 'text-gray-400');
-//     }
-//   });
-
-//   // ३. डेटा लोड करा
-//   try {
-//     const doc = await db.collection("tournaments").doc(targetId).get();
-//     const tData = doc.data();
-
-//     if (tabName === 'details') {
-//       renderDetailsTab(tData, targetId);
-//     } else if (tabName === 'fixtures') {
-//       renderFixturesTab(targetId);
-//     }
-//   } catch (error) {
-//     console.error("Tab switch error:", error);
-//   }
-// }
-
+/** */
 async function switchTab(tabName, tId) {
   console.log(`[Navigation]: Switching to tab -> ${tabName}`);
   
@@ -1183,6 +1270,8 @@ function renderTeamsTab(tData, tId) {
 
 // add Teams in Torunamnet
 /**यामध्ये आपण जुना डेटा (केवळ नाव असलेली स्ट्रिंग) आणि नवीन डेटा (पूर्ण ऑब्जेक्ट) दोन्ही सुरक्षितपणे मॅनेज केले आहेत */
+
+
 async function displayTournamentTeams(teamsList, tId) {
     console.log("%c----------------------------------------", "color: #f97316; font-weight: bold;");
     console.log("[Process]: Rendering Team Grid with Full-Card Click Logic...");
@@ -1295,18 +1384,28 @@ async function displayTournamentTeams(teamsList, tId) {
  * renderFixturesTab (मॅचेस दाखवण्यासाठी)
 हे फंक्शन फायरबेसमधून त्या टूर्नामेंटच्या सर्व मॅचेस खेचून आणेल आणि कार्ड्सच्या स्वरूपात दाखवेल.
  */
+
 // async function renderFixturesTab(tId) {
 //   const content = document.getElementById('tabContent');
-//   content.innerHTML = "<p class='text-center text-gray-500 py-10 text-xs'>मॅचेस शोधत आहे...</p>";
+//   if (!content) return;
+
+//   // प्रो-लेव्हल लोडिंग स्टेट
+//   content.innerHTML = `
+//     <div class="flex justify-center py-20 text-orange-500 animate-pulse text-[10px] font-black uppercase tracking-widest">
+//         मॅचेस शोधत आहे (Loading Fixtures)...
+//     </div>`;
 
 //   try {
 //     const snapshot = await db.collection("tournaments").doc(tId).collection("matches").orderBy("matchNo").get();
     
 //     if (snapshot.empty) {
 //       content.innerHTML = `
-//         <div class="text-center py-10">
-//           <p class="text-gray-500 mb-4 text-sm">अजून मॅचेस तयार केल्या नाहीत.</p>
-//           <button onclick="switchTab('details', '${tId}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs">Details मध्ये जाऊन Template तयार करा</button>
+//         <div class="text-center py-16 bg-[#111] rounded-[2rem] border border-gray-800/60 px-4">
+//           <p class="text-gray-500 mb-5 text-xs font-bold uppercase tracking-wider">अजून फिक्स्चर्स / मॅचेस तयार केल्या नाहीत.</p>
+//           <button onclick="switchTab('details', '${tId}')" 
+//               class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-all">
+//               Details मध्ये जाऊन Template तयार करा
+//           </button>
 //         </div>
 //       `;
 //       return;
@@ -1317,74 +1416,226 @@ async function displayTournamentTeams(teamsList, tId) {
 //       const match = doc.data();
 //       const mId = doc.id;
 
-//       // १. दोन्ही टीम्स TBD नसतील तरच स्टार्ट बटन दाखवण्यासाठी हा चेक:
-//       const isReady = match.teamA !== "TBD" && match.teamB !== "TBD";
+//       // १. दोन्ही टीम्स TBD किंवा BYE नसतील तरच स्टार्ट बटन दाखवण्यासाठी हा चेक:
+//       const isReady = match.teamA !== "TBD" && match.teamB !== "TBD" && match.teamA !== "BYE" && match.teamB !== "BYE";
 
+//       // २. मऊ डार्क ऑरेंज थीममधील मॅच कार्ड
 //       content.innerHTML += `
-//         <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800 mb-4 shadow-xl">
-//           <div class="flex justify-between items-center mb-3">
-//             <div class="flex flex-col">
-//               <span class="text-[9px] bg-blue-900 text-blue-200 px-2 py-0.5 rounded-full font-bold w-fit uppercase tracking-wider mb-1">
+//         <div class="bg-[#111] p-4 rounded-[2rem] border border-gray-800/80 mb-4 shadow-xl relative overflow-hidden group">
+          
+//           <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-800/40">
+//             <div class="flex flex-col gap-0.5">
+//               <span class="text-[8px] bg-gray-950 text-orange-500 border border-gray-800 px-2 py-0.5 rounded-full font-black w-fit uppercase tracking-widest italic">
 //                 ${match.round || 'Tournament'}
 //               </span>
-//               <span class="text-[10px] text-gray-500 font-bold">Match #${match.matchNo}</span>
+//               <span class="text-[10px] text-gray-500 font-bold font-mono">Match #${match.matchNo}</span>
 //             </div>
             
-//             <button onclick="openMatchSetter('${tId}', '${mId}')" class="text-[10px] bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg text-gray-300 transition-colors">
+//             <button onclick="openMatchSetter('${tId}', '${mId}')" 
+//                 class="text-[9px] bg-gray-900 hover:bg-orange-600/10 hover:text-orange-500 text-gray-400 border border-gray-800 px-3 py-1.5 rounded-xl font-bold uppercase tracking-tighter transition-all active:scale-95 shadow-md">
 //               Set Team/Time
 //             </button>
 //           </div>
 
-//           <div class="flex justify-between items-center text-center py-2">
-//             <div class="flex-1">
-//               <p class="text-sm font-black text-white uppercase">${match.teamA}</p>
-//               <p class="text-xl font-black text-green-500 mt-1">${match.scoreA || 0}</p>
+//           <div class="flex justify-between items-center text-center py-2 relative">
+            
+//             <div class="flex-1 min-w-[40%]">
+//               <p class="text-xs font-black text-white uppercase tracking-tighter truncate px-1">${match.teamA}</p>
+//               <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${match.scoreA || 0}</p>
 //             </div>
-//             <div class="px-4">
-//               <div class="text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded font-bold uppercase">VS</div>
+            
+//             <div class="px-2 shrink-0">
+//               <div class="text-[9px] bg-gray-950 text-orange-500/80 border border-gray-800 px-2.5 py-1 rounded-xl font-black uppercase tracking-wider shadow-inner group-hover:scale-110 transition-transform italic">
+//                 VS
+//               </div>
 //             </div>
-//             <div class="flex-1">
-//               <p class="text-sm font-black text-white uppercase">${match.teamB}</p>
-//               <p class="text-xl font-black text-green-500 mt-1">${match.scoreB || 0}</p>
+            
+//             <div class="flex-1 min-w-[40%]">
+//               <p class="text-xs font-black text-white uppercase tracking-tighter truncate px-1">${match.teamB}</p>
+//               <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${match.scoreB || 0}</p>
 //             </div>
+            
 //           </div>
 
-//           <div class="mt-4 pt-3 border-t border-gray-800 flex justify-between items-center">
-//             <div class="text-[9px] text-gray-500 italic">
-//               📅 ${match.matchDate || 'Date TBD'} | ⏰ ${match.matchTime || 'Time TBD'}
+//           <div class="mt-4 pt-3 border-t border-gray-800/60 flex justify-between items-center">
+//             <div class="text-[9px] text-gray-500 font-medium font-mono flex items-center gap-1">
+//               <span>📅</span> ${match.matchDate || 'Date TBD'} <span class="text-gray-700">|</span> <span>⏰</span> ${match.matchTime || 'Time TBD'}
 //             </div>
             
 //             <div>
 //               ${isReady ? `
-//                 <button onclick="startScoring('${tId}', '${mId}')" class="bg-green-600 hover:bg-green-500 text-white text-[10px] px-4 py-2 rounded-xl font-black shadow-lg transition-all active:scale-95 uppercase">
+//                 <button onclick="startScoring('${tId}', '${mId}')" 
+//                     class="bg-orange-600 hover:bg-orange-700 text-white text-[10px] px-4 py-2 rounded-xl font-black shadow-[0_4px_12px_rgba(249,115,22,0.3)] transition-all active:scale-95 uppercase tracking-tighter italic">
 //                   Start Scoring
 //                 </button>
 //               ` : `
-//                 <span class="text-[9px] text-orange-500 font-bold italic animate-pulse">Set Teams First</span>
+//                 <span class="text-[8px] bg-orange-600/10 text-orange-500 border border-orange-500/20 px-2.5 py-1 rounded-lg font-black uppercase tracking-wider italic animate-pulse">
+//                   ${match.teamA === "BYE" || match.teamB === "BYE" ? 'BYE Match' : 'Set Teams First'}
+//                 </span>
 //               `}
 //             </div>
 //           </div>
+          
 //         </div>
 //       `;
 //     });
 
 //   } catch (error) {
-//     console.error("Error fetching fixtures:", error);
-//     content.innerHTML = "<div class='text-center text-red-500 py-10'>फिक्स्चर्स लोड करताना चूक झाली.</div>";
+//     console.error("[Fatal Error] renderFixturesTab failed:", error);
+//     content.innerHTML = `
+//       <div class='text-center text-red-500 py-16 bg-[#111] rounded-[2rem] border border-red-900/30 text-xs font-bold'>
+//         फिक्स्चर्स लोड करताना तांत्रिक चूक झाली.
+//       </div>`;
 //   }
 // }
 
+// async function renderFixturesTab(tId) {
+//   const content = document.getElementById('tabContent');
+//   if (!content) return;
+
+//   // प्रो-लेव्हल लोडिंग स्टेट
+//   content.innerHTML = `
+//     <div class="flex justify-center py-20 text-orange-500 animate-pulse text-[10px] font-black uppercase tracking-widest">
+//         मॅचेस शोधत आहे (Loading Fixtures)...
+//     </div>`;
+
+//   try {
+//     const snapshot = await db.collection("tournaments").doc(tId).collection("matches").orderBy("matchNo").get();
+    
+//     if (snapshot.empty) {
+//       content.innerHTML = `
+//         <div class="text-center py-16 bg-[#111] rounded-[2rem] border border-gray-800/60 px-4">
+//           <p class="text-gray-500 mb-5 text-xs font-bold uppercase tracking-wider">अजून फिक्स्चर्स / मॅचेस तयार केल्या नाहीत.</p>
+//           <button onclick="switchTab('details', '${tId}')" 
+//               class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-tighter shadow-lg active:scale-95 transition-all">
+//               Details मध्ये जाऊन Template तयार करा
+//           </button>
+//         </div>
+//       `;
+//       return;
+//     }
+
+//     content.innerHTML = "";
+//     snapshot.forEach(doc => {
+//       const match = doc.data();
+//       const mId = doc.id;
+
+//       // 🚨 [💥 THE CRITICAL LOADING FIX & CONSOLE LOGS]: डेटाबेस स्टेटस तपासणे
+//       const matchStatusFromDB = (match.status || match.match_status || "").trim();
+//       console.log(`🔍 [FIXTURE CARD LOAD]: Match #${match.matchNo} (ID: ${mId}) ➔ Database Status: "${matchStatusFromDB}"`);
+
+//       // १. दोन्ही टीम्स TBD किंवा BYE नसतील तरच स्टार्ट बटन दाखवण्यासाठी हा चेक
+//       const isReady = match.teamA !== "TBD" && match.teamB !== "TBD" && match.teamA !== "BYE" && match.teamB !== "BYE";
+
+//       // 🎯 स्टेटस 'Finished' असेल तर "START SCORING" ऐवजी "VIEW SUMMARY" दाखवण्याचे बटन लॉजिक
+//       let actionButtonHtml = "";
+
+//       if (matchStatusFromDB === "Finished") {
+//          console.log(`✅ [FIXTURE BLOCK]: Match #${match.matchNo} आधीच संपली आहे. 'Start Scoring' बटण ब्लॉक केले!`);
+//          actionButtonHtml = `
+//             <button onclick="viewMatchSummary('${mId}')" 
+//                 class="bg-slate-800 hover:bg-slate-750 text-zinc-400 border border-slate-700 text-[10px] px-4 py-2 rounded-xl font-black shadow-md transition-all active:scale-95 uppercase tracking-tighter">
+//                 🏁 View Summary
+//             </button>
+//          `;
+//       } else if (isReady) {
+//          console.log(`🏃‍♂️ [FIXTURE LIVE]: Match #${match.matchNo} अजून चालू किंवा नवीन आहे. 'Start Scoring' बटण उपलब्ध आहे.`);
+//          actionButtonHtml = `
+//             <button onclick="startScoring('${tId}', '${mId}')" 
+//                 class="bg-orange-600 hover:bg-orange-700 text-white text-[10px] px-4 py-2 rounded-xl font-black shadow-[0_4px_12px_rgba(249,115,22,0.3)] transition-all active:scale-95 uppercase tracking-tighter italic">
+//               Start Scoring
+//             </button>
+//          `;
+//       } else {
+//          actionButtonHtml = `
+//             <span class="text-[8px] bg-orange-600/10 text-orange-500 border border-orange-500/20 px-2.5 py-1 rounded-lg font-black uppercase tracking-wider italic animate-pulse">
+//               ${match.teamA === "BYE" || match.teamB === "BYE" ? 'BYE Match' : 'Set Teams First'}
+//             </span>
+//          `;
+//       }
+
+//       // २. मऊ डार्क ऑरेंज थीममधील मॅच कार्ड (डिझाईन नो चेंज)
+//       content.innerHTML += `
+//         <div class="bg-[#111] p-4 rounded-[2rem] border border-gray-800/80 mb-4 shadow-xl relative overflow-hidden group">
+          
+//           <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-800/40">
+//             <div class="flex flex-col gap-0.5">
+//               <span class="text-[8px] bg-gray-950 text-orange-500 border border-gray-800 px-2 py-0.5 rounded-full font-black w-fit uppercase tracking-widest italic">
+//                 ${match.round || 'Tournament'}
+//               </span>
+//               <span class="text-[10px] text-gray-500 font-bold font-mono">Match #${match.matchNo}</span>
+//             </div>
+            
+//             <button onclick="openMatchSetter('${tId}', '${mId}')" 
+//                 class="text-[9px] bg-gray-900 hover:bg-orange-600/10 hover:text-orange-500 text-gray-400 border border-gray-800 px-3 py-1.5 rounded-xl font-bold uppercase tracking-tighter transition-all active:scale-95 shadow-md">
+//               Set Team/Time
+//             </button>
+//           </div>
+
+//           <div class="flex justify-between items-center text-center py-2 relative">
+            
+//             <div class="flex-1 min-w-[40%]">
+//               <p class="text-xs font-black text-white uppercase tracking-tighter truncate px-1">${match.teamA}</p>
+//               <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${match.scoreA || 0}</p>
+//             </div>
+            
+//             <div class="px-2 shrink-0">
+//               <div class="text-[9px] bg-gray-950 text-orange-500/80 border border-gray-800 px-2.5 py-1 rounded-xl font-black uppercase tracking-wider shadow-inner group-hover:scale-110 transition-transform italic">
+//                 VS
+//               </div>
+//             </div>
+            
+//             <div class="flex-1 min-w-[40%]">
+//               <p class="text-xs font-black text-white uppercase tracking-tighter truncate px-1">${match.teamB}</p>
+//               <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${match.scoreB || 0}</p>
+//             </div>
+            
+//           </div>
+
+//           <div class="mt-4 pt-3 border-t border-gray-800/60 flex justify-between items-center">
+//             <div class="text-[9px] text-gray-500 font-medium font-mono flex items-center gap-1">
+//               <span>📅</span> ${match.matchDate || 'Date TBD'} <span class="text-gray-700">|</span> <span>⏰</span> ${match.matchTime || 'Time TBD'}
+//             </div>
+            
+//             <div>
+//               ${actionButtonHtml} 
+//             </div>
+//           </div>
+          
+//         </div>
+//       `;
+//     });
+
+//   } catch (error) {
+//     console.error("[Fatal Error] renderFixturesTab failed:", error);
+//     content.innerHTML = `
+//       <div class='text-center text-red-500 py-16 bg-[#111] rounded-[2rem] border border-red-900/30 text-xs font-bold'>
+//         फिक्स्चर्स लोड करताना तांत्रिक चूक झाली.
+//       </div>`;
+//   }
+// }
+
+/**
+ * सुधारित renderFixturesTab फंक्शन (मास्टर ऑब्जेक्ट डिस्प्लेसह)
+आपण ठरवल्याप्रमाणे तुझा प्रो-लेव्हल लोडिंग स्टेट, मऊ डार्क ऑरेंज थीम, "Start Scoring" चे बटन लॉजिक आणि कडक कन्सोल लॉग्स जसेच्या तसे सुरक्षित ठेवले आहेत. 
+फक्त डिस्प्ले करताना स्कोअर कसा ओढायचा, तिथं आपण मास्टर ऑब्जेक्टचा कप्पा जोडला आहे.
+ */
 async function renderFixturesTab(tId) {
+  // =========================================================================
+  // 📂 SECTION 1: DOM CHECK & PRO-LEVEL INITIAL LOADING STATE
+  // =========================================================================
   const content = document.getElementById('tabContent');
   if (!content) return;
 
-  // प्रो-लेव्हल लोडिंग स्टेट
   content.innerHTML = `
     <div class="flex justify-center py-20 text-orange-500 animate-pulse text-[10px] font-black uppercase tracking-widest">
         मॅचेस शोधत आहे (Loading Fixtures)...
     </div>`;
 
   try {
+    // =========================================================================
+    // 📂 SECTION 2: FIRESTORE FIXTURES FETCH & EMPTY CHECK
+    // =========================================================================
     const snapshot = await db.collection("tournaments").doc(tId).collection("matches").orderBy("matchNo").get();
     
     if (snapshot.empty) {
@@ -1401,14 +1652,66 @@ async function renderFixturesTab(tId) {
     }
 
     content.innerHTML = "";
+
+    // =========================================================================
+    // 📂 SECTION 3: LOOPING MATCHES & MASTER SCORECARD DISPLAY RESOLUTION
+    // =========================================================================
     snapshot.forEach(doc => {
       const match = doc.data();
       const mId = doc.id;
 
-      // १. दोन्ही टीम्स TBD किंवा BYE नसतील तरच स्टार्ट बटन दाखवण्यासाठी हा चेक:
+      // अ. डेटाबेस स्टेटस तपासणी आणि कन्सोल लॉग्स
+      const matchStatusFromDB = (match.status || match.match_status || "").trim();
+      console.log(`🔍 [FIXTURE CARD LOAD]: Match #${match.matchNo} (ID: ${mId}) ➔ Database Status: "${matchStatusFromDB}"`);
+
+      // ब. मास्टर स्कोरकार्ड रेझोल्युशन (scoreCard ऑब्जेक्टमधून स्कोअर ओढणे)
+      const card = match.scoreCard || {
+          mainMatch: { teamA: Number(match.scoreA || 0), teamB: Number(match.scoreB || 0) }
+      };
+      
+      const displayScoreA = card.mainMatch.teamA;
+      const displayScoreB = card.mainMatch.teamB;
+
+      // क. दोन्ही टीम्स TBD किंवा BYE नसतील तरच स्टार्ट बटण दाखवण्यासाठी चेक
       const isReady = match.teamA !== "TBD" && match.teamB !== "TBD" && match.teamA !== "BYE" && match.teamB !== "BYE";
 
-      // २. मऊ डार्क ऑरेंज थीममधील मॅच कार्ड
+
+      // =========================================================================
+      // 📂 SECTION 4: DYNAMIC ACTION BUTTON LOGIC (🎯 THE CRITICAL tId FIX)
+      // =========================================================================
+      let actionButtonHtml = "";
+
+      if (matchStatusFromDB === "Finished") {
+         console.log(`✅ [FIXTURE BLOCK]: Match #${match.matchNo} आधीच संपली आहे. 'View Summary' उपलब्ध केले.`);
+         
+         // 🚨 [💥 THE EXACT FIX]: viewMatchSummary च्या आत '${tId}' आणि '${mId}' दोन्ही अचूक पास केले!
+            // फिक्स्चर टॅबच्या आत Finished मॅचसाठी बटण असं असावं:
+            actionButtonHtml = `
+                <button onclick="openSummaryModal('${tId}', '${mId}')" 
+                    class="bg-slate-800 hover:bg-slate-750 text-zinc-400 border border-slate-700 text-[10px] px-4 py-2 rounded-xl font-black shadow-md transition-all active:scale-95 uppercase tracking-tighter">
+                    🏁 View Summary
+                </button>
+            `;
+      } else if (isReady) {
+         console.log(`🏃‍♂️ [FIXTURE LIVE]: Match #${match.matchNo} नवीन/चालू आहे. 'Start Scoring' उपलब्ध केले.`);
+         actionButtonHtml = `
+            <button onclick="startScoring('${tId}', '${mId}')" 
+                class="bg-orange-600 hover:bg-orange-700 text-white text-[10px] px-4 py-2 rounded-xl font-black shadow-[0_4px_12px_rgba(249,115,22,0.3)] transition-all active:scale-95 uppercase tracking-tighter italic">
+              Start Scoring
+            </button>
+         `;
+      } else {
+         actionButtonHtml = `
+            <span class="text-[8px] bg-orange-600/10 text-orange-500 border border-orange-500/20 px-2.5 py-1 rounded-lg font-black uppercase tracking-wider italic animate-pulse">
+              ${match.teamA === "BYE" || match.teamB === "BYE" ? 'BYE Match' : 'Set Teams First'}
+            </span>
+         `;
+      }
+
+
+      // =========================================================================
+      // 📂 SECTION 5: PURE DYNAMIC ORANGE/DARK KABADDI CARD HTML TEMPLATE
+      // =========================================================================
       content.innerHTML += `
         <div class="bg-[#111] p-4 rounded-[2rem] border border-gray-800/80 mb-4 shadow-xl relative overflow-hidden group">
           
@@ -1430,7 +1733,7 @@ async function renderFixturesTab(tId) {
             
             <div class="flex-1 min-w-[40%]">
               <p class="text-xs font-black text-white uppercase tracking-tighter truncate px-1">${match.teamA}</p>
-              <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${match.scoreA || 0}</p>
+              <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${displayScoreA}</p>
             </div>
             
             <div class="px-2 shrink-0">
@@ -1441,7 +1744,7 @@ async function renderFixturesTab(tId) {
             
             <div class="flex-1 min-w-[40%]">
               <p class="text-xs font-black text-white uppercase tracking-tighter truncate px-1">${match.teamB}</p>
-              <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${match.scoreB || 0}</p>
+              <p class="text-2xl font-black text-white mt-1.5 font-mono drop-shadow-md">${displayScoreB}</p>
             </div>
             
           </div>
@@ -1452,16 +1755,7 @@ async function renderFixturesTab(tId) {
             </div>
             
             <div>
-              ${isReady ? `
-                <button onclick="startScoring('${tId}', '${mId}')" 
-                    class="bg-orange-600 hover:bg-orange-700 text-white text-[10px] px-4 py-2 rounded-xl font-black shadow-[0_4px_12px_rgba(249,115,22,0.3)] transition-all active:scale-95 uppercase tracking-tighter italic">
-                  Start Scoring
-                </button>
-              ` : `
-                <span class="text-[8px] bg-orange-600/10 text-orange-500 border border-orange-500/20 px-2.5 py-1 rounded-lg font-black uppercase tracking-wider italic animate-pulse">
-                  ${match.teamA === "BYE" || match.teamB === "BYE" ? 'BYE Match' : 'Set Teams First'}
-                </span>
-              `}
+              ${actionButtonHtml} 
             </div>
           </div>
           
@@ -1478,339 +1772,297 @@ async function renderFixturesTab(tId) {
   }
 }
 
+
 /**
  * startScoring फंक्शन (स्कोअरिंग स्क्रीनकडे नेण्यासाठी)
 हे फंक्शन स्कोअरिंग स्क्रीन लोड करेल आणि कोणत्या मॅचचे स्कोअरिंग करायचे आहे त्याचा आयडी पाठवेल.
  */
 let matchSetupData = null;
 
-
-
-
-
+/******** */
 // async function startScoring(tId, mId) {
-//     console.log("Starting Match Setup:", tId, mId);
-//     matchSetupData = { tId, mId };
-    
-//     // --- बदल १: आधी LocalStorage मध्ये 'Resume' करण्यासाठी डेटा आहे का ते चेक करा ---
-//     const localMatch = localStorage.getItem(`active_match_${mId}`);
-//     if (localMatch) {
-//         const savedData = JSON.parse(localMatch);
-//         if (savedData.status === "STARTED") {
-//             console.log("Match already started, resuming scoring...");
-//             // जर मॅच सुरू असेल तर थेट स्कोअरिंग UI कडे वळा (हे फंक्शन आपण नंतर लिहू)
-//             // resumeMatchUI(savedData); 
-//             // return; 
-//         }
-//     }
-
-//     const modal = document.getElementById('startMatchModal');
-//     const tossSelect = document.getElementById('tossWinner');
-//     const tabBtnA = document.getElementById('tabBtnA');
-//     const tabBtnB = document.getElementById('tabBtnB');
-
-//     if (!modal || !tossSelect) {
-//         Swal.fire("Error", "Start Match Modal missing in HTML!", "error");
-//         return;
-//     }
-
-//     try {
-//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-//         const match = mDoc.data();
-
-//         // १. टॉस विनरचे ऑप्शन्स भरा
-//         tossSelect.innerHTML = `
-//             <option value="${match.teamA}">${match.teamA}</option>
-//             <option value="${match.teamB}">${match.teamB}</option>
-//         `;
-
-//         // २. टॅब बटणांवर टीमची नावे दाखवा
-//         if (tabBtnA) tabBtnA.innerText = match.teamA;
-//         if (tabBtnB) tabBtnB.innerText = match.teamB;
-
-//         // ३. १२ खेळाडूंचे इनपुट रेंडर करा
-//         renderPlayerInputs('playerListA', 'A');
-//         renderPlayerInputs('playerListB', 'B');
-
-//         // --- बदल २: जर आधीच खेळाडूंची नावे लोकलमध्ये असतील तर ती इनपुटमध्ये भरा ---
-//         if (localMatch) {
-//             const savedData = JSON.parse(localMatch);
-//             fillSavedPlayers(savedData); // हे एक छोटा फंक्शन आपण खाली बनवूया
-//         }
-
-//         // ४. मोडल उघडा
-//         modal.classList.remove('hidden');
-//         modal.classList.add('flex');
-        
-//         // ५. बाय डिफॉल्ट Team A चा टॅब उघडा ठेवा
-//         switchPlayerTab('A');
-
-//     } catch (e) {
-//         console.error("Error in startScoring:", e);
-//         Swal.fire("Error", "डेटा लोड करताना चूक झाली.", "error");
-//     }
-// }
-
-// async function startScoring(tId, mId) {
-//     console.log(`--- [MATCH_INIT] Checking Status for Match: ${mId} --- 🚀`);
-//     matchSetupData = { tId, mId };
-    
-//     try {
-//         // १. सर्वात आधी Firestore मधून मॅचचा करंट स्टेटस चेक करा ☁️
-//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-        
-//         if (!mDoc.exists) {
-//             Swal.fire("Error", "मॅचचा डेटा सापडला नाही!", "error");
-//             return;
-//         }
-
-//         const match = mDoc.data();
-//         console.log(`[STATUS_CHECK] Current Match Status: ${match.status} 📊`);
-
-//         // २. [LOCK-LOGIC] जर स्टेटस आधीच "Live" असेल तर सेटअप न दाखवता थेट स्कोअरिंगला पाठवा 🏁
-//         if (match.status === "Live") {
-//             console.log("[REDIRECT] Match is already Live. Bypassing Setup Modal... 🚀");
-            
-//             // लोकल स्टोरेज अपडेट करा जेणेकरून स्कोअरिंग स्क्रीनला डेटा मिळेल
-//             localStorage.setItem(`active_match_${mId}`, JSON.stringify(match));
-            
-//             // थेट स्कोअरिंग स्क्रीनवर नेणारे तुझे फंक्शन
-//             goToScoring(tId, mId); 
-//             return; // फंक्शन इथेच थांबवा
-//         }
-
-//         // ३. जर मॅच "Live" नसेल, तरच सेटअप मोडलची तयारी सुरू करा 🛠️
-//         const modal = document.getElementById('startMatchModal');
-//         const tossSelect = document.getElementById('tossWinner');
-//         const tabBtnA = document.getElementById('tabBtnA');
-//         const tabBtnB = document.getElementById('tabBtnB');
-
-//         if (!modal || !tossSelect) {
-//             Swal.fire("Error", "Start Match Modal missing in HTML!", "error");
-//             return;
-//         }
-
-//         // ४. टॉस विनरचे ऑप्शन्स भरा
-//         tossSelect.innerHTML = `
-//             <option value="${match.teamA}">${match.teamA}</option>
-//             <option value="${match.teamB}">${match.teamB}</option>
-//         `;
-
-//         // ५. टॅब बटणांवर टीमची नावे दाखवा
-//         if (tabBtnA) tabBtnA.innerText = match.teamA;
-//         if (tabBtnB) tabBtnB.innerText = match.teamB;
-
-//         // ६. १२ खेळाडूंचे इनपुट रेंडर करा
-//         console.log("[UI] Rendering 12 player inputs... 👤");
-//         renderPlayerInputs('playerListA', 'A');
-//         renderPlayerInputs('playerListB', 'B');
-
-//         // ७. [RESUME-DRAFT] जर लोकल स्टोरेजमध्ये काही अर्धवट भरलेला डेटा असेल तर तो भरा 📦
-//         const localMatch = localStorage.getItem(`active_match_${mId}`);
-//         if (localMatch) {
-//             const savedData = JSON.parse(localMatch);
-//             console.log("[DRAFT] Filling saved player names from draft... ✅");
-//             fillSavedPlayers(savedData); 
-//         }
-
-//         // ८. मोडल उघडा
-//         modal.classList.remove('hidden');
-//         modal.classList.add('flex');
-        
-//         // ९. बाय डिफॉल्ट Team A चा टॅब उघडा ठेवा
-//         switchPlayerTab('A');
-
-//     } catch (e) {
-//         console.error("[CRITICAL_ERROR] Error in startScoring: ❌", e);
-//         Swal.fire("Error", "डेटा लोड करताना चूक झाली.", "error");
-//     }
-// }
-
-/**अपडेटेड startScoring फंक्शन (app.js)
- * तुझ्या app.js मधील जुन्या फंक्शनच्या जागी हा कोड रिप्लेस करून घे. 
- * यामध्ये आपण डेटाबेस मधून खेळाडू शोधण्यासाठी match.teamAId आणि match.teamBId चा वापर केला आहे: 
- */
-// async function startScoring(tId, mId) {
-//     // 🔥 [FRONTEND LIVE LOG]: स्कोअरिंग मोडल उघडताच संपूर्ण आयडी पॅटर्न कन्सोलमध्ये चमकेल
 //     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
-//     console.log(`%c🚀 [मॅच स्कोअरिंग सुरुवात]: 🔐 फ्युचर-प्रूफ युनिक आयडी तपासणी सुरू...`, "color: #f97316; font-weight: bold; font-size: 11px;");
-//     console.log(`👉 टूर्नामेंट ID : ${tId}`);
-//     console.log(`👉 मॅच आयडी     : ${mId}`);
+//     console.log(`%c🚀 [START SCORING TRIGGERED]: 🔐 युनिक आयडी हायब्रिड तपासणी सुरू...`, "color: #f97316; font-weight: bold;");
+//     console.log(`👉 Tournament ID : ${tId} | Match ID : ${mId}`);
 //     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
     
 //     matchSetupData = { tId, mId };
+//     currentEditingMatch = { tId, mId }; 
+//     localStorage.setItem('squad_editing_match', JSON.stringify(currentEditingMatch));
     
 //     try {
 //         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
         
 //         if (!mDoc.exists) {
-//             console.error(`🚨 [ERR]: टूर्नामेंट "${tId}" मध्ये मॅच "${mId}" चा डेटा सापडला नाही!`);
+//             console.error(`🚨 [CRITICAL ERROR]: फायरबेसमध्ये टूर्नामेंट "${tId}" अंतर्गत मॅच "${mId}" सापडली नाही!`);
 //             Swal.fire("त्रुटी", "मॅचचा डेटा सापडला नाही!", "error");
 //             return;
 //         }
 
 //         const match = mDoc.data();
+//         console.log("📦 [Firestore Fetch Success]: फायरबेसमधून आलेला मूळ डेटा:", match);
 
-//         // 🟢 [अल्टीमेट आयडी फिक्स]: आपण डिझाईन केलेले नवीन कडक सिस्टीम आयडी (TM_...) इथून गोळा करणे
 //         const idA = match.teamA_id;
 //         const idB = match.teamB_id;
+//         const dbStatus = (match.status || match.match_status || "").trim();
 
-//         console.log(`%c[आयडी ट्रॅकिंग]: संघ A आयडी -> %c"${idA}" %c| संघ B आयडी -> %c"${idB}"`, 
-//             "color: #gray;", "color: #3b82f6; font-weight: bold;", "color: #gray;", "color: #3b82f6; font-weight: bold;");
+//         // 🎯 [STAGE RESTORE]: ५-५ (`five_raid`) आणि सुवर्ण मोड (`golden_raid`) असतानाही थेट पॅनेल री-लोड करणे
+//         if (dbStatus === "Live" || dbStatus === "1st_Half_End" || dbStatus === "five_raid" || dbStatus === "golden_raid" || (match.teamAPlayers && match.teamAPlayers.length > 0)) {
+//             console.log(`%c[STAGE RESTORE DETECTED] ➔ मॅच आधीच '${dbStatus}' आहे. थेट स्कोअरिंग पॅनल री-लोड करत आहे... 🏁`, "color: #22c55e; font-weight: bold;");
+            
+//             matchSetupData = {
+//                 tId: tId,
+//                 mId: mId,
+//                 roundName: match.round || match.roundName || "League Match",
+//                 scoreA: match.scoreA !== undefined ? Number(match.scoreA) : 0,
+//                 scoreB: match.scoreB !== undefined ? Number(match.scoreB) : 0,
+//                 teamAName: match.teamA,
+//                 teamBName: match.teamB
+//             };
 
-//         // जर आयडी मिळाले नाहीत, तर डेव्हलपमेंटमध्येच अलर्ट येईल जेणेकरून चूक लगेच पकडता येईल
-//         if (!idA || !idB || idA === "TBD" || idB === "TBD") {
-//             console.error("🚨 एरर: मॅच डॉक्युमेंटमध्ये अधिकृत teamA_id किंवा teamB_id (TM_...) सापडला नाही!");
-//             Swal.fire({
-//                 icon: 'error',
-//                 title: 'संघाची माहिती अपूर्ण!',
-//                 text: 'स्कोअरिंग सुरू करण्यापूर्वी कृपया फिक्सचर सेटरमध्ये जाऊन दोन्ही संघांची निवड अचूक करा.'
-//             });
-//             return;
-//         }
+//             localStorage.setItem(`active_match_${tId}_${mId}`, JSON.stringify(match));
+//             localStorage.setItem('liveScoreA', matchSetupData.scoreA);
+//             localStorage.setItem('liveScoreB', matchSetupData.scoreB);
+            
+//             const dbSeconds = (match.savedMatchTime !== undefined) ? match.savedMatchTime : 1200;
+//             matchTotalSeconds = dbSeconds;
+//             localStorage.setItem('savedMatchTime', dbSeconds);
+            
+//             window.isMatchPaused = true;
+//             window.isFirstTimeStart = (dbSeconds == 1200);
 
-//         // जर स्टेटस आधीच "Live" असेल तर थेट स्कोअरिंग स्क्रीनला पाठवा
-//         if (match.status === "Live") {
-//             console.log("%c[REDIRECT]: मॅच आधीच लाईव्ह आहे. थेट स्कोअरिंग स्क्रीनवर पाठवत आहे... 🏁", "color: #22c55e; font-weight: bold;");
-//             localStorage.setItem(`active_match_${mId}`, JSON.stringify(match));
+//             // ५-५ आणि गोल्डन मोडचे मेमरी फ्लॅग्ज जागेवर ऑन करणे
+//             if (dbStatus === "five_raid") window.isFiveRaidModeOn = true;
+//             if (dbStatus === "golden_raid") { window.isFiveRaidModeOn = false; window.isGoldenRaidActiveNow = true; }
+
+//             if (typeof socket !== 'undefined' && socket && socket.connected) {
+//                 const initialPayload = {
+//                     matchId: mId,
+//                     tournamentId: tId,
+//                     round: matchSetupData.roundName,
+//                     teamA: matchSetupData.teamAName,
+//                     scoreA: matchSetupData.scoreA,
+//                     teamB: matchSetupData.teamBName,
+//                     scoreB: matchSetupData.scoreB,
+//                     status: dbStatus || "Live",
+//                     lastRaid: match.lastRaid || null
+//                 };
+                
+//                 socket.emit('match_status_changed_or_updated', initialPayload);
+//             }
+
 //             goToScoring(tId, mId); 
+
+//             setTimeout(() => {
+//                 const elA = document.getElementById('scoreA');
+//                 const elB = document.getElementById('scoreB');
+//                 if (elA) elA.innerText = matchSetupData.scoreA;
+//                 if (elB) elB.innerText = matchSetupData.scoreB;
+
+//                 // 🚨 [THE MASTER RESTORE FIX]: जर मेनू बदलून युझर परत आला आणि सामना ५-५ मोडवर असेल, 
+//                 // तर तुझ्या मूळ 'startFiveRaidsSystem' फंक्शनला पुन्हा कॉल करणे, जेणेकरून जुनी बटणे आपोआप लपतील!
+//                 if (dbStatus === "five_raid" && typeof startFiveRaidsSystem === "function") {
+//                     console.log("⚙️ [RE-LOAD SYNC]: ५-५ मोड सुरू आहे, जुनी बटणे लपवण्यासाठी सिस्टीम री-इश्यू करत आहे...");
+//                     startFiveRaidsSystem(matchSetupData.scoreA, matchSetupData.scoreB);
+//                 }
+//             }, 300);
+
 //             return; 
 //         }
 
+//         console.log("🆕 [New Match Setup]: नवीन सामना आहे, खेळाडू निवड मोडल उघडत आहे.");
 //         const modal = document.getElementById('startMatchModal');
 //         const tossSelect = document.getElementById('tossWinner');
-//         const tabBtnA = document.getElementById('tabBtnA');
-//         const tabBtnB = document.getElementById('tabBtnB');
-
-//         if (!modal || !tossSelect) {
-//             console.error("🚨 [UI एरर]: HTML मध्ये 'startMatchModal' किंवा 'tossWinner' एलिमेंट्स गहाळ आहेत!");
-//             Swal.fire("त्रुटी", "Start Match Modal एचटीएमएलमध्ये सापडले नाही!", "error");
-//             return;
+//         if (modal && tossSelect) {
+//             tossSelect.innerHTML = `<option value="${idA}">${match.teamA}</option><option value="${idB}">${match.teamB}</option>`;
+//             document.getElementById('tabBtnA').innerText = match.teamA;
+//             document.getElementById('tabBtnB').innerText = match.teamB;
+//             await renderSmartSquadSelector('playerListA', idA, 'A');
+//             await renderSmartSquadSelector('playerListB', idB, 'B');
+//             modal.classList.remove('hidden');
+//             modal.classList.add('flex');
+//             switchPlayerTab('A');
 //         }
 
-//         // टॉस विनर ड्रॉपडाउनमध्ये नाव दिसेल, पण व्हॅल्यू म्हणून बॅकएंडला युनिक आयडी (TM_...) जाईल
-//         tossSelect.innerHTML = `
-//             <option value="${idA}">${match.teamA}</option>
-//             <option value="${idB}">${match.teamB}</option>
-//         `;
-
-//         if (tabBtnA) tabBtnA.innerText = match.teamA;
-//         if (tabBtnB) tabBtnB.innerText = match.teamB;
-
-//         // 🟢 [स्मार्ट सिलेक्टर]: थेट नवीन कडक आयडी पास करून मास्टर प्लेअर्समधून ३० खेळाडू ओढणे
-//         console.log(`%c👤 [UI Rendering]: मास्टर डेटाबेसमधून खेळाडू शोधत आहे...`, "color: #06b6d4;");
-//         console.log(`👉 टीम A (ID: ${idA}) चे खेळाडू लोड होत आहेत...`);
-//         await renderSmartSquadSelector('playerListA', idA, 'A');
-        
-//         console.log(`👉 टीम B (ID: ${idB}) चे खेळाडू लोड होत आहेत...`);
-//         await renderSmartSquadSelector('playerListB', idB, 'B');
-
-//         // मोडल ओपन करा
-//         modal.classList.remove('hidden');
-//         modal.classList.add('flex');
-        
-//         // बाय डिफॉल्ट Team A चा टॅब उघडा ठेवा
-//         switchPlayerTab('A');
-//         console.log("%c✅ [मॅच सेटअप मोडल रेडी]: युझर १२ खेळाडू निवडण्यासाठी सज्ज आहे!", "color: #22c55e; font-weight: bold;");
-
 //     } catch (e) {
-//         console.error("🚨 [startScoring क्रिटिकल एरर]:", e);
+//         console.error("🚨 [startScoring FATAL CRASH]:", e);
 //         Swal.fire("त्रुटी", "डेटा लोड करताना तांत्रिक चूक झाली.", "error");
 //     }
 // }
 
+/**
+ * 
+ */
 async function startScoring(tId, mId) {
     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
-    console.log(`%c🚀 [मॅच स्कोअरिंग सुरुवात]: 🔐 सुरक्षित युनिक आयडी तपासणी सुरू...`, "color: #f97316; font-weight: bold; font-size: 11px;");
-    console.log(`👉 टूर्नामेंट ID : ${tId} | मॅच आयडी : ${mId}`);
+    console.log(`%c🚀 [START SCORING TRIGGERED]: 🔐 युनिक आयडी हायब्रिड तपासणी सुरू...`, "color: #f97316; font-weight: bold;");
+    console.log(`👉 Tournament ID : ${tId} | Match ID : ${mId}`);
     console.log("%c==================================================", "color: #f97316; font-weight: bold;");
     
     matchSetupData = { tId, mId };
-    currentEditingMatch = { tId, mId }; // बॅकअप सेव्हर
+    currentEditingMatch = { tId, mId }; 
     localStorage.setItem('squad_editing_match', JSON.stringify(currentEditingMatch));
     
     try {
         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
         
         if (!mDoc.exists) {
-            console.error(`🚨 [ERR]: टूर्नामेंट "${tId}" मध्ये मॅच "${mId}" चा डेटा सापडला नाही!`);
+            console.error(`🚨 [CRITICAL ERROR]: फायरबेसमध्ये टूर्नामेंट "${tId}" अंतर्गत मॅच "${mId}" सापडली नाही!`);
             Swal.fire("त्रुटी", "मॅचचा डेटा सापडला नाही!", "error");
             return;
         }
 
         const match = mDoc.data();
+        console.log("📦 [Firestore Fetch Success]: फायरबेसमधून आलेला मूळ डेटा:", match);
+
         const idA = match.teamA_id;
         const idB = match.teamB_id;
+        const dbStatus = (match.status || match.match_status || "").trim();
 
-        if (!idA || !idB || idA === "TBD" || idB === "TBD") {
-            console.error("🚨 एरर: मॅच डॉक्युमेंटमध्ये अधिकृत teamA_id किंवा teamB_id (TM_...) सापडला नाही!");
-            Swal.fire({
-                icon: 'error',
-                title: 'संघाची माहिती अपूर्ण!',
-                text: 'स्कोअरिंग सुरू करण्यापूर्वी कृपया फिक्सचर सेटरमध्ये जाऊन दोन्ही संघांची निवड अचूक करा.'
-            });
-            return;
-        }
+        const currentScoreCard = match.scoreCard || {
+            mainMatch:  { teamA: Number(match.scoreA || 0), teamB: Number(match.scoreB || 0) },
+            fiveRaid:   { teamA: 0, teamB: 0 },
+            goldenRaid: { teamA: 0, teamB: 0 }
+        };
 
-        // 🎯 [YOUR SMART BYPASS FIX]: जर मॅच आधीच लाईव्ह असेल किंवा खेळाडू आधीच निवडले असतील, तर प्लेयर सिलेक्शन बायपास करा!
-        if (match.status === "Live" || (match.teamAPlayers && match.teamAPlayers.length > 0)) {
-            console.log(`%c[STAGE RESTORE] ➔ मॅच आधीच सुरू झालेली आहे! थेट स्कोअरिंग पॅनलकडे नेव्हिगेट करत आहे... 🏁`, "color: #22c55e; font-weight: bold;");
+        // 🎯 [STAGE RESTORE]: सामने पुन्हा उघडतानाचा रिस्टोर फ्लो
+        if (dbStatus === "Live" || dbStatus === "1st_Half_End" || dbStatus === "five_raid" || dbStatus === "golden_raid" || (match.teamAPlayers && match.teamAPlayers.length > 0)) {
+            console.log(`%c[STAGE RESTORE DETECTED] ➔ मॅच आधीच '${dbStatus}' आहे. मास्टर ऑब्जेक्टसह री-लोड करत आहे... 🏁`, "color: #22c55e; font-weight: bold;");
             
-            // १. पूर्ण मॅच डेटा लोकल स्टोरेजमध्ये साठवा
-            localStorage.setItem(`active_match_${mId}`, JSON.stringify(match));
+            matchSetupData = {
+                tId: tId,
+                mId: mId,
+                roundName: match.round || match.roundName || "League Match",
+                teamAName: match.teamA,
+                teamBName: match.teamB,
+                scoreCard: currentScoreCard
+            };
+
+            localStorage.setItem(`active_match_${tId}_${mId}`, JSON.stringify(match));
+            localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
             
-            // २. ☁️ क्लाउड डेटाबेसवरून चालू वेळ मेमरीमध्ये खेचा 
             const dbSeconds = (match.savedMatchTime !== undefined) ? match.savedMatchTime : 1200;
             matchTotalSeconds = dbSeconds;
             localStorage.setItem('savedMatchTime', dbSeconds);
             
-            // ३. पुन्हा आत येताना सुरुवातीला टायमर पॉज ठेवा (युझर क्लिक करून रिझ्युम करेल)
             window.isMatchPaused = true;
-            
-            // 🎯 ४. जर वेळ पूर्ण १२०० सेकंद असेल तरच नवीन मॅच माना, नाहीतर थेट RESUME मोड लागू होईल!
             window.isFirstTimeStart = (dbSeconds == 1200);
 
-            console.log(`📝 [Cloud Time Sync]: डेटाबेसवर शिल्लक वेळ -> ${dbSeconds} सेकंद | isFirstTimeStart: ${window.isFirstTimeStart}`);
+            // ५-५ आणि गोल्डन मोडचे मेमरी फ्लॅग्ज ऑन करणे
+            if (dbStatus === "five_raid") window.isFiveRaidModeOn = true;
+            if (dbStatus === "golden_raid") { window.isFiveRaidModeOn = false; window.isGoldenRaidActiveNow = true; }
 
-            // ५. थेट स्कोरिंग स्क्रीनवर ढकला
+            if (typeof socket !== 'undefined' && socket && socket.connected) {
+                const initialPayload = {
+                    matchId: mId,
+                    tournamentId: tId,
+                    round: matchSetupData.roundName,
+                    teamA: matchSetupData.teamAName,
+                    teamB: matchSetupData.teamBName,
+                    status: dbStatus || "Live",
+                    lastRaid: match.lastRaid || null,
+                    scoreCard: currentScoreCard
+                };
+                
+                console.log("📤 [SOCKET OUTGOING]: रिस्टोर करताना मास्टर ऑब्जेक्ट锁 सॉकेटवर पाठवला.");
+                socket.emit('match_status_changed_or_updated', initialPayload);
+            }
+
             goToScoring(tId, mId); 
-            return; // 🔐 प्लेयर मोडल उघडणे कायमचे ब्लॉक केले!
+
+            // 🎯 [UI DISPLAY DYNAMICS]: सामना ज्या मोडवर आहे, त्यानुसार स्क्रीनवर अचूक स्कोअर दाखवणे
+            setTimeout(() => {
+                const elA = document.getElementById('scoreA');
+                const elB = document.getElementById('scoreB');
+                
+                let displayScoreA = currentScoreCard.mainMatch.teamA;
+                let displayScoreB = currentScoreCard.mainMatch.teamB;
+
+                // if (dbStatus === "five_raid") {
+                //     displayScoreA = currentScoreCard.fiveRaid.teamA;
+                //     displayScoreB = currentScoreCard.fiveRaid.teamB;
+                // } else if (dbStatus === "golden_raid") {
+                //     displayScoreA = currentScoreCard.goldenRaid.teamA;
+                //     displayScoreB = currentScoreCard.goldenRaid.teamB;
+                // }
+
+                if (elA) elA.innerText = displayScoreA;
+                if (elB) elB.innerText = displayScoreB;
+
+                console.log(`📊 [UI SUCCESS]: स्क्रीनवर ${dbStatus} मोडचा स्कोअर (${displayScoreA}-${displayScoreB}) यशस्वीरित्या लोड झाला!`);
+
+                // =============================================================
+                // 🎯 [💥 THE WATERPROOF HYBRID CHECK SYSTEM]
+                // =============================================================
+                const raidTimeline = match.timeline || match.raidsHistory || [];
+
+                if (dbStatus === "five_raid" && typeof startFiveRaidsSystem === "function") {
+                    console.log("%c⚙️ [5-5 RECOVERY ROUTER]: ५-५ डेटा पडताळणी सुरू...", "background: #eab308; color: #000; font-weight: bold;");
+
+                    // १. टाइमलाइन वरून ५-५ च्या एकूण किती रेड्स झाल्या आहेत ते मोजणे
+                    const completedFiveRaids = raidTimeline.filter(r => r.matchStatus === "five_raid" || r.status === "five_raid");
+                    const totalRaidsCount = completedFiveRaids.length;
+
+                    console.log(`📋 [TIMELINE MATRIX]: आत्तापर्यंत झालेल्या ५-५ रेड्स संख्या ➔ ${totalRaidsCount}`);
+
+                    // २. लोकल स्टोरेजमधील सेव्ह केलेला सिंगल मास्टर ऑब्जेक्ट बाहेर काढणे
+                    const savedOrderRaw = localStorage.getItem(`five_raid_order_setup_${mId}`);
+                    
+                    if (savedOrderRaw) {
+                        const parsedOrder = JSON.parse(savedOrderRaw);
+                        window.fiveRaidOrderTeamA = parsedOrder.teamA_order || [];
+                        window.fiveRaidOrderTeamB = parsedOrder.teamB_order || [];
+                        console.log("✅ [ORDER RECOVERED]: लोकल स्टोरेजमधील मास्टर ऑब्जेक्ट यशस्वीरीत्या मेमरीमध्ये रिस्टोर केला!", parsedOrder);
+                    } else {
+                        console.warn("⚠️ [ORDER NOT FOUND]: 'five_raid_order_setup' ऑब्जेक्ट सापडला नाही, फ्रेश विजार्ड दाखवावा लागेल.");
+                    }
+
+                    // ३. आत्तापर्यंत झालेल्या रेड्सचा आकडा तुझा जुन्या सिस्टीम फंक्शनला पास करणे
+                    // (जर एकूण रेड्स ० पेक्षा जास्त असतील तर विंडो बायपास करून थेट स्कोरिंग ग्राउंड ऑन होईल)
+                    if (typeof window.fiveRaidCount !== 'undefined') {
+                        window.fiveRaidCount = totalRaidsCount + 1; // पुढची रेड सेट केली
+                    }
+                    
+                    startFiveRaidsSystem(totalRaidsCount);
+                } 
+                
+                else if (dbStatus === "golden_raid") {
+                    console.log("%c⚙️ [GOLDEN RAID RECOVERY ROUTER]: सुवर्ण रेड पडताळणी सुरू...", "background: #ef4444; color: #fff; font-weight: bold;");
+                    
+                    const completedGoldenRaids = raidTimeline.filter(r => r.matchStatus === "golden_raid" || r.status === "golden_raid");
+                    console.log(`📋 [TIMELINE MATRIX]: आत्तापर्यंत झालेल्या गोल्डन रेड्स संख्या ➔ ${completedGoldenRaids.length}`);
+                    
+                    // समजा तुझ्याकडे गोल्डन रेड सुरू करण्यासाठी 'startGoldenRaidSystem' असेल:
+                    if (typeof startGoldenRaidSystem === "function") {
+                        startGoldenRaidSystem(completedGoldenRaids.length);
+                    }
+                }
+                // =============================================================
+                
+            }, 300);
+
+            return; 
         }
 
-        // --- जर मॅच अगदी नवीन असेल (खेळाडू पहिल्यांदा निवडायचे असतील), तरच खालचा कोड चालेल ---
+        console.log("🆕 [New Match Setup]: नवीन सामना आहे, खेळाडू निवड मोडल उघडत आहे.");
         const modal = document.getElementById('startMatchModal');
         const tossSelect = document.getElementById('tossWinner');
-        const tabBtnA = document.getElementById('tabBtnA');
-        const tabBtnB = document.getElementById('tabBtnB');
-
-        if (!modal || !tossSelect) {
-            console.error("🚨 [UI एरर]: HTML मध्ये 'startMatchModal' किंवा 'tossWinner' एलिमेंट्स गहाळ आहेत!");
-            return;
+        if (modal && tossSelect) {
+            tossSelect.innerHTML = `<option value="${idA}">${match.teamA}</option><option value="${idB}">${match.teamB}</option>`;
+            document.getElementById('tabBtnA').innerText = match.teamA;
+            document.getElementById('tabBtnB').innerText = match.teamB;
+            await renderSmartSquadSelector('playerListA', idA, 'A');
+            await renderSmartSquadSelector('playerListB', idB, 'B');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            switchPlayerTab('A');
         }
 
-        tossSelect.innerHTML = `
-            <option value="${idA}">${match.teamA}</option>
-            <option value="${idB}">${match.teamB}</option>
-        `;
-
-        if (tabBtnA) tabBtnA.innerText = match.teamA;
-        if (tabBtnB) tabBtnB.innerText = match.teamB;
-
-        console.log(`%c👤 [UI Rendering]: मास्टर डेटाबेसमधून खेळाडू शोधत आहे...`, "color: #06b6d4;");
-        await renderSmartSquadSelector('playerListA', idA, 'A');
-        await renderSmartSquadSelector('playerListB', idB, 'B');
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        switchPlayerTab('A');
-        console.log("%c✅ [मॅच सेटअप मोडल रेडी]: युझर १२ खेळाडू निवडण्यासाठी सज्ज आहे!", "color: #22c55e; font-weight: bold;");
-
     } catch (e) {
-        console.error("🚨 [startScoring क्रिटिकल एरर]:", e);
+        console.error("🚨 [startScoring FATAL CRASH]:", e);
         Swal.fire("त्रुटी", "डेटा लोड करताना तांत्रिक चूक झाली.", "error");
     }
 }
-
 
 /**नवीन renderSmartSquadSelector फंक्शन (app.js)
  * हे फंक्शन तुझ्या app.js मध्ये जोडून घे. 
@@ -2216,161 +2468,124 @@ function handleSetupRoleChange(prefix, index) {
     }
 }
 
-
+/** */
 
 function closeStartMatchModal() {
     document.getElementById('startMatchModal').classList.add('hidden');
 }
 
+/** */
 // async function confirmStartMatch() {
-//     console.log("--- [START_MATCH_PROCESS] Final Validation Initiated ---");
-//     const { tId, mId } = matchSetupData;
-
-//     // १. 'Playing' खेळाडूंची संख्या मोजा (Strict Exactly 7 Check)
-//     const countA = document.querySelectorAll('.player-check-A:checked').length;
-//     const countB = document.querySelectorAll('.player-check-B:checked').length;
-
-//     console.log(`[VALIDATION] Team A: ${countA}/7 | Team B: ${countB}/7`);
-
-//     if (countA !== 7 || countB !== 7) {
-//         console.warn(`[DENIED] Match blocked. Improper player count.`);
-//         Swal.fire({
-//             title: "खेळाडू अपूर्ण आहेत!",
-//             text: `मॅच सुरू करण्यासाठी प्रत्येक टीममध्ये ७ खेळाडू निवडणे अनिवार्य आहे. (सध्या: Team A: ${countA}, Team B: ${countB})`,
-//             icon: "error",
-//             background: '#111',
-//             color: '#fff'
-//         });
-//         return; 
+//     console.log("%c--- 🚀 [START_MATCH_PROCESS] फायनल व्हॅलिडेशन सुरू ---", "color: #f97316; font-weight: bold;");
+    
+//     // १. चालू मॅचचा संदर्भ मिळवा
+//     if (!currentEditingMatch) {
+//         console.error("🚨 [मॅच सुरू एरर]: currentEditingMatch चा डेटा मेमरीमध्ये सापडला नाही!");
+//         const backupMatch = localStorage.getItem('squad_editing_match');
+//         if (backupMatch) {
+//             currentEditingMatch = JSON.parse(backupMatch);
+//             console.log("%c✅ [Backup Recovered]: LocalStorage मधून मॅच संदर्भ यशस्वीरित्या परत मिळवला!", "color: #22c55e; font-weight: bold;");
+//         } else {
+//             console.error("🚨 [Fatal Error]: कुठेही मॅचचा आयडी सापडला नाही!");
+//             Swal.fire({
+//                 icon: "error",
+//                 title: "संदर्भ सापडला नाही!",
+//                 text: "मॅचचा आयडी मेमरीमधून उडाला आहे. कृपया मोडल बंद करून पुन्हा 'Start Scoring' वर क्लिक करा.",
+//                 background: '#111',
+//                 color: '#fff',
+//                 confirmButtonColor: '#f97316'
+//             });
+//             return;
+//         }
 //     }
 
-//     // २. जर ७-७ खेळाडू असतील तरच डेटा गोळा करा
-//     console.log("[PROCEED] Validation successful. Collecting players data...");
-//     const playersA = getPlayersData('A');
-//     const playersB = getPlayersData('B');
+//     const { tId, mId } = currentEditingMatch;
 
-//     const tossWinner = document.getElementById('tossWinner').value;
-//     const selection = document.getElementById('tossSelection').value;
-
-//     try {
-//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-//         const match = mDoc.data();
-        
-//         // [IMPORTANT]: इकडे आपण localStorage मध्ये नावे साठवत आहोत
-//         // यामुळे scoring.html ला समजेल की नक्की कोणत्या टीम खेळत आहेत.
-//         localStorage.setItem('currentTeamA', match.teamA);
-//         localStorage.setItem('currentTeamB', match.teamB);
-
-//         let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
-
-//         const updateData = {
-//             status: "Live",
-//             tossWinner: tossWinner,
-//             tossSelection: selection,
-//             firstRaidBy: firstRaidBy,
-//             currentRaider: firstRaidBy,
-//             teamAPlayers: playersA,
-//             teamBPlayers: playersB,
-//             scoreA: 0,
-//             scoreB: 0,
-//             timeoutsA: 0,
-//             timeoutsB: 0,
-//             matchLog: []
-//         };
-
-//         console.log("[DATABASE] Updating Firestore with match data...");
-//         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
-        
-//         console.log("--- [MATCH_LIVE] Setup Complete! ---");
-//         closeStartMatchModal();
-        
-//         Swal.fire({
-//             title: "Match Live!",
-//             text: "स्कोअरिंग विंडो उघडत आहे...",
-//             icon: "success",
-//             timer: 1500,
-//             showConfirmButton: false
-//         });
-
-//         goToScoring(tId, mId);
-
-//     } catch (e) {
-//         console.error("[CRITICAL_ERROR] Failed to start match:", e);
-//         Swal.fire("Error", "डेटा अपडेट करताना तांत्रिक अडचण आली.", "error");
-//     }
-//     if (typeof updateVisualPlayers === "function") updateVisualPlayers();
-// }
-
-
-// async function confirmStartMatch99() {
-//     console.log("--- [START_MATCH_PROCESS] Final Validation Initiated --- 🚀");
-//     const { tId, mId } = matchSetupData;
-
-//     // १. [DATA COLLECTION] आधी सर्व १२ खेळाडूंचा डेटा मिळवा (getPlayersData मधून) 🚀
-//     // हे फंक्शन आपण मगाशी अपडेट केले आहे जेणेकरून रिकामी नावे पकडता येतील.
+//     // २. [DATA COLLECTION]: दोन्ही टीमचा सिलेक्टेड डेटा मिळवा
 //     const playersA = getPlayersData('A'); 
 //     const playersB = getPlayersData('B');
 
-//     // २. [STRICT NAME VALIDATION] १२ खेळाडूंची नावे भरली आहेत का ते तपासा 🚀
-//     // जर एक जरी नाव रिकामं असेल (name === ""), तर hasEmpty true होईल.
-//     const hasEmptyA = playersA.some(p => p.name === "");
-//     const hasEmptyB = playersB.some(p => p.name === "");
+//     // ३. [STRICT TOTAL COUNT CHECK - नियम १२ खेळाडूंचा]:
+//     if (playersA.length !== 12 || playersB.length !== 12) {
+//         console.warn(`❌ [DENIED]: मॅच ब्लॉक! खेळाडूंची संख्या १२ नाही. (A: ${playersA.length}, B: ${playersB.length})`);
+//         Swal.fire({
+//             title: "खेळाडू संख्या चुकीची!",
+//             text: `PRO-KABADDI नियमांनुसार मॅच सुरू करण्यासाठी प्रत्येक संघातून तंतोतंत १२ खेळाडू निवडणे बंधनकारक आहे! (सध्या तुमच्या निवडीनुसार ➔ Team A: ${playersA.length}, Team B: ${playersB.length})`,
+//             icon: "error",
+//             background: '#111',
+//             color: '#fff',
+//             confirmButtonColor: '#f97316'
+//         });
+//         return;
+//     }
+
+//     // ४. [STRICT PLAYING & BENCH CHECK - नियम ७ प्लेइंग आणि ५ बेंच]:
+//     const playingA = playersA.filter(p => p.playingStatus === "Playing").length;
+//     const benchA = playersA.filter(p => p.playingStatus === "Bench").length;
+    
+//     const playingB = playersB.filter(p => p.playingStatus === "Playing").length;
+//     const benchB = playersB.filter(p => p.playingStatus === "Bench").length;
+
+//     if (playingA !== 7 || playingB !== 7 || benchA !== 5 || benchB !== 5) {
+//         console.warn(`❌ [DENIED]: मॅच ब्लॉक! ७ Playing आणि ५ Bench चा कोटा मॅच होत नाहीये.`);
+//         Swal.fire({
+//             title: "स्क्वॉड रचना चुकली!",
+//             text: `मॅचसाठी प्रत्येक संघात ७ Playing आणि ५ Bench खेळाडू असणे अनिवार्य आहे! (सध्या ➔ Team A: ${playingA} Playing + ${benchA} Bench | Team B: ${playingB} Playing + ${benchB} Bench)`,
+//             icon: "error",
+//             background: '#111',
+//             color: '#fff',
+//             confirmButtonColor: '#f97316'
+//         });
+//         return;
+//     }
+
+//     // ५. [STRICT NAME VALIDATION]: सर्व नावे भरलेली आहेत ना याची शेवटची तपासणी
+//     const hasEmptyA = playersA.some(p => !p.name || p.name.trim() === "");
+//     const hasEmptyB = playersB.some(p => !p.name || p.name.trim() === "");
 
 //     if (hasEmptyA || hasEmptyB) {
-//         console.warn("[DENIED] Match blocked. Real player names are missing. ❌");
-//         Swal.fire({
-//             title: "नावे अनिवार्य आहेत!",
-//             text: "सर्व १२ खेळाडूंची खरी नावे भरणे आवश्यक आहे. डिफॉल्ट नावे चालणार नाहीत.",
-//             icon: "error",
-//             background: '#111',
-//             color: '#fff'
-//         });
-//         return; // नाव नसेल तर प्रोसेस इथेच थांबवा
+//         console.warn("❌ [DENIED]: नावे रिकामी आहेत.");
+//         Swal.fire({ title: "नावे अनिवार्य!", text: "निवडलेल्या सर्व १२ खेळाडूंची खरी नावे डेटाबेसमध्ये असणे आवश्यक आहे.", icon: "error", background: '#111', color: '#fff' });
+//         return;
 //     }
 
-//     // ३. [STRICT COUNT VALIDATION] 'Playing' खेळाडूंची संख्या मोजा (Exactly 7 Check) 🚀
-//     const countA = playersA.filter(p => p.playingStatus === "Playing").length;
-//     const countB = playersB.filter(p => p.playingStatus === "Playing").length;
+//     console.log("✅ [WHALIDATION SUCCESS]: दोन्ही टीम्सचे १२ खेळाडू (७ Playing + 5 Bench) शंभर टक्के चोख आहेत!");
 
-//     console.log(`[VALIDATION] Names OK. Playing Count - Team A: ${countA}/7 | Team B: ${countB}/7 ✅`);
-
-//     if (countA !== 7 || countB !== 7) {
-//         console.warn("[DENIED] Match blocked. Improper playing count. ❌");
-//         Swal.fire({
-//             title: "खेळाडू निवड चुकली!",
-//             text: `मॅच सुरू करण्यासाठी प्रत्येक टीममध्ये नक्की ७ खेळाडू 'Playing' असणे अनिवार्य आहे. (सध्या: Team A: ${countA}, Team B: ${countB})`,
-//             icon: "error",
-//             background: '#111',
-//             color: '#fff'
-//         });
-//         return; // ७ खेळाडू नसतील तर पुढे जाऊ नका
-//     }
-
-//     // ४. [PROCEED] सर्व व्हॅलिडेशन झाले, आता डेटा गोळा करा ✅
+//     // ६. टॉस आणि सिलेक्शन व्हॅल्यूज मिळवा
 //     const tossWinner = document.getElementById('tossWinner').value;
 //     const selection = document.getElementById('tossSelection').value;
 
+//     if (tossWinner === "TBD") {
+//         Swal.fire({ title: "टॉस विनर निवडा!", text: "मॅच सुरू करण्यापूर्वी टॉस कोणी जिंकला ते निवडणे आवश्यक आहे.", icon: "warning", background: '#111', color: '#fff', confirmButtonColor: '#f97316' });
+//         return;
+//     }
+
 //     try {
-//         console.log("[DATABASE] Fetching match details... ☁️");
+//         console.log("☁️ [DATABASE]: फायरस्टोअरमधून मॅचचे मूळ तपशील मिळवत आहे...");
 //         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
 //         const match = mDoc.data();
         
-//         // पहिल्या रेडरचे लॉजिक
+//         // पहिल्या रेडरचे कडक लॉजिक
 //         let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
 
-//         // ५. [HYBRID-DATA] पूर्ण मॅच ऑब्जेक्ट तयार करा (Status "Live") 🚀
+//         // ७. [HYBRID-DATA]: पूर्ण मॅच ऑब्जेक्ट तयार करा (Status "Live")
 //         const updateData = {
 //             tId: tId,
 //             mId: mId,
 //             teamAName: match.teamA,
 //             teamBName: match.teamB,
-//             status: "Live", // आता स्टेटस लाईव्ह झाला, इथून बॅक येता येणार नाही
+//             teamA_id: match.teamA_id || "", 
+//             teamB_id: match.teamB_id || "", 
+//             status: "Live",        
+//             savedMatchTime: 1200,          // ☁️ डेटाबेसमध्ये फ्रेश २० मिनिटे लॉक
+//             isMatchPaused: true,           // सुरुवातीला टायमर पॉज असेल
+//             isFirstTimeStart: true,         
 //             tossWinner: tossWinner,
 //             tossSelection: selection,
 //             firstRaidBy: firstRaidBy,
 //             currentRaider: firstRaidBy,
-//             teamAPlayers: playersA, // १२ खरी नावे (Playing/Bench)
-//             teamBPlayers: playersB, // १२ खरी नावे
+//             teamAPlayers: playersA,         
+//             teamBPlayers: playersB,         
 //             scoreA: 0,
 //             scoreB: 0,
 //             timeoutsA: 0,
@@ -2379,56 +2594,165 @@ function closeStartMatchModal() {
 //             lastUpdated: new Date().getTime()
 //         };
 
-//         // ६. [HYBRID-SAVE] LocalStorage मध्ये स्नॅपशॉट सेव्ह करा 📦
-//         console.log("[HYBRID-LOCAL] Saving to LocalStorage for safety... ✅");
+//         // ८. [HYBRID-SAVE]: LocalStorage मध्ये स्नॅपशॉट सेव्ह करा 📦
+//         console.log("📦 [HYBRID-LOCAL]: सुरक्षिततेसाठी LocalStorage मध्ये डेटा जतन करत आहे...");
 //         localStorage.setItem(`active_match_${mId}`, JSON.stringify(updateData));
         
-//         // ७. [HYBRID-SAVE] Firestore मध्ये सिंक करा ☁️
-//         console.log("[HYBRID-CLOUD] Syncing to Firestore... ✅");
+//         // 🔐 [अल्टीमेट टायमर फिक्स]: जुना कचरा टाईम इथल्या इथे साफ करून कडकडीत १२०० सेकंद टाका!
+//         localStorage.setItem('savedMatchTime', 1200);
+        
+//         // ग्लोबल मेमरी स्टेट्स सक्तीने फ्रेश मॅचसाठी री-सेट करा
+//         window.isMatchPaused = true;
+//         window.isFirstTimeStart = true;
+//         if (typeof matchTotalSeconds !== 'undefined') matchTotalSeconds = 1200; // मुख्य टायमर रिसेट 🎯
+
+//         // ९. [HYBRID-SAVE]: Firestore मध्ये सिंक करा ☁️
+//         console.log("☁️ [HYBRID-CLOUD]: फायरस्टोअर क्लाउडमध्ये डेटा सिंक करत आहे...");
 //         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
         
-//         console.log("--- [MATCH_LIVE] Status: Live. Setup Locked. 🚀 ---");
+//         // 🎯 [NEW SOCKET EMIT]: सामना सुरू झालाय, पूर्ण डेटा सर्व्हर मेमरीकडे रवाना करा (0 Reads Cost!)
+//         if (typeof socket !== 'undefined' && socket && socket.connected) {
+//             socket.emit('match_status_changed_or_updated', updateData);
+//             console.log("%c🚀 [Socket Emit Success]: फ्रेश सामना सर्व्हरच्या मेमरीत लाईव्ह रजिस्टर्ड केला!", "color: #22c55e; font-weight: bold;");
+//         }
+
+//         console.log("%c--- 🎉 [MATCH_LIVE] मॅच अधिकृतपणे लाईव्ह झाली आहे आणि ठेवा सेटअप लॉक झाला! 🚀 ---", "background: #22c55e; color: #fff; font-weight: bold; padding: 4px;");
         
 //         closeStartMatchModal();
         
-//         Swal.fire({
-//             title: "Match Live!",
+//         await Swal.fire({
+//             title: "Match Live! 🔥",
 //             text: "१२ खेळाडूंची नावे नोंदवली आहेत. मॅच सुरू होत आहे!",
 //             icon: "success",
+//             background: '#111',
+//             color: '#fff',
 //             timer: 1500,
 //             showConfirmButton: false
 //         });
 
-//         // ८. स्कोअरिंग स्क्रीनवर रिडायरेक्ट करा
-//         console.log(`[REDIRECT] Moving to scoring window... 🏁`);
+//         // १०. स्कोअरिंग स्क्रीनवर रिडायरेक्ट करा
+//         console.log(`🏁 [REDIRECT]: स्कोअरिंग विंडो उघडत आहे (goToScoring)...`);
 //         goToScoring(tId, mId);
 
 //     } catch (e) {
-//         console.error("[CRITICAL_ERROR] Setup failed: ❌", e);
-//         Swal.fire("Error", "डेटा अपडेट करताना तांत्रिक अडचण आली.", "error");
+//         console.error("🚨 [CRITICAL_ERROR] मॅच लाईव्ह करताना मोठी अडचण आली:", e);
+//         Swal.fire({ title: "Error", text: "डेटा अपडेट करताना तांत्रिक अडचण आली.", icon: "error", background: '#111', color: '#fff' });
 //     }
 // }
 
-/** */
+/******** scoreA ** scoreB ** */
+// async function confirmStartMatch() {
+//     console.log("%c--- 🚀 [START_MATCH_PROCESS] फायनल व्हॅलिडेशन सुरू ---", "color: #f97316; font-weight: bold;");
+    
+//     if (!currentEditingMatch) {
+//         const backupMatch = localStorage.getItem('squad_editing_match');
+//         if (backupMatch) {
+//             currentEditingMatch = JSON.parse(backupMatch);
+//         } else {
+//             Swal.fire({
+//                 icon: "error", title: "संदर्भ सापडला नाही!",
+//                 text: "मॅचचा आयडी मेमरीमधून उडाला आहे. कृपया पुन्हा 'Start Scoring' वर क्लिक करा.",
+//                 background: '#111', color: '#fff', confirmButtonColor: '#f97316'
+//             });
+//             return;
+//         }
+//     }
+
+//     const { tId, mId } = currentEditingMatch;
+
+//     const playersA = getPlayersData('A'); 
+//     const playersB = getPlayersData('B');
+
+//     if (playersA.length !== 12 || playersB.length !== 12) {
+//         Swal.fire({
+//             title: "खेळाडू संख्या चुकीची!",
+//             text: `PRO-KABADDI नियमांनुसार प्रत्येक संघातून १२ खेळाडू निवडणे बंधनकारक आहे! (Team A: ${playersA.length}, Team B: ${playersB.length})`,
+//             icon: "error", background: '#111', color: '#fff', confirmButtonColor: '#f97316'
+//         });
+//         return;
+//     }
+
+//     const playingA = playersA.filter(p => p.playingStatus === "Playing").length;
+//     const benchA = playersA.filter(p => p.playingStatus === "Bench").length;
+//     const playingB = playersB.filter(p => p.playingStatus === "Playing").length;
+//     const benchB = playersB.filter(p => p.playingStatus === "Bench").length;
+
+//     if (playingA !== 7 || playingB !== 7 || benchA !== 5 || benchB !== 5) {
+//         Swal.fire({
+//             title: "स्क्वॉड रचना चुकली!",
+//             text: `मॅचसाठी प्रत्येक संघात ७ Playing आणि ५ Bench खेळाडू असणे अनिवार्य आहे!`,
+//             icon: "error", background: '#111', color: '#fff', confirmButtonColor: '#f97316'
+//         });
+//         return;
+//     }
+
+//     const tossWinner = document.getElementById('tossWinner').value;
+//     const selection = document.getElementById('tossSelection').value;
+
+//     if (tossWinner === "TBD") {
+//         Swal.fire({ title: "टॉस विनर निवडा!", text: "मॅच सुरू करण्यापूर्वी टॉस निवडा.", icon: "warning", background: '#111', color: '#fff', confirmButtonColor: '#f97316' });
+//         return;
+//     }
+
+//     try {
+//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+//         const match = mDoc.data();
+        
+//         let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
+
+//         const updateData = {
+//             tId: tId, mId: mId,
+//             teamAName: match.teamA, teamBName: match.teamB,
+//             teamA_id: match.teamA_id || "", teamB_id: match.teamB_id || "", 
+//             status: "Live", savedMatchTime: 1200, isMatchPaused: true, isFirstTimeStart: true,         
+//             tossWinner: tossWinner, tossSelection: selection, firstRaidBy: firstRaidBy, currentRaider: firstRaidBy,
+//             teamAPlayers: playersA, teamBPlayers: playersB, 
+//             scoreA: 0, scoreB: 0, timeoutsA: 0, timeoutsB: 0, matchLog: [],
+//             lastUpdated: new Date().getTime()
+//         };
+
+//         // 🚨 [HYBRID KEY SAVE]: फ्रेश मॅच सुरू होतानाच युनिक हायब्रिड की मध्ये डेटा जतन करणे!
+//         localStorage.setItem(`active_match_${tId}_${mId}`, JSON.stringify(updateData));
+//         localStorage.setItem('savedMatchTime', 1200);
+        
+//         window.isMatchPaused = true;
+//         window.isFirstTimeStart = true;
+//         if (typeof matchTotalSeconds !== 'undefined') matchTotalSeconds = 1200; 
+
+//         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
+        
+//         if (typeof socket !== 'undefined' && socket && socket.connected) {
+//             socket.emit('match_status_changed_or_updated', updateData);
+//         }
+
+//         closeStartMatchModal();
+        
+//         await Swal.fire({ title: "Match Live! 🔥", text: "मॅच सुरू होत आहे!", icon: "success", background: '#111', color: '#fff', timer: 1500, showConfirmButton: false });
+
+//         goToScoring(tId, mId);
+
+//     } catch (e) {
+//         console.error("🚨 [confirmStartMatch Error]:", e);
+//     }
+// }
+
+/**
+ *  यात आपण जुन्या scoreA: 0, scoreB: 0 या सुट्या दोन फील्ड्स काढून तिथं आपला कडक scoreCard ऑब्जेक्ट बसवला आहे, 
+ * आणि सोबतच कन्सोल लॉग्स एकदम तंतोतंत ठेवले आहेत जेणेकरून Inspect -> Console मध्ये तुला प्रत्येक हालचाल स्वच्छ दिसेल.
+ */
+
 async function confirmStartMatch() {
     console.log("%c--- 🚀 [START_MATCH_PROCESS] फायनल व्हॅलिडेशन सुरू ---", "color: #f97316; font-weight: bold;");
     
-    // १. चालू मॅचचा संदर्भ मिळवा (कंसाचा फिक्स केला आहे 🎯)
     if (!currentEditingMatch) {
-        console.error("🚨 [मॅच सुरू एरर]: currentEditingMatch चा डेटा मेमरीमध्ये सापडला नाही!");
         const backupMatch = localStorage.getItem('squad_editing_match');
         if (backupMatch) {
             currentEditingMatch = JSON.parse(backupMatch);
-            console.log("%c✅ [Backup Recovered]: LocalStorage मधून मॅच संदर्भ यशस्वीरित्या परत मिळवला!", "color: #22c55e; font-weight: bold;");
         } else {
-            console.error("🚨 [Fatal Error]: कुठेही मॅचचा आयडी सापडला नाही!");
             Swal.fire({
-                icon: "error",
-                title: "संदर्भ सापडला नाही!",
-                text: "मॅचचा आयडी मेमरीमधून उडाला आहे. कृपया मोडल बंद करून पुन्हा 'Start Scoring' वर क्लिक करा.",
-                background: '#111',
-                color: '#fff',
-                confirmButtonColor: '#f97316'
+                icon: "error", title: "संदर्भ सापडला नाही!",
+                text: "मॅचचा आयडी मेमरीमधून उडाला आहे. कृपया पुन्हा 'Start Scoring' वर क्लिक करा.",
+                background: '#111', color: '#fff', confirmButtonColor: '#f97316'
             });
             return;
         }
@@ -2436,207 +2760,97 @@ async function confirmStartMatch() {
 
     const { tId, mId } = currentEditingMatch;
 
-    // २. [DATA COLLECTION]: दोन्ही टीमचा सिलेक्टेड डेटा मिळवा
     const playersA = getPlayersData('A'); 
     const playersB = getPlayersData('B');
 
-    // ३. [STRICT TOTAL COUNT CHECK - नियम १२ खेळाडूंचा]:
     if (playersA.length !== 12 || playersB.length !== 12) {
-        console.warn(`❌ [DENIED]: मॅच儲 ब्लॉक! खेळाडूंची संख्या १२ नाही. (A: ${playersA.length}, B: ${playersB.length})`);
         Swal.fire({
             title: "खेळाडू संख्या चुकीची!",
-            text: `PRO-KABADDI नियमांनुसार मॅच सुरू करण्यासाठी प्रत्येक संघातून तंतोतंत १२ खेळाडू निवडणे बंधनकारक आहे! (सध्या तुमच्या निवडीनुसार ➔ Team A: ${playersA.length}, Team B: ${playersB.length})`,
-            icon: "error",
-            background: '#111',
-            color: '#fff',
-            confirmButtonColor: '#f97316'
+            text: `PRO-KABADDI नियमांनुसार प्रत्येक संघातून १२ खेळाडू निवडणे बंधनकारक आहे! (Team A: ${playersA.length}, Team B: ${playersB.length})`,
+            icon: "error", background: '#111', color: '#fff', confirmButtonColor: '#f97316'
         });
         return;
     }
 
-    // ४. [STRICT PLAYING & BENCH CHECK - नियम ७ प्लेइंग आणि ५ बेंच]:
     const playingA = playersA.filter(p => p.playingStatus === "Playing").length;
     const benchA = playersA.filter(p => p.playingStatus === "Bench").length;
-    
     const playingB = playersB.filter(p => p.playingStatus === "Playing").length;
     const benchB = playersB.filter(p => p.playingStatus === "Bench").length;
 
     if (playingA !== 7 || playingB !== 7 || benchA !== 5 || benchB !== 5) {
-        console.warn(`❌ [DENIED]: मॅच ब्लॉक! ७ Playing आणि ५ Bench चा कोटा मॅच होत नाहीये.`);
         Swal.fire({
             title: "स्क्वॉड रचना चुकली!",
-            text: `मॅचसाठी प्रत्येक संघात ७ Playing आणि ५ Bench खेळाडू असणे अनिवार्य आहे! (सध्या ➔ Team A: ${playingA} Playing + ${benchA} Bench | Team B: ${playingB} Playing + ${benchB} Bench)`,
-            icon: "error",
-            background: '#111',
-            color: '#fff',
-            confirmButtonColor: '#f97316'
+            text: `मॅचसाठी प्रत्येक संघात ७ Playing आणि ५ Bench खेळाडू असणे अनिवार्य आहे!`,
+            icon: "error", background: '#111', color: '#fff', confirmButtonColor: '#f97316'
         });
         return;
     }
 
-    // ५. [STRICT NAME VALIDATION]: सर्व नावे भरलेली आहेत ना याची शेवटची तपासणी
-    const hasEmptyA = playersA.some(p => !p.name || p.name.trim() === "");
-    const hasEmptyB = playersB.some(p => !p.name || p.name.trim() === "");
-
-    if (hasEmptyA || hasEmptyB) {
-        console.warn("❌ [DENIED]: नावे रिकामी आहेत.");
-        Swal.fire({ title: "नावे अनिवार्य!", text: "निवडलेल्या सर्व १२ खेळाडूंची खरी नावे डेटाबेसमध्ये असणे आवश्यक आहे.", icon: "error", background: '#111', color: '#fff' });
-        return;
-    }
-
-    console.log("✅ [WHALIDATION SUCCESS]: दोन्ही टीम्सचे १२ खेळाडू (७ Playing + 5 Bench) शंभर टक्के चोख आहेत!");
-
-    // ६. टॉस आणि充 सिलेक्शन व्हॅल्यूज मिळवा
     const tossWinner = document.getElementById('tossWinner').value;
     const selection = document.getElementById('tossSelection').value;
 
     if (tossWinner === "TBD") {
-        Swal.fire({ title: "टॉस विनर निवडा!", text: "मॅच सुरू करण्यापूर्वी टॉस कोणी जिंकला ते निवडणे आवश्यक आहे.", icon: "warning", background: '#111', color: '#fff', confirmButtonColor: '#f97316' });
+        Swal.fire({ title: "टॉस विनर निवडा!", text: "मॅच सुरू करण्यापूर्वी टॉस निवडा.", icon: "warning", background: '#111', color: '#fff', confirmButtonColor: '#f97316' });
         return;
     }
 
     try {
-        console.log("☁️ [DATABASE]: फायरस्टोअरमधून मॅचचे मूळ तपशील मिळवत आहे...");
         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
         const match = mDoc.data();
         
-        // पहिल्या रेडरचे कडक लॉजिक
         let firstRaidBy = (selection === "Raid") ? tossWinner : (tossWinner === match.teamA ? match.teamB : match.teamA);
 
-        // ७. [HYBRID-DATA]: पूर्ण मॅच ऑब्जेक्ट तयार करा (Status "Live")
+        // 🚨 [💥 STEP 1: NEW ARCHITECTURE] - जुन्या सुट्या फील्ड्स डिलीट करून मास्टर ऑब्जेक्ट तयार करणे
         const updateData = {
-            tId: tId,
-            mId: mId,
-            teamAName: match.teamA,
-            teamBName: match.teamB,
-            teamA_id: match.teamA_id || "", 
-            teamB_id: match.teamB_id || "", 
-            status: "Live",        
-            savedMatchTime: 1200,          // ☁️ डेटाबेसमध्ये फ्रेश २० मिनिटे लॉक
-            isMatchPaused: true,           // सुरुवातीला टायमर पॉज असेल
-            isFirstTimeStart: true,         
-            tossWinner: tossWinner,
-            tossSelection: selection,
-            firstRaidBy: firstRaidBy,
-            currentRaider: firstRaidBy,
-            teamAPlayers: playersA,         
-            teamBPlayers: playersB,         
-            scoreA: 0,
-            scoreB: 0,
-            timeoutsA: 0,
-            timeoutsB: 0,
-            matchLog: [],
-            lastUpdated: new Date().getTime()
+            tId: tId, mId: mId,
+            teamAName: match.teamA, teamBName: match.teamB,
+            teamA_id: match.teamA_id || "", teamB_id: match.teamB_id || "", 
+            status: "Live", savedMatchTime: 1200, isMatchPaused: true, isFirstTimeStart: true,         
+            tossWinner: tossWinner, tossSelection: selection, firstRaidBy: firstRaidBy, currentRaider: firstRaidBy,
+            teamAPlayers: playersA, teamBPlayers: playersB, 
+            timeoutsA: 0, timeoutsB: 0, matchLog: [],
+            lastUpdated: new Date().getTime(),
+
+            // 🎯 [SINGLE SOURCE OF TRUTH]: सर्व स्कोअर एकाच कप्प्यात लॉक केले!
+            scoreCard: {
+                mainMatch:  { teamA: 0, teamB: 0 },
+                fiveRaid:   { teamA: 0, teamB: 0 },
+                goldenRaid: { teamA: 0, teamB: 0 }
+            }
         };
 
-        // ८. [HYBRID-SAVE]: LocalStorage मध्ये स्नॅपशॉट सेव्ह करा 📦
-        console.log("📦 [HYBRID-LOCAL]: सुरक्षिततेसाठी LocalStorage मध्ये डेटा जतन करत आहे...");
-        localStorage.setItem(`active_match_${mId}`, JSON.stringify(updateData));
-        
-        // 🔐 [अल्टीमेट टायमर फिक्स]: जुना कचरा टाईम इथल्या इथे साफ करून कडकडीत १२०० सेकंद टाका!
+        console.log("%c📊 [INITIALIZING SCORECARD]: फ्रेश मॅचसाठी नवीन स्कोअरकार्ड ऑब्जेक्ट तयार झाला आहे!", "color: #22c55e; font-weight: bold;");
+        console.dir(updateData.scoreCard);
+
+        // 🚨 [HYBRID KEY SAVE]: नवीन हायब्रिड की मध्ये संपूर्ण मास्टर ऑब्जेक्टसह डेटा जतन करणे
+        localStorage.setItem(`active_match_${tId}_${mId}`, JSON.stringify(updateData));
         localStorage.setItem('savedMatchTime', 1200);
         
-        // ग्लोबल मेमरी स्टेट्स सक्तीने फ्रेश मॅचसाठी री-सेट करा
         window.isMatchPaused = true;
         window.isFirstTimeStart = true;
-        if (typeof matchTotalSeconds !== 'undefined') matchTotalSeconds = 1200; // मुख्य टायमर रिसेट 🎯
+        if (typeof matchTotalSeconds !== 'undefined') matchTotalSeconds = 1200; 
 
-        // ९. [HYBRID-SAVE]: Firestore मध्ये सिंक करा ☁️
-        console.log("☁️ [HYBRID-CLOUD]: फायरस्टोअर क्लाउडमध्ये डेटा सिंक करत आहे...");
+        // फायरबेस अपडेट (आता थेट डीबी मध्ये scoreCard चा मॅप जाईल)
         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updateData);
+        console.log("☁️ [Firebase Update Success]: नवीन scoreCard डेटाबेसमध्ये यशस्वीरित्या सिंक झाला!");
         
-        console.log("%c--- 🎉 [MATCH_LIVE] मॅच अधिकृतपणे लाईव्ह झाली आहे आणि सेटअप लॉक झाला! 🚀 ---", "background: #22c55e; color: #fff; font-weight: bold; padding: 4px;");
-        
+        if (typeof socket !== 'undefined' && socket && socket.connected) {
+            console.log("📤 [SOCKET BROADCAST]: नवीन मास्टर ऑब्जेक्ट सॉकेट पाईपलाईनवर ब्रॉडकास्ट केला!");
+            socket.emit('match_status_changed_or_updated', updateData);
+        }
+
         closeStartMatchModal();
         
-        await Swal.fire({
-            title: "Match Live! 🔥",
-            text: "१२ खेळाडूंची नावे नोंदवली आहेत. मॅच सुरू होत आहे!",
-            icon: "success",
-            background: '#111',
-            color: '#fff',
-            timer: 1500,
-            showConfirmButton: false
-        });
+        await Swal.fire({ title: "Match Live! 🔥", text: "मॅच सुरू होत आहे!", icon: "success", background: '#111', color: '#fff', timer: 1500, showConfirmButton: false });
 
-        // १०. स्कोअरिंग स्क्रीनवर रिडायरेक्ट करा
-        console.log(`🏁 [REDIRECT]: स्कोअरिंग विंडो उघडत आहे (goToScoring)...`);
         goToScoring(tId, mId);
 
     } catch (e) {
-        console.error("🚨 [CRITICAL_ERROR] मॅच लाईव्ह करताना मोठी अडचण आली:", e);
-        Swal.fire({ title: "Error", text: "डेटा अपडेट करताना तांत्रिक अडचण आली.", icon: "error", background: '#111', color: '#fff' });
+        console.error("🚨 [confirmStartMatch Error]:", e);
     }
 }
 
-
-// function getPlayersData(prefix) {
-//     console.log(`--- [DATA_COLLECTION] Starting for Team: ${prefix} ---`);
-//     let data = [];
-    
-//     for (let i = 1; i <= 12; i++) {
-//         const noVal = document.getElementById(`${prefix}P${i}_no`).value;
-//         const nameVal = document.getElementById(`${prefix}P${i}_name`).value;
-//         const isChecked = document.getElementById(`${prefix}P${i}_check`).checked;
-
-//         // १. प्रत्येक प्लेयरचा ऑब्जेक्ट तयार करा
-//         const playerObj = {
-//             no: noVal || (prefix === 'A' ? i : i + 20),
-//             name: nameVal || `Player ${noVal || i}`,
-//             // आपण ठरवल्याप्रमाणे 'Playing' आणि 'Bench' हे शब्द वापरूया
-//             playingStatus: isChecked ? "Playing" : "Bench", 
-//             // कोर्टातील स्थिती
-//             status: isChecked ? "In" : "Out",
-//             outTime: null
-//         };
-
-//         data.push(playerObj);
-//     }
-
-//     // २. व्हेरिफिकेशनसाठी कन्सोल लॉग्स
-//     const playingCount = data.filter(p => p.playingStatus === "Playing").length;
-//     const benchCount = data.filter(p => p.playingStatus === "Bench").length;
-    
-//     console.log(`[SUMMARY] Team ${prefix}: ${playingCount} Playing, ${benchCount} Bench.`);
-    
-//     // पूर्ण डेटा टेबल फॉरमॅटमध्ये बघण्यासाठी (डेव्हलपमेंटसाठी खूप सोपं पडतं)
-//     console.table(data); 
-
-//     return data;
-// }
-
-/*** 2 
-function getPlayersData(prefix) {
-    console.log(`--- [DATA_COLLECTION] Starting for Team: ${prefix} --- 🚀`);
-    let data = [];
-    
-    for (let i = 1; i <= 12; i++) {
-        const noVal = document.getElementById(`${prefix}P${i}_no`).value.trim();
-        const nameVal = document.getElementById(`${prefix}P${i}_name`).value.trim();
-        const isChecked = document.getElementById(`${prefix}P${i}_check`).checked;
-
-        // १. प्रत्येक प्लेयरचा ऑब्जेक्ट तयार करा
-        const playerObj = {
-            no: noVal, // आता इथे डिफॉल्ट नंबर देणार नाही, युजरने टाकला तरच येईल
-            // [STRICT] जर नाव नसेल तर फक्त रिकामी स्ट्रिंग ठेवा, "Player X" असं नका करू 🚀
-            name: nameVal, 
-            playingStatus: isChecked ? "Playing" : "Bench", 
-            status: isChecked ? "In" : "Out",
-            outTime: null,
-            stats: { raids: 0, tackles: 0, points: 0 } // भविष्यासाठी आकडेवारी जोडली
-        };
-
-        data.push(playerObj);
-    }
-
-    // २. व्हेरिफिकेशनसाठी कन्सोल लॉग्स
-    const playingCount = data.filter(p => p.playingStatus === "Playing").length;
-    console.log(`[SUMMARY] Team ${prefix}: ${playingCount}/7 Playing Checked. ✅`);
-    
-    return data;
-}
-*/
-
+/** */
 function getPlayersData(prefix) {
     console.log(`%c--- 📥 [डेटा गोळा करणे]: Team ${prefix} चा कस्टमाईज्ड स्क्वॉड डेटा गोळा करत आहे... ---`, "color: #3b82f6; font-weight: bold;");
     let data = [];
@@ -2686,49 +2900,6 @@ function getPlayersData(prefix) {
 
 /** Edit Tournaments */
 let currentEditId = null; // सध्या कोणती टूर्नामेंट एडिट होत आहे त्याचा आयडी
-
-// async function editTournament(id) {
-//   try {
-//     const doc = await db.collection("tournaments").doc(id).get();
-//     if (!doc.exists) return;
-
-//     const t = doc.data();
-//     currentEditId = id; // आयडी स्टोअर करा
-
-//     // फॉर्ममध्ये डेटा भरणे [cite: 352, 358]
-//     document.getElementById('tName').value = t.name;
-//     document.getElementById('tOrganizer').value = t.organizer;
-//     document.getElementById('tSeason').value = t.season;
-//     document.getElementById('tLevel').value = t.level;
-//     handleLevelChange(); // असोसिएशन फिल्ड दाखवण्यासाठी
-//     document.getElementById('tAssociation').value = t.association;
-//     document.getElementById('tSurface').value = t.surface;
-//     document.getElementById('tType').value = t.type;
-//     document.getElementById('tCategory').value = t.category;
-//     document.getElementById('tGroup').value = t.group;
-//     document.getElementById('tFormat').value = t.format;
-//     document.getElementById('tLimit').value = t.teamLimit;
-//     document.getElementById('tStartDate').value = t.startDate || "";
-//     document.getElementById('tEndDate').value = t.endDate || "";
-    
-//     // टीम्स रिस्टोअर करणे
-//     tournamentTeams = t.teams || [];
-//     updateSelectedTeamsUI();
-
-//     // मॉडेल ओपन करा
-//     openTournamentModal();
-
-//     // सेव्ह बटणाचे नाव बदला (Optional)
-//     const saveBtn = document.querySelector("#tournamentModal button[onclick='createTournament()']");
-//     if(saveBtn) {
-//         saveBtn.innerText = "Update Tournament";
-//         saveBtn.setAttribute("onclick", `updateTournament()`);
-//     }
-
-//   } catch (error) {
-//     Swal.fire("Error", "डेटा मिळवता आला नाही", "error");
-//   }
-// }
 
 async function editTournament(id) {
   console.log(`[Process]: Fetching tournament details for edit. ID: ${id}`);
@@ -2980,25 +3151,75 @@ async function addNewTeamManual() {
  * फिक्श्चर जनरेट करण्यासाठी आपण Knockout अल्गोरिदम वापरू. १६ टीम्स असतील तर ८ मॅचेस (Round 1) तयार होतील.
   */
 
+// async function generateKnockoutFixtures(tId, teams) {
+//   // १. टीम्सना रँडमली शफल करा [cite: 5]
+//   const shuffled = teams.sort(() => Math.random() - 0.5);
+//   const matches = [];
+
+//   // २. जोड्या लावा (Team 1 vs Team 2) [cite: 5, 53]
+//   for (let i = 0; i < shuffled.length; i += 2) {
+//     if (shuffled[i + 1]) {
+//       matches.push({
+//         matchNo: (i / 2) + 1,
+//         teamA: shuffled[i].name,
+//         teamB: shuffled[i + 1].name,
+//         status: "Pending", // Pending / Live / Completed 
+//         scoreA: 0,
+//         scoreB: 0,
+//         round: 1
+//       });
+//     }
+//   }
+
+//   // ३. Firebase मध्ये एकाच वेळी मॅचेस सेव्ह करा
+//   const batch = db.batch();
+//   matches.forEach(m => {
+//     const mRef = db.collection("tournaments").doc(tId).collection("matches").doc();
+//     batch.set(mRef, m);
+//   });
+//   await batch.commit();
+// }
+
+/**
+ * नवीन फ्लो (New Master Object Flow):
+आता आपण हे सुटे कप्पे काढून, मॅच तयार होतानाच तिच्या पोटात आपला अधिकृत scoreCard चा मास्टर ऑब्जेक्ट डिफॉल्ट व्हॅल्यूसह (0-0 स्कोअर ठेवून) सेट करून टाकणार आहोत.
+ */
 async function generateKnockoutFixtures(tId, teams) {
-  // १. टीम्सना रँडमली शफल करा [cite: 5]
+  console.log("%c--- 📅 [KNOCKOUT FIXTURES PROCESS] नवीन सामने तयार करणे सुरू ---", "color: #3b82f6; font-weight: bold;");
+
+  // १. टीम्सना रँडमली शफल करा
   const shuffled = teams.sort(() => Math.random() - 0.5);
   const matches = [];
 
-  // २. जोड्या लावा (Team 1 vs Team 2) [cite: 5, 53]
+  // २. जोड्या लावा (Team 1 vs Team 2)
   for (let i = 0; i < shuffled.length; i += 2) {
     if (shuffled[i + 1]) {
-      matches.push({
+      
+      // 🚨 [💥 NEW ARCHITECTURE]: मॅचचा पाया रचतानाच मास्टर ऑब्जेक्ट डिफॉल्ट सेट करणे
+      const matchObject = {
         matchNo: (i / 2) + 1,
         teamA: shuffled[i].name,
         teamB: shuffled[i + 1].name,
-        status: "Pending", // Pending / Live / Completed 
-        scoreA: 0,
-        scoreB: 0,
-        round: 1
-      });
+        teamA_id: shuffled[i].id || shuffled[i].teamId || "", // भविष्यासाठी आयडी बॅकअप
+        teamB_id: shuffled[i + 1].id || shuffled[i + 1].teamId || "",
+        status: "Pending", // Pending / Live / Finished
+        round: 1,
+        lastUpdated: new Date().getTime(),
+
+        // 🎯 [SINGLE SOURCE OF TRUTH]: सामने तयार होतानाच प्रत्येकाला फ्रेश स्कोअरकार्ड वाटप!
+        scoreCard: {
+            mainMatch:  { teamA: 0, teamB: 0 },
+            fiveRaid:   { teamA: 0, teamB: 0 },
+            goldenRaid: { teamA: 0, teamB: 0 }
+        }
+      };
+
+      matches.push(matchObject);
     }
   }
+
+  console.log(`📊 [FIXTURES GENERATED]: एकूण ${matches.length} सामन्यांचे आराखडे मास्टर ऑब्जेक्टसह तयार झाले!`);
+  console.dir(matches);
 
   // ३. Firebase मध्ये एकाच वेळी मॅचेस सेव्ह करा
   const batch = db.batch();
@@ -3006,7 +3227,9 @@ async function generateKnockoutFixtures(tId, teams) {
     const mRef = db.collection("tournaments").doc(tId).collection("matches").doc();
     batch.set(mRef, m);
   });
+  
   await batch.commit();
+  console.log("%c☁️ [Firebase Batch Success]: सर्व सामने नवीन scoreCard रचनेसह डेटाबेसमध्ये जतन झाले!", "color: #22c55e; font-weight: bold;");
 }
 
 /**
@@ -3049,64 +3272,6 @@ async function generateManualTemplate(tId, teamLimit) {
  */
 
 let currentEditingMatch = null;
-
-// async function openMatchSetter(tId, mId) {
-//   console.log("उघडत आहे मॅच सेटर:", tId, mId);
-//   currentEditingMatch = { tId, mId };
-
-//   const modal = document.getElementById('matchSetterModal');
-//   const selA = document.getElementById('mTeamA');
-//   const selB = document.getElementById('mTeamB');
-//   const inpDate = document.getElementById('mDate');
-//   const inpTime = document.getElementById('mTime');
-
-//   if (!modal || !selA || !selB) {
-//     Swal.fire("Error", "HTML मध्ये पॉपअप कोड सापडला नाही.", "error");
-//     return;
-//   }
-
-//   try {
-//     // १. टूर्नामेंटचा डेटा आणि मॅचचा सध्याचा डेटा मिळवा
-//     const tDoc = await db.collection("tournaments").doc(tId).get();
-//     const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-    
-//     // टूर्नामेंटमधील संघ यादी (आता हा थेट नावांचा ॲरे आहे)
-//     const teams = tDoc.data().teams || [];
-//     const currentMatch = mDoc.exists ? mDoc.data() : {};
-
-//     console.log("[Match Setter]: Loaded Tournament Teams ->", teams);
-
-//     // २. ड्रॉपडाउन पर्याय तयार करणे
-//     let options = `
-//       <option value="TBD">निवडा (Select Team)</option>
-//       <option value="BYE">BYE (पुढच्या फेरीसाठी पात्र)</option>
-//     `;
-
-//     // 🔥 बदल इथे केला आहे: 't' स्वतःच संघाचे नाव (String) आहे, त्यामुळे थेट 't' वापरा!
-//     teams.forEach(t => {
-//       if (t) { // सुरक्षिततेसाठी चेक
-//         options += `<option value="${t}">${t}</option>`;
-//       }
-//     });
-
-//     selA.innerHTML = options;
-//     selB.innerHTML = options;
-
-//     // ३. पॉपअप उघडताना जुना डेटा सेट करा
-//     selA.value = currentMatch.teamA || "TBD";
-//     selB.value = currentMatch.teamB || "TBD";
-//     if (inpDate) inpDate.value = currentMatch.matchDate || "";
-//     if (inpTime) inpTime.value = currentMatch.matchTime || "";
-
-//     // ४. पॉपअप दाखवा
-//     modal.classList.remove('hidden');
-//     modal.classList.add('flex');
-    
-//   } catch (err) {
-//     console.error("Teams Load Error:", err);
-//     Swal.fire("Error", "डेटा लोड करताना चूक झाली.", "error");
-//   }
-// }
 
 async function openMatchSetter(tId, mId) {
   console.log(`%c--- 📂 [ओपन मॅच सेटर] चालू टूर्नामेंट: ${tId} | मॅच आयडी: ${mId} ---`, "color: #3b82f6; font-weight: bold; font-size: 11px;");
@@ -3184,54 +3349,6 @@ function closeMatchSetter() {
 
 /**मॅन्युअली टीम सेट करणे (Save Logic)
 जेव्हा युजर पॉपअपमध्ये टीम्स निवडेल, तेव्हा त्या मॅचला अपडेट करण्यासाठी हे फंक्शन वापरा: */
-// async function saveMatchDetails() {
-//   if (!currentEditingMatch) return;
-//   const { tId, mId } = currentEditingMatch;
-
-//   const teamA = document.getElementById('mTeamA').value;
-//   const teamB = document.getElementById('mTeamB').value;
-//   const matchDate = document.getElementById('mDate').value;
-//   const matchTime = document.getElementById('mTime').value;
-
-//   // १. एकाच टीमची मॅच स्वतःसोबत लागण्यापासून रोखणे
-//   // (TBD किंवा BYE सोडून इतर टीम्ससाठी हा नियम लागू होईल)
-//   if (teamA !== "TBD" && teamA !== "BYE" && teamA === teamB) {
-//     Swal.fire({
-//       icon: 'error',
-//       title: 'चूक!',
-//       text: 'एकच संघ स्वतःविरुद्ध खेळू शकत नाही. कृपया वेगळा संघ निवडा.',
-//       confirmButtonColor: '#d33'
-//     });
-//     return;
-//   }
-
-//   const data = {
-//     teamA: teamA,
-//     teamB: teamB,
-//     matchDate: matchDate,
-//     matchTime: matchTime
-//   };
-
-//   try {
-//     await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(data);
-    
-//     closeMatchSetter();
-//     Swal.fire({
-//       title: "यशस्वी!",
-//       text: "मॅच यशस्वीरीत्या अपडेट झाली आहे.",
-//       icon: "success",
-//       timer: 1500,
-//       showConfirmButton: false
-//     });
-    
-//     // फिक्स्चर टॅब रिफ्रेश करा
-//     renderFixturesTab(tId); 
-//   } catch (error) {
-//     console.error("Update Error:", error);
-//     Swal.fire("Error", "डेटा अपडेट करताना तांत्रिक अडचण आली.", "error");
-//   }
-// }
-
 async function saveMatchDetails() {
   if (!currentEditingMatch) {
     console.error("🚨 [सेव्ह एरर]: currentEditingMatch चा डेटा रिकामी आहे!");
@@ -3297,7 +3414,7 @@ async function saveMatchDetails() {
 }
 
 
-
+/** */
 
 function closeMatchSetter() {
   document.getElementById('matchSetterModal').classList.add('hidden'); // [cite: 299]
@@ -3308,71 +3425,6 @@ function closeMatchSetter() {
  * या फंक्शनशिवाय स्कोअरिंग स्क्रीनला हे समजणारच नाही की नक्की कोणत्या टीमची आणि कोणत्या खेळाडूंची मॅच सुरू आहे.
  */
 
-// async function goToScoring(tId, mId) {
-//     await loadPage('scoring'); 
-
-//     try {
-//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-//         const match = mDoc.data();
-//         currentMatchData = match;
-
-//         // [ बदल ]: नावे LocalStorage मध्ये साठवा जेणेकरून ती पुढच्या फंक्शनला मिळतील
-//         localStorage.setItem('currentTeamA', match.teamA);
-//         localStorage.setItem('currentTeamB', match.teamB);
-//             // मूळ स्क्रीनवरील नावे अपडेट करा
-//                     setupLiveMatchNames();
-
-//         teamAPlayers = match.teamAPlayers || [];
-//         teamBPlayers = match.teamBPlayers || [];
-
-
-//         document.getElementById('scoreA').innerText = match.scoreA || 0;
-//         document.getElementById('scoreB').innerText = match.scoreB || 0;
-
-//         renderMiniPlayers();
-        
-//         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
-
-//     } catch (e) {
-//         console.error("Error loading scoring data:", e);
-//     }
-// }
-
-
-// async function goToScoring(tId, mId) {
-//     console.log("--- [NAV] Loading Original Scoring Logic ---");
-//     await loadPage('scoring'); 
-
-//     try {
-//         const mDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
-//         const match = mDoc.data();
-        
-//         // १. तुझा जुना मूळ डेटा सेट
-//         currentMatchData = match;
-
-//         localStorage.setItem('currentTeamA', match.teamA);
-//         localStorage.setItem('currentTeamB', match.teamB);
-        
-//         setupLiveMatchNames();
-
-//         teamAPlayers = match.teamAPlayers || [];
-//         teamBPlayers = match.teamBPlayers || [];
-
-//         if(document.getElementById('scoreA')) document.getElementById('scoreA').innerText = match.scoreA || 0;
-//         if(document.getElementById('scoreB')) document.getElementById('scoreB').innerText = match.scoreB || 0;
-
-//         // २. तुझे मूळ रेंडरिंग फंक्शन (जसे होते तसेच)
-//         renderMiniPlayers();
-        
-//         // ३. फक्त नवीन UI साठी (काहीही बिघडणार नाही)
-//         if (typeof updateTimeoutUI === "function") updateTimeoutUI();
-
-//         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
-
-//     } catch (e) {
-//         console.error("Error loading scoring data:", e);
-//     }
-// }
 
 // async function goToScoring(tId, mId) {
 //     console.log("--- [NAV] Loading Original Scoring Logic --- 🚀");
@@ -3383,12 +3435,10 @@ function closeMatchSetter() {
 //         const match = mDoc.data();
         
 //         currentMatchData = match;
-
 //         localStorage.setItem('currentTeamA', match.teamA);
 //         localStorage.setItem('currentTeamB', match.teamB);
         
 //         setupLiveMatchNames();
-
 //         teamAPlayers = match.teamAPlayers || [];
 //         teamBPlayers = match.teamBPlayers || [];
 
@@ -3396,55 +3446,136 @@ function closeMatchSetter() {
 //         if(document.getElementById('scoreB')) document.getElementById('scoreB').innerText = match.scoreB || 0;
 
 //         renderMiniPlayers();
-        
 //         if (typeof updateTimeoutUI === "function") updateTimeoutUI();
 
 //         // ---------------------------------------------------------
-//         // 🛠️ [LOCKING LOGIC] - मॅच सुरू होण्यापूर्वी बटणे लॉक करणे 🚀
+//         // 🛠️ [STRICT RECOVERY LOGIC] - १२०० सेकंदाच्या निकषावर फिक्स 🚀
 //         // ---------------------------------------------------------
-//         // १. तुझ्या स्कोअरिंग बटणांचा मुख्य कंटेनर (उदा. जिथे बोनस, टच पॉईंट बटणे आहेत)
 //         const scoringArea = document.getElementById('scoringButtonsContainer'); 
-        
-//         // २. तुझं मूळ "Start Match" बटण
 //         const mainBtn = document.getElementById('mainMatchBtn'); 
-
-//         // ३. रिलोड झाल्यावर किंवा पहिल्यांदा येताना टायमरची स्थिती तपासा
-//         // आपण localStorage मधून टायमरची वेळ तपासू शकतो
-//         const savedTime = localStorage.getItem('savedMatchTime');
+//         const actionBtn = document.getElementById('mainActionBtn');
+//         const halfTextElement = document.getElementById('matchHalfText') || document.getElementById('periodDisplay');
         
-//         // जर मॅच अजून 'Pause' मोडमध्ये असेल आणि वेळ अजून खर्च झाली नसेल
-//         if (!match.isMatchRunning && (!savedTime || savedTime == 1200)) { 
-//             console.log("[LOCK] Initial State: Controls Locked. Click 'Start Match' 🔒");
-            
+//         let dbSeconds = (match.savedMatchTime !== undefined) ? match.savedMatchTime : 1200;
+//         matchTotalSeconds = dbSeconds; 
+//         localStorage.setItem('savedMatchTime', dbSeconds);
+
+//         window.isMatchPaused = true; 
+
+//         // ⚙️ [STAGE RECOVERY]: '1st_Half_End' आणि वेळेच्या समीकरणावरून २रा हाफ अचूक ट्रॅक करा! 🔑
+//         if (match.status === "1st_Half_End") {
+//             if (dbSeconds === 0) {
+//                 // 🛑 केस १: स्टेटस १स्त हाफ एंड आहे आणि वेळ ० आहे ➔ अजून २रा हाफ सुरू व्हायचा आहे!
+//                 matchStage = "INTERVAL";
+//                 console.log("%c⚙️ [Strict Sync]: स्टेज 'INTERVAL' (ब्रेक) रिकव्हर केली.", "color: #3b82f6; font-weight: bold;");
+//             } else {
+//                 // 🏃‍♂️ केस २: स्टेटस १स्त हाफ एंडच आहे, पण वेळ ० पेक्षा जास्त आहे ➔ २रा हाफ सुरू झाला होता आणि रिफ्रेश झालाय!
+//                 matchStage = "2ND_HALF";
+//                 console.log("%c⚙️ [Strict Sync]: स्टेज '2ND_HALF' ओळखली. २रा हाफ आधीच चालू होता.", "color: #a855f7; font-weight: bold;");
+//             }
+//         } else {
+//             // 🟢 केस ३: फ्रेश मॅच किंवा पहिला हाफ चालू आहे
+//             matchStage = "1ST_HALF";
+//             console.log("%c⚙️ [Strict Sync]: स्टेज '1ST_HALF' ओळखीली.", "color: #eab308; font-weight: bold;");
+//         }
+
+//         // हेडर टेक्स्ट सेट करा ("1st Half" किंवा "2nd Half")
+//         if (halfTextElement) {
+//             halfTextElement.innerText = (matchStage === "2ND_HALF" || matchStage === "INTERVAL") ? "2nd Half" : "1st Half";
+//         }
+
+//         // 🟠 [CASE 2 RE-ENTRY FIX] - २रा हाफ सुरू व्हायच्या आधीची ब्रेक स्थिती
+//         if (matchStage === "INTERVAL") {
+//             console.log("%c[STRICT CASE 2]: १स्त हाफ संपलेला आढळला. डावे बटण डिसेबल करत आहे.", "color: #f97316; font-weight: bold;");
+//             window.isFirstTimeStart = true;
+
 //             if (scoringArea) {
 //                 scoringArea.style.pointerEvents = "none";
 //                 scoringArea.style.opacity = "0.4";
 //             }
-            
 //             if (mainBtn) {
-//                 mainBtn.innerText = "START MATCH";
-//                 mainBtn.classList.add('bg-gray-800'); // मूळ कलर
+//                 mainBtn.classList.add('hidden'); // दोन बटणे एकत्र दिसू नये म्हणून डावे बटण लपवले 🧼
 //             }
-//         } else {
-//             // जर मॅच आधीच सुरू झाली असेल (Reload Case)
-//             console.log("[UNLOCK] Resuming Match: Controls Unlocked. 🏃‍♂️");
-            
-//             if (scoringArea) {
-//                 scoringArea.style.pointerEvents = "auto";
-//                 scoringArea.style.opacity = "1";
+//             if (actionBtn) {
+//                 actionBtn.innerText = "Start 2nd Half";
+//                 actionBtn.className = "w-full bg-green-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl active:scale-95";
 //             }
-            
-//             if (mainBtn) {
-//                 // रिलोड झाल्यावर बटणाचं नाव 'PAUSE' ठेवा कारण मॅच सुरू आहे असं आपण समजू
-//                 mainBtn.innerText = "PAUSE MATCH";
-//                 mainBtn.classList.add('bg-red-600');
-//             }
+//         }
+//         // 🏃‍♂️ [CASE 1 & CASE 3]: चालू खेळ मधेच थांबला होता (Resume Mode)
+//         else if (dbSeconds < 1200) {
+//             console.log(`%c[STRICT RESUME]: मॅच मधेच थांबलीये (${dbSeconds} सेकंद). RESUME MODE!`, "color: #22c55e; font-weight: bold;");
+//             window.isFirstTimeStart = false; 
 
-//             // नेव्हिगेशन लॉक करा जेणेकरून रिलोड झाल्यावरही युजर बाहेर जाऊ शकणार नाही
-//             if (typeof lockUserOnScoringPage === "function") lockUserOnScoringPage(true);
+//             if (scoringArea) {
+//                 scoringArea.style.pointerEvents = "none";
+//                 scoringArea.style.opacity = "0.4";
+//             }
+//             if (mainBtn) {
+//                 mainBtn.classList.remove('hidden'); // मॅच रिझ्युम करायची आहे म्हणून डावे बटण समोर आणले
+//                 mainBtn.innerText = "RESUME MATCH";
+//                 mainBtn.className = "w-full bg-green-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl text-white animate-pulse";
+//             }
+//             // 🎯 [THE ULTIMATE FIX]: जर २रा हाफ मधेच थांबून युझर परत आला असेल, तर उजवीकडे थेट "End Match" चे लाल बटन लावा!
+//             if (actionBtn) {
+//                 if (matchStage === "2ND_HALF") {
+//                     actionBtn.innerText = "End Match";
+//                     actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+//                 } else {
+//                     actionBtn.innerText = "End 1st Half";
+//                     actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+//                 }
+//             }
+//         } 
+//         // 🟢 [FRESH MATCH] - नवीन कोरी मॅच
+//         else { 
+//             console.log("%c[STRICT FRESH]: नवीन फ्रेश मॅच चालू होत आहे.", "color: #eab308; font-weight: bold;");
+//             window.isFirstTimeStart = true;
+
+//             if (scoringArea) {
+//                 scoringArea.style.pointerEvents = "none";
+//                 scoringArea.style.opacity = "0.4";
+//             }
+//             if (mainBtn) {
+//                 mainBtn.classList.remove('hidden');
+//                 mainBtn.innerText = "Start Match";
+//                 mainBtn.className = "w-full bg-gray-800 py-4 rounded-2xl text-[10px] font-black uppercase border border-gray-700 shadow-xl text-orange-500 animate-pulse";
+//             }
+//             if (actionBtn) {
+//                 actionBtn.innerText = "End 1st Half";
+//                 actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
+//             }
+//         }
+
+//         // ---------------------------------------------------------
+//         // 🔄 [RAID HISTORY RESTORE]: एकाच फील्डमधून अख्खा इतिहास पुन्हा लोड करा 🚀
+//         // ---------------------------------------------------------
+//         console.log("🔄 [History Restore]: डेटाबेसवरून 'raidsHistory' इतिहासाची पुनर्रचना सुरू...");
+        
+//         raidCounter = 0; 
+//         window.activeRaidsList = match.raidsHistory || []; 
+
+//         const rFeed = document.getElementById('raidFeed');
+//         const mList = document.getElementById('modalRaidList');
+//         if (rFeed) rFeed.innerHTML = ""; 
+//         if (mList) mList.innerHTML = "";
+
+//         if (window.activeRaidsList && window.activeRaidsList.length > 0) {
+//             console.log(`🎯 [History Restore]: ${window.activeRaidsList.length} जुन्या रेड्स सापडल्या! स्क्रीनवर रेंडर करत आहे...`);
+            
+//             window.activeRaidsList.forEach(r => {
+//                 addRaidToSummary(r.team, r.raiderName, r.result, r.points, r.details, true);
+//             });
+
+//             const rawString = JSON.stringify(window.activeRaidsList);
+//             const encodedData = btoa(unescape(encodeURIComponent(rawString)));
+//             localStorage.setItem(`raids_secure_log_${mId}`, encodedData);
+//         } else {
+//             console.log("📝 [History Restore]: या मॅचमध्ये अजून एकही रेड झालेली नाही.");
+//             if (rFeed) rFeed.innerHTML = `<div id="noRaidText" class="text-gray-500 text-[10px] italic p-2">No raids yet...</div>`;
 //         }
 //         // ---------------------------------------------------------
 
+//         if (typeof updateMatchUI === "function") updateMatchUI();
 //         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
 
 //     } catch (e) {
@@ -3452,9 +3583,14 @@ function closeMatchSetter() {
 //     }
 // }
 
+/*** */
 
 async function goToScoring(tId, mId) {
-    console.log("--- [NAV] Loading Original Scoring Logic --- 🚀");
+    console.log("%c==================================================", "color: #3b82f6; font-weight: bold;");
+    console.log("--- 🚀 [NAV DIAGNOSTIC]: Loading Original Scoring Logic ---");
+    console.log(`👉 Match ID: ${mId} | Tournament ID: ${tId}`);
+    console.log("%c==================================================", "color: #3b82f6; font-weight: bold;");
+
     await loadPage('scoring'); 
 
     try {
@@ -3489,62 +3625,81 @@ async function goToScoring(tId, mId) {
 
         window.isMatchPaused = true; 
 
-        // ⚙️ [STAGE RECOVERY]: '1st_Half_End' आणि वेळेच्या समीकरणावरून २रा हाफ अचूक ट्रॅक करा! 🔑
-        if (match.status === "1st_Half_End") {
+        // =============================================================
+        // 🎯 [THE CRITICAL REFERENCE FIX]: dbStatus व्हेरिएबल इथे तयार केला! 🔑
+        // =============================================================
+        const rawStatus = match.status || match.match_status || "";
+        const dbStatus = rawStatus.trim(); 
+
+        const currentScoreCard = match.scoreCard || {
+            mainMatch:  { teamA: Number(match.scoreA || 0), teamB: Number(match.scoreB || 0) },
+            fiveRaid:   { teamA: 0, teamB: 0 },
+            goldenRaid: { teamA: 0, teamB: 0 }
+        };
+
+        console.log("%c🔍 [CHECKPOINT 1 - STATUS INTAKE]:", "background: #0f172a; color: #38bdf8; font-weight: bold; padding: 2px;");
+        console.log("👉 Original DB Status From Firebase:", `"${rawStatus}"`);
+        console.log("👉 Trimmed DB Status For Code Check:", `"${dbStatus}"`);
+
+        // ⚙️ [STAGE RECOVERY]: स्टेटस पडताळणी
+        if (dbStatus === "five_raid") {
+            matchStage = "FIVE_RAID";
+            console.log("%c🎯 [MATCH STAGE MATCHED] ➔ FIVE_RAID मोड परफेक्ट डिटेक्ट झाला! ⚔️", "color: #f59e0b; font-weight: bold;");
+        } else if (dbStatus === "golden_raid") {
+            matchStage = "GOLDEN_RAID";
+            console.log("%c🎯 [MATCH STAGE MATCHED] ➔ GOLDEN_RAID मोड परफेक्ट डिटेक्ट झाला! 🔥", "color: #ef4444; font-weight: bold;");
+        } else if (dbStatus === "1st_Half_End") {
             if (dbSeconds === 0) {
-                // 🛑 केस १: स्टेटस १स्त हाफ एंड आहे आणि वेळ ० आहे ➔ अजून २रा हाफ सुरू व्हायचा आहे!
                 matchStage = "INTERVAL";
                 console.log("%c⚙️ [Strict Sync]: स्टेज 'INTERVAL' (ब्रेक) रिकव्हर केली.", "color: #3b82f6; font-weight: bold;");
             } else {
-                // 🏃‍♂️ केस २: स्टेटस १स्त हाफ एंडच आहे, पण वेळ ० पेक्षा जास्त आहे ➔ २रा हाफ सुरू झाला होता आणि रिफ्रेश झालाय!
                 matchStage = "2ND_HALF";
                 console.log("%c⚙️ [Strict Sync]: स्टेज '2ND_HALF' ओळखली. २रा हाफ आधीच चालू होता.", "color: #a855f7; font-weight: bold;");
             }
         } else {
-            // 🟢 केस ३: फ्रेश मॅच किंवा पहिला हाफ चालू आहे
             matchStage = "1ST_HALF";
             console.log("%c⚙️ [Strict Sync]: स्टेज '1ST_HALF' ओळखीली.", "color: #eab308; font-weight: bold;");
         }
 
-        // हेडर टेक्स्ट सेट करा ("1st Half" किंवा "2nd Half")
+        // हेडर टेक्स्ट सेट करा ("1st Half", "2nd Half" किंवा "5-5 Raids")
         if (halfTextElement) {
-            halfTextElement.innerText = (matchStage === "2ND_HALF" || matchStage === "INTERVAL") ? "2nd Half" : "1st Half";
+            if (matchStage === "FIVE_RAID") {
+                halfTextElement.innerText = "5-5 Raids";
+            } else if (matchStage === "GOLDEN_RAID") {
+                halfTextElement.innerText = "Golden Raid";
+            } else {
+                halfTextElement.innerText = (matchStage === "2ND_HALF" || matchStage === "INTERVAL") ? "2nd Half" : "1st Half";
+            }
         }
 
         // 🟠 [CASE 2 RE-ENTRY FIX] - २रा हाफ सुरू व्हायच्या आधीची ब्रेक स्थिती
         if (matchStage === "INTERVAL") {
-            console.log("%c[STRICT CASE 2]: १स्त हाफ संपलेला आढळला. डावे बटण डिसेबल करत आहे.", "color: #f97316; font-weight: bold;");
             window.isFirstTimeStart = true;
-
             if (scoringArea) {
                 scoringArea.style.pointerEvents = "none";
                 scoringArea.style.opacity = "0.4";
             }
-            if (mainBtn) {
-                mainBtn.classList.add('hidden'); // दोन बटणे एकत्र दिसू नये म्हणून डावे बटण लपवले 🧼
-            }
+            if (mainBtn) mainBtn.classList.add('hidden'); 
             if (actionBtn) {
                 actionBtn.innerText = "Start 2nd Half";
                 actionBtn.className = "w-full bg-green-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl active:scale-95";
             }
         }
-        // 🏃‍♂️ [CASE 1 & CASE 3]: चालू खेळ मधेच थांबला होता (Resume Mode)
-        else if (dbSeconds < 1200) {
-            console.log(`%c[STRICT RESUME]: मॅच मधेच थांबलीये (${dbSeconds} सेकंद). RESUME MODE!`, "color: #22c55e; font-weight: bold;");
+        // 🏃‍♂️ [RESUME MODE]: चालू खेळ मधेच थांबला होता (५-५ आणि गोल्डन सहित)
+        else if (dbSeconds < 1200 || matchStage === "FIVE_RAID" || matchStage === "GOLDEN_RAID") {
             window.isFirstTimeStart = false; 
-
             if (scoringArea) {
                 scoringArea.style.pointerEvents = "none";
                 scoringArea.style.opacity = "0.4";
             }
             if (mainBtn) {
-                mainBtn.classList.remove('hidden'); // मॅच रिझ्युम करायची आहे म्हणून डावे बटण समोर आणले
+                mainBtn.classList.remove('hidden'); 
                 mainBtn.innerText = "RESUME MATCH";
                 mainBtn.className = "w-full bg-green-600 py-4 rounded-2xl text-[10px] font-black uppercase border border-green-500 shadow-xl text-white animate-pulse";
             }
-            // 🎯 [THE ULTIMATE FIX]: जर २रा हाफ मधेच थांबून युझर परत आला असेल, तर उजवीकडे थेट "End Match" चे लाल बटन लावा!
+            
             if (actionBtn) {
-                if (matchStage === "2ND_HALF") {
+                if (matchStage === "2ND_HALF" || matchStage === "FIVE_RAID" || matchStage === "GOLDEN_RAID") {
                     actionBtn.innerText = "End Match";
                     actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
                 } else {
@@ -3552,12 +3707,8 @@ async function goToScoring(tId, mId) {
                     actionBtn.className = "w-full bg-red-900/20 text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase border border-red-900/30 active:scale-95";
                 }
             }
-        } 
-        // 🟢 [FRESH MATCH] - नवीन कोरी मॅच
-        else { 
-            console.log("%c[STRICT FRESH]: नवीन फ्रेश मॅच चालू होत आहे.", "color: #eab308; font-weight: bold;");
+        } else { 
             window.isFirstTimeStart = true;
-
             if (scoringArea) {
                 scoringArea.style.pointerEvents = "none";
                 scoringArea.style.opacity = "0.4";
@@ -3574,10 +3725,8 @@ async function goToScoring(tId, mId) {
         }
 
         // ---------------------------------------------------------
-        // 🔄 [RAID HISTORY RESTORE]: एकाच फील्डमधून अख्खा इतिहास पुन्हा लोड करा 🚀
+        // 🔄 [RAID HISTORY RESTORE]
         // ---------------------------------------------------------
-        console.log("🔄 [History Restore]: डेटाबेसवरून 'raidsHistory' इतिहासाची पुनर्रचना सुरू...");
-        
         raidCounter = 0; 
         window.activeRaidsList = match.raidsHistory || []; 
 
@@ -3587,29 +3736,57 @@ async function goToScoring(tId, mId) {
         if (mList) mList.innerHTML = "";
 
         if (window.activeRaidsList && window.activeRaidsList.length > 0) {
-            console.log(`🎯 [History Restore]: ${window.activeRaidsList.length} जुन्या रेड्स सापडल्या! स्क्रीनवर रेंडर करत आहे...`);
-            
             window.activeRaidsList.forEach(r => {
-                addRaidToSummary(r.team, r.raiderName, r.result, r.points, r.details, true);
+                addRaidToSummary(
+                    r.team, 
+                    r.raiderName, 
+                    r.result, 
+                    r.points, 
+                    r.details, 
+                    true,                   
+                    r.isFiveRaid || false,   
+                    r.isGoldenRaid || false  
+                );
             });
 
             const rawString = JSON.stringify(window.activeRaidsList);
             const encodedData = btoa(unescape(encodeURIComponent(rawString)));
             localStorage.setItem(`raids_secure_log_${mId}`, encodedData);
         } else {
-            console.log("📝 [History Restore]: या मॅचमध्ये अजून एकही रेड झालेली नाही.");
             if (rFeed) rFeed.innerHTML = `<div id="noRaidText" class="text-gray-500 text-[10px] italic p-2">No raids yet...</div>`;
         }
-        // ---------------------------------------------------------
+
+        // =========================================================================
+        // 📂 SECTION: FINAL HEADER SCORE OVERWRITE (THE ULTIMATE RESYNC) 🎯
+        // =========================================================================
+        // सर्व जुन्या रेड्स रेंडर झाल्यानंतर, हा तुकडा टॉप हेडरच्या स्कोरला कन्सोलच्या खऱ्या 'mainMatch' वर सक्तीने लॉक करेल!
+        setTimeout(() => {
+            console.log("%c================ 🎛️ [FINAL HEADER RESYNC] ================", "background: #15803d; color: #fff; font-weight: bold; padding: 2px;");
+            
+            const elA = document.getElementById('scoreA');
+            const elB = document.getElementById('scoreB');
+            
+            // कन्सोलमधील खरा 'mainMatch' चा स्कोअर (उदा. 2 - 2)
+            let realMainMatchScoreA = Number(currentScoreCard?.mainMatch?.teamA ?? match.scoreA ?? 0);
+            let realMainMatchScoreB = Number(currentScoreCard?.mainMatch?.teamB ?? match.scoreB ?? 0);
+
+            if (elA) elA.innerText = realMainMatchScoreA;
+            if (elB) elB.innerText = realMainMatchScoreB;
+
+            console.log(`📊 [SUCCESS]: टॉप हेडरवर मुख्य सामन्याचा खरा स्कोअर (${realMainMatchScoreA}-${realMainMatchScoreB}) सक्तीने सेट केला!`);
+            console.log("%c================================================================", "color: #15803d;");
+        }, 100);
+        // =========================================================================
 
         if (typeof updateMatchUI === "function") updateMatchUI();
         console.log("Scoring Screen Ready for:", match.teamA, "vs", match.teamB);
 
     } catch (e) {
-        console.error("Error loading scoring data:", e);
+        console.error("🚨 [goToScoring FATAL CRASH]:", e);
     }
 }
 
+/*** */
 
 function renderLivePlayers(players, containerId) {
     const container = document.getElementById(containerId);
@@ -3640,14 +3817,6 @@ function checkActiveRaider(team) {
 let raidInterval;
 let raidTime = 30;
 
-// function startRaidTimer(team) {
-//     // १. आधी टायमर थांबवा (जर आधीची रेड चुकून सुरू असेल तर)
-//     clearInterval(raidInterval);
-    
-//     // २. रेडर निवडण्यासाठी मोडल उघडा
-//     openRaiderSelectionModal(team);
-// }
-
 function startRaidTimer(team, isJustStarting = false) {
     // १. आधी टायमर थांबवा (जर आधीची रेड चुकून सुरू असेल तर) - [मूळ कोड तसाच आहे]
     clearInterval(raidInterval);
@@ -3656,35 +3825,7 @@ function startRaidTimer(team, isJustStarting = false) {
     openRaiderSelectionModal(team, isJustStarting);
 }
 
-
-
-// function openRaiderSelectionModal(team) {
-//     // STRICT LOG: हे सांगेल की हे मोडल नक्की कधी उघडलं
-//     console.error(`[STRICT_LOG] 🚨 Raider Selection Modal OPENED at ${new Date().getTime()}`);
-    
-//     const modal = document.getElementById('playerSelectModal');
-//     const grid = document.getElementById('playerModalGrid');
-//     const title = document.getElementById('playerModalTitle');
-    
-//     if (!modal || !grid) return;
-
-//     let players = (team === 'A') ? teamAPlayers : teamBPlayers;
-//     title.innerText = `Select Raider (Team ${team})`;
-//     grid.innerHTML = "";
-    
-//     const activeRaiders = players.filter(p => p.playingStatus === 'Playing' && p.status === 'In');
-    
-//     activeRaiders.forEach(p => {
-//         grid.innerHTML += `
-//             <button onclick="actuallyStartTimer('${p.no}', '${p.name}', '${team}')" 
-//                 class="bg-gray-800 border border-gray-700 p-3 rounded-xl flex flex-col items-center active:bg-green-600 transition-all shadow-lg">
-//                 <span class="text-xl font-black text-white">${p.no}</span>
-//                 <span class="text-[8px] text-gray-500 font-bold uppercase truncate w-full text-center mt-1">${p.name}</span>
-//             </button>`;
-//     });
-
-//     modal.classList.replace('hidden', 'flex');
-// }
+/** */
 
 function openRaiderSelectionModal(team, isJustStarting = false) {
     // STRICT LOG: हे सांगेल की हे मोडल नक्की कधी उघडलं - [मूळ कोड तसाच आहे]
@@ -3715,193 +3856,10 @@ function openRaiderSelectionModal(team, isJustStarting = false) {
     modal.classList.replace('hidden', 'flex');
 }
 
-
 /**actuallyStartTimer (तुझे मूळ टायमर लॉजिक)
  * 
 एकदा रेडर निवडला की हे फंक्शन तुझे टायमरचे काम पूर्ण करेल. */
-// function actuallyStartTimer(playerNo, playerName, team) {
-//     const timestamp = Date.now();
-//     console.log(`[STRICT_LOG] 🏁 actuallyStartTimer START | Player: ${playerNo} | Team: ${team} | Time: ${timestamp}`);
-
-//     if (typeof closePlayerModal === "function") {
-//         console.log(`[STRICT_LOG] 🏠 Closing Player Modal...`);
-//         closePlayerModal();
-//     }
-
-//     const activeRaiderEl = document.getElementById('activeRaider');
-//     if (activeRaiderEl) {
-//         activeRaiderEl.innerText = `${playerName.toUpperCase()} (${team})`;
-//         console.log(`[STRICT_LOG] 👤 Active Raider Set: ${playerName} (${team})`);
-//     }
-
-//     // १. बोनस चेक (हा सर्वात आधी व्हायला हवा)
-//     if (window.isBonusPending === true) {
-//         console.log(`[STRICT_LOG] 🎁 BONUS_PENDING Detected!`);
-//         window.isBonusPending = false; // खूण तात्काळ पुसा
-
-//         // नियम: बोनसवर एम्प्टी डॉट्स रिसेट होतात
-//         emptyRaidCount[team] = 0;
-//         if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
-
-//         // समरी अपडेट
-//         if (typeof addRaidToSummary === "function") {
-//             //addRaidToSummary(team, playerName, 'Bonus Point', 1, 'Technical Bonus');
-//         }
-
-//         // बोनस मोडल उघडा
-//         if (typeof openBonusPointsModal === "function") {
-//             console.log(`[STRICT_LOG] 🔓 Opening Bonus Points Modal and STOPPING flow.`);
-//             openBonusPointsModal(team);
-//         }
-
-//         return; // अत्यंत महत्त्वाचे: विरुद्ध टीमचे मोडल उघडू नये म्हणून इथूनच बाहेर पडा
-//     }
-
-//     // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle)
-//     if (window.pendingAction) {
-//         const action = window.pendingAction;
-//         console.log(`[STRICT_LOG] 📦 Pending Action Found: ${action.type}`);
-//         window.pendingAction = null; 
-
-//         if (action.type === 'empty') {
-//             console.log(`[STRICT_LOG] ⚪ Processing Empty Raid...`);
-//             if (typeof addRaidToSummary === "function") {
-//                 addRaidToSummary(action.team, playerName, 'Empty Raid', 0, 'Returned Safely');
-//             }
-
-//             setTimeout(() => {
-//                 processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
-//             }, 400);
-//             return; 
-//         }
-
-//         setTimeout(() => {
-//             console.log(`[STRICT_LOG] ⚡ Executing Delayed Action: ${action.type}`);
-//             if (action.type === 'touch') {
-//                 handlePoint(action.team, action.points);
-//             } else {
-//                 handleAction(action.team, action.type, action.points);
-//             }
-//         }, 300);
-//         return; 
-//     }
-
-//     // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा
-//     console.log(`[STRICT_LOG] ⏱️ Normal Flow: Starting Raid Timer.`);
-//     if (typeof startRaidTimer === "function") startRaidTimer();
-// }
-
-/***/
-// function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) {
-//     const timestamp = Date.now();
-//     console.log(`[STRICT_LOG] 🏁 actuallyStartTimer START | Player: ${playerNo} | Team: ${team} | Time: ${timestamp} | JustStarting: ${isJustStarting}`);
-
-//     if (typeof closePlayerModal === "function") {
-//         console.log(`[STRICT_LOG] 🏠 Closing Player Modal...`);
-//         closePlayerModal();
-//     }
-
-//     const activeRaiderEl = document.getElementById('activeRaider');
-//     if (activeRaiderEl) {
-//        // activeRaiderEl.innerText = `${playerName.toUpperCase()} (${team})`;
-//         activeRaiderEl.innerText = `#${playerNo} ${playerName.toUpperCase()} (${team})`; // 🎯 १. स्क्रीनवर आता नंबरसह नाव चमकेल! उदा: #21 Sandesh Mahadik (B)
-//         console.log(`[STRICT_LOG] 👤 Active Raider Set: ${playerName} (${team})`);
-//     }
-
-//     // 🎯 २. ग्लोबल मेमरीमध्ये फक्त नंबर नाही, तर अख्खा रायडरचा डेटा पॅकेज लॉक केला! 📦
-//         window.currentActiveRaider = {
-//             no: playerNo,
-//             name: playerName,
-//             team: team
-//         };
-
-//     console.log(`%c💾 [Global Raider Lock]: चालू रायडरचा पूर्ण डेटा साठवला:`, "color: #16a34a; font-weight: bold;", window.currentActiveRaider);
-
-//     // --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल, तर इथूनच बाहेर पडा ---
-// // --- [NEW SAFE GATE]: जर फक्त 'Start Raid' बटण दाबलं असेल ---
-//     if (isJustStarting === true) {
-//         console.log(`[STRICT_LOG] ⏱️ Just Starting: Manual Timer Start Triggered.`);
-        
-//         // १. टायमरचा आकडा ३० वर सेट करा
-//         const timerEl = document.getElementById('raidTimer');
-//         if (timerEl) timerEl.innerText = "30";
-
-//         // २. टायमर पळवण्यासाठी लॉजिक
-//         let timeLeft = 30;
-        
-//         // जुना कोणताही इंटरव्हल असेल तर थांबवा
-//         if (typeof raidInterval !== 'undefined') clearInterval(raidInterval);
-
-//         raidInterval = setInterval(() => {
-//             timeLeft--;
-//             if (timerEl) timerEl.innerText = timeLeft;
-
-//             if (timeLeft <= 0) {
-//                 clearInterval(raidInterval);
-//                 console.log("Raid Time Up!");
-//                 // वेळ संपल्यावर काय व्हायला हवं (उदा. शिट्टी वाजणे) ते इथे टाकू शकतोस
-//             }
-//         }, 1000);
-
-//         return; 
-//     }
-//     // -------------------------------------------------------------------------
-
-//     // १. बोनस चेक (हा सर्वात आधी व्हायला हवा) - [मूळ कोड तसाच आहे]
-//     if (window.isBonusPending === true) {
-//         console.log(`[STRICT_LOG] 🎁 BONUS_PENDING Detected!`);
-//         window.isBonusPending = false; 
-
-//         emptyRaidCount[team] = 0;
-//         if (typeof updateEmptyDots === 'function') updateEmptyDots(team);
-
-//         if (typeof openBonusPointsModal === "function") {
-//             console.log(`[STRICT_LOG] 🔓 Opening Bonus Points Modal and STOPPING flow.`);
-//             openBonusPointsModal(team);
-//         }
-
-//         return; 
-//     }
-
-//     // २. इतर पेंडिंग ॲक्शन्स (Empty, Touch, Tackle) - [मूळ कोड तसाच आहे]
-//     if (window.pendingAction) {
-//         const action = window.pendingAction;
-//         console.log(`[STRICT_LOG] 📦 Pending Action Found: ${action.type}`);
-//         window.pendingAction = null; 
-
-//         if (action.type === 'empty') {
-//             console.log(`[STRICT_LOG] ⚪ Processing Empty Raid...`);
-//             if (typeof addRaidToSummary === "function") {
-//                 addRaidToSummary(action.team, playerName, 'Empty Raid', 0, 'Returned Safely');
-//             }
-
-//             setTimeout(() => {
-//                 processEmptyRaidLogic(action.team, "SELECTION_FLOW", playerNo);
-//             }, 400);
-//             return; 
-//         }
-
-//         setTimeout(() => {
-//             console.log(`[STRICT_LOG] ⚡ Executing Delayed Action: ${action.type}`);
-//             if (action.type === 'touch') {
-//                 handlePoint(action.team, action.points);
-//             } else {
-//                 handleAction(action.team, action.type, action.points);
-//             }
-//         }, 300);
-//         return; 
-//     }
-
-//     // ३. काहीच पेंडिंग नसेल तर टायमर सुरू करा - [मूळ कोड तसाच आहे]
-//     console.log(`[STRICT_LOG] ⏱️ Normal Flow: Starting Raid Timer.`);
-//     // टीप: इथे startClock() किंवा तुझे मूळ टायमर फंक्शन कॉल होईल
-//     if (typeof startRaidTimer === "function") startRaidTimer(); 
-// }
-
-/**
- * 
- * 
- */
+/** */
 
 function actuallyStartTimer(playerNo, playerName, team, isJustStarting = false) {
     const timestamp = Date.now();
@@ -4083,6 +4041,8 @@ function handlePoint(team, points) {
     openMultiPlayerModal(oppositeTeam, ptsInt, "Touch Points Out");
 }
 
+/** */
+
 function openMorePointsModal(team) {
     console.log(`[STRICT_LOG] Opening More Points Modal for Team: ${team}`);
     
@@ -4133,6 +4093,7 @@ function openMultiPlayerModal(teamToShow, count, headerText) {
     modal.classList.replace('hidden', 'flex');
 }
 
+/** */
 function startTouchSelection(team, count) {
     console.log(`[DATA] startTouchSelection: Team ${team}, Count ${count}`);
     
@@ -4196,39 +4157,6 @@ function openPlayerModal(team, type) {
 }
 // ३. प्लेयर सिलेक्ट केल्यावर पॉईंट फायनल करणे
 // selectPlayer मध्ये हा लॉजिक पार्ट चेक कर
-// function selectPlayer(playerNo, team, type) {
-//     console.log(`>>> [SELECT_PLAYER] No: ${playerNo} | Team: ${team} | Type: ${type}`);
-    
-//     if (type === 'out' || type === 'tackle') {
-//         // १. खेळाडूला OUT करा
-//         updatePlayerStatus(playerNo, team, 'Out');
-        
-//         // २. स्कोर अपडेट (जर टॅकल पॉईंट असेल तर)
-//         if (window.currentAction && window.currentAction.team) {
-//             updateScore(window.currentAction.team, 1);
-            
-//             // ३. टॅकल झाल्यावर सुद्धा समोरच्याचा खेळाडू रिवाइव्ह (In) झाला पाहिजे
-//             if (typeof revivePlayers === "function") {
-//                 revivePlayers(window.currentAction.team, 1);
-//             }
-            
-//             window.currentAction = null; 
-//         }
-//     } else {
-//         updatePlayerStatus(playerNo, team, 'In');
-//     }
-
-//     // ३ऱ्या रेडच्या वेळी (Direct Out) आपण खालची फंक्शन्स थांबवतोय
-//     if (type !== 'out') {
-//         if (typeof processRaiderOutStatus === "function") processRaiderOutStatus(); 
-//         if (typeof processPoints === "function") processPoints();
-//     }
-
-//     closePlayerModal();
-    
-//     const raiderEl = document.getElementById('activeRaider');
-//     if (raiderEl) raiderEl.innerText = "WAITING FOR RAIDER...";
-// }
 
 function selectPlayer(playerNo, team, type) {
     console.log(`>>> [SELECT_PLAYER] No: ${playerNo} | Team: ${team} | Type: ${type}`);
@@ -4285,114 +4213,7 @@ function processRaiderOutStatus() {
     console.log(`[STATUS] Raider ${raiderName} marked as OUT.`);
 }
 
-/*** */
-// function processPoints() {
-//     // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
-//     if (!currentAction) {
-//         console.error(">>> [PROCESS_ERROR] No currentAction found to process!");
-//         return;
-//     }
-
-//     // २. [CRITICAL ORDER]: UI रिसेट करण्यापूर्वी सर्व आवश्यक डेटा व्हेरिएबल्समध्ये काढून घ्या
-//     const { team, type, points, raiderName } = currentAction;
-//     const oppositeTeam = (team === 'A' ? 'B' : 'A');
-
-//     // एक्टिव रेडरचे नाव मिळवा (UI वरून किंवा currentAction मधून)
-//     const activeRaiderEl = document.getElementById('activeRaider');
-//     const currentRaider = raiderName || (activeRaiderEl && activeRaiderEl.innerText !== "NONE (WAITING)" 
-//                          ? activeRaiderEl.innerText.split('(')[0].trim() 
-//                          : "Raider");
-
-//     console.log(`--- [PROCESS_START] ---`);
-//     console.log(`[ACTION_INFO] Processing ${type} for Team ${team} | Raider: ${currentRaider}`);
-
-//     // ३. [CLEANUP]: डेटा वाचून झाल्यावर आता UI रिसेट करा (जेणेकरून NONE चा प्रॉब्लेम येणार नाही)
-//     if (activeRaiderEl) {
-//         console.log(`[CLEANUP] Resetting activeRaider UI...`);
-//         activeRaiderEl.innerText = "NONE (WAITING)";
-//         activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
-//     }
-
-//     // ४. आऊट झालेल्या खेळाडूंची यादी तयार करा
-//     let outPlayersInfo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) 
-//                          ? "Out: " + window.selectedPlayersList.join(", ") 
-//                          : points + " Players Out";
-
-//     // ५. [LOGIC SECTION]: जुन्या बटनांचे सर्व नियम इथे सुरक्षित आहेत
-//     if (type === 'touch') {
-//         updateScore(team, points);
-//         addRaidToSummary(team, currentRaider, 'TOUCH POINT', points, outPlayersInfo);
-//     } 
-//     else if (type === 'bonus_touch') {
-//         updateScore(team, points); 
-//         addRaidToSummary(team, currentRaider, 'BONUS + TOUCH', points, outPlayersInfo);
-//     }
-//     else if (type === 'tackle') {
-//         // 🚨 डिफेंडरचा नंबर आणि नाव शोधणे
-//         let defenderNo = (window.selectedPlayersList && window.selectedPlayersList.length > 0) ? window.selectedPlayersList[0] : null;
-//         let defenderInfo = "Defender";
-//         if (defenderNo) {
-//             let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
-//             let pObj = defTeamList.find(p => p.no == defenderNo);
-//             defenderInfo = pObj ? `#${pObj.no} ${pObj.name.toUpperCase()}` : `#${defenderNo}`;
-//         }
-        
-//         // 🎯 अचूक इव्हेंट जनरेशन
-//         addRaidToSummary(team, currentRaider, 'TACKLE', 1, `Caught by ${defenderInfo}`);
-//     }
-//     else if (type === 'super_tackle') {
-//         updateScore(team, 2);
-//         // 🚨 सर्व डिफेंडर्सचे नंबर आणि नावे एकत्र करणे
-//         let defendersInfo = "Defenders";
-//         if (window.selectedPlayersList && window.selectedPlayersList.length > 0) {
-//             let defTeamList = (team === 'A') ? teamAPlayers : teamBPlayers;
-//             let mapped = window.selectedPlayersList.map(no => {
-//                 let pObj = defTeamList.find(p => p.no == no);
-//                 return pObj ? `#${pObj.no} ${pObj.name.toUpperCase()}` : `#${no}`;
-//             });
-//             defendersInfo = mapped.join(', ');
-//         }
-        
-//         addRaidToSummary(team, currentRaider, 'SUPER TACKLE', 2, `Caught by ${defendersInfo}`);
-//     }
-//     else if (type === 'bonus_tackle') {
-//         updateScore(team, 1);
-//         updateScore(oppositeTeam, 1);
-//         addRaidToSummary(team, currentRaider, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
-//     }
-//     else if (type === 'self_out') {
-//         updateScore(team, points);
-//         addRaidToSummary(team, currentRaider, 'SELF OUT', points, 'Raider went out of bounds');
-//     }
-//     else if (type === 'technical') {
-//         updateScore(team, points);
-//         addRaidToSummary(team, 'OFFICIALS', 'TECHNICAL POINT', points, 'Technical Violation');
-//     }
-
-//     // ६. [REVIVAL LOGIC]: रिवाइव्हलचे नियम (जुनेच आहेत)
-//     let pointsToRevive = 0;
-//     if (type === 'touch') pointsToRevive = points;
-//     else if (type === 'bonus_touch') pointsToRevive = points - 1;
-//     else if (type === 'tackle' || type === 'super_tackle' || type === 'bonus_tackle') pointsToRevive = 1;
-
-//     if (pointsToRevive > 0 && typeof revivePlayers === "function") {
-//         revivePlayers(team, pointsToRevive);
-//     }
-
-//     // ७. [EMPTY RAID RESET]: एम्प्टी रेड सिस्टिम रिसेट
-//     if (type === 'touch' || type === 'bonus_touch' || type === 'bonus_tackle') {
-//         if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
-//         if (typeof updateEmptyDots === "function") updateEmptyDots(team);
-//     }
-
-//     // ८. अंतिम क्लिनअप: मेमरी रिसेट करा
-//     window.selectedPlayersList = []; 
-//     currentAction = null;
-    
-//     console.log(`--- [PROCESS_END] ---`);
-// }
-/*** */
-
+/** 
 function processPoints99() {
     // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
     if (!currentAction) {
@@ -4546,7 +4367,7 @@ function processPoints99() {
     
     console.log(`--- [PROCESS_END] ---`);
 }
-
+*/
 
 function processPoints() {
     // १. सुरक्षा तपासणी: जर currentAction नसेल तर पुढे जाऊ नका
@@ -4838,6 +4659,9 @@ function handleBonus(team) {
     openBonusPointsModal(team);
 }
 
+
+/** */
+
 function openBonusPointsModal(team) {
     Swal.fire({
         title: 'BONUS ACTION',
@@ -4868,110 +4692,6 @@ function openBonusPointsModal(team) {
 
 let selectedPlayersCount = 0;
 let requiredPlayers = 0;
-
-// function processBonus(team, touchPoints) {
-//     const ts = Date.now();
-//     console.log(`[BONUS_DEBUG] processBonus Start | Team: ${team} | TouchPts: ${touchPoints} | TS: ${ts}`);
-    
-//     Swal.close();
-    
-//     const ptsInt = parseInt(touchPoints);
-//     window.requiredPlayers = ptsInt;
-//     window.selectedPlayersCount = 0;
-//     const oppositeTeam = (team === 'A' ? 'B' : 'A');
-
-//     const activeRaiderEl = document.getElementById('activeRaider');
-//     const raiderName = activeRaiderEl ? activeRaiderEl.innerText.split('(')[0].trim() : "Raider";
-
-//     if (ptsInt === 0) {
-//         // --- १. फक्त बोनस (+1) ---
-//         updateScore(team, 1);
-        
-//         // एम्प्टी रेड डॉट्स रिसेट (तुझे मूळ लॉजिक)
-//         if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[team] = 0;
-//         if (typeof updateEmptyDots === "function") updateEmptyDots(team);
-        
-//         // --- २. समरी अपडेट (आता आपण हे processPoints कडे सोपवू शकतो किंवा इथेच ठेवू शकतो) ---
-//         if (typeof addRaidToSummary === "function") {
-//             addRaidToSummary(team, raiderName, 'BONUS POINT', 1, 'Technical Bonus');
-//         }
-
-//         Swal.fire({ title: 'Bonus Only!', icon: 'success', toast: true, position: 'top', timer: 1500 });
-
-//         // --- ३. सर्वात महत्त्वाचा बदल: रेड क्लोज करणे ---
-//         // खेळाडू निवडायचे नसल्यामुळे आपण इथूनच 'Cleanup' करूया
-//         if (activeRaiderEl) {
-//             console.log(`[CLEANUP] Resetting activeRaider after Only Bonus...`);
-//             activeRaiderEl.innerText = "NONE (WAITING)";
-//             activeRaiderEl.classList.remove('text-green-400', 'text-blue-400');
-//         }
-
-//         // प्रॉब्लेम सोडवण्यासाठी: जर currentAction सेट असेल तर तो null करा
-//         currentAction = null;
-//         window.selectedPlayersList = [];
-
-//         // टायमर सुरू करा (तुझे मूळ लॉजिक)
-//        // if (typeof startRaidTimer === "function") startRaidTimer();
-
-//     } else {
-//         // --- बोनस (+1) + टच पॉईंट्स (हे लॉजिक जसे आहे तसेच राहील) ---
-//         console.log(`[BONUS_DEBUG] Bonus + Touch points. Opening Modal for Team: ${oppositeTeam}`);
-        
-//         const totalPoints = 1 + ptsInt;
-
-//         currentAction = { 
-//             team: team, 
-//             type: 'bonus_touch', 
-//             points: totalPoints 
-//         };
-
-//         // डिफेन्डर निवडण्यासाठी मोडल उघडा
-//         openMultiPlayerModal(oppositeTeam, ptsInt, "Bonus Touch Out"); 
-//     }
-// }
-/** */
-// function handleBonusTackle(raiderTeam) {
-//     console.log(`[STRICT_LOG] Bonus + Tackle! Raider Team: ${raiderTeam}`);
-//     Swal.close();
-
-//     const defenderTeam = (raiderTeam === 'A' ? 'B' : 'A');
-//     const activeRaiderEl = document.getElementById('activeRaider');
-//     const raiderRaw = activeRaiderEl ? activeRaiderEl.innerText : "";
-//     const raiderName = raiderRaw.split('(')[0].trim();
-
-//     // १. एम्प्टी रेड काउंट रिसेट करा (बोनस मिळाल्यामुळे)
-//     emptyRaidCount[raiderTeam] = 0; 
-//     if (typeof updateEmptyDots === 'function') updateEmptyDots(raiderTeam);
-
-//     // २. रेडरला Out List मध्ये टाका
-//     let raiderNoMatch = raiderRaw.match(/\d+/); 
-//     if (raiderNoMatch) {
-//         console.log(`[STRICT_LOG] Raider ${raiderNoMatch[0]} identified for Out status.`);
-//         updatePlayerStatus(raiderNoMatch[0], raiderTeam, 'Out');
-//     }
-
-//     // ३. समरीमध्ये नोंद
-//     if (typeof addRaidToSummary === "function") {
-//         addRaidToSummary(raiderTeam, raiderName, 'Bonus+Tackle', 1, 'Scored Bonus then Tackled');
-//     }
-
-//     // ४. करंट ॲक्शन सेट करा (स्कोर आता processPoints मधून अपडेट होईल)
-//     currentAction = { 
-//         team: defenderTeam, 
-//         type: 'bonus_tackle', 
-//         points: 1 
-//     };
-
-//     console.log(`[FLOW] Opening Defender List for Team ${defenderTeam}`);
-//     openPlayerModal(defenderTeam, 'tackle'); 
-
-//     Swal.fire({
-//         title: 'Bonus + Tackle!',
-//         text: 'आता टॅकल करणाऱ्या डिफेंडरला निवडा.',
-//         icon: 'success',
-//         toast: true, position: 'top', timer: 2000, showConfirmButton: false
-//     });
-// }
 
 /** */
 // =========================================================================
@@ -5052,63 +4772,6 @@ function processBonus(team, touchPoints) {
 // =========================================================================
 // 🛑 २. handleBonusTackle() - बोनस+टॅकलचा वॉटर-टाईट नेमिंग पॅच 🎯
 // =========================================================================
-// function handleBonusTackle(raiderTeam) {
-//     console.log(`[STRICT_LOG] Bonus + Tackle! Raider Team: ${raiderTeam}`);
-//     Swal.close();
-
-//     const defenderTeam = (raiderTeam === 'A' ? 'B' : 'A');
-//     const activeRaiderEl = document.getElementById('activeRaider');
-//     const raiderRaw = activeRaiderEl ? activeRaiderEl.innerText : "";
-//     const raiderName = raiderRaw.split('(')[0].trim();
-
-//     // 🚨 [PREFIX SECURITY GATE]: बोनस+टॅकलसाठी रायडरचे नाव ब्रॅकेटसह शुद्ध करणे
-//     let cleanRaiderHeader = "";
-//     if (window.currentActiveRaider) {
-//         cleanRaiderHeader = `#${window.currentActiveRaider.no} ${window.currentActiveRaider.name.toUpperCase()} [${raiderTeam}]`;
-//     } else {
-//         let raiderClean = raiderName.replace(/[^a-zA-Z0-9 ]/g, "").trim();
-//         cleanRaiderHeader = raiderClean.includes("#") ? `${raiderClean} [${raiderTeam}]` : `${raiderClean} [${raiderTeam}]`;
-//     }
-
-//     // १. एम्प्टी領काउंट रिसेट (बोनस मिळाल्यामुळे)
-//     if (typeof emptyRaidCount !== 'undefined') emptyRaidCount[raiderTeam] = 0; 
-//     if (typeof updateEmptyDots === 'function') updateEmptyDots(raiderTeam);
-
-//     // २. रेडरला Out List मध्ये टाका (मूळ कोड सुरक्षित)
-//     let raiderNoMatch = raiderRaw.match(/\d+/); 
-//     let finalRaiderNo = raiderNoMatch ? raiderNoMatch[0] : null;
-    
-//     if (finalRaiderNo) {
-//         console.log(`[STRICT_LOG] Raider ${finalRaiderNo} identified for Out status.`);
-//         updatePlayerStatus(finalRaiderNo, raiderTeam, 'Out');
-//     }
-
-//     // ३. समरीमध्ये नोंद (🚨 इथे आपण 'cleanRaiderHeader' अधिकृतपणे पास केला!)
-//     if (typeof addRaidToSummary === "function") {
-//         console.log(`%c🛑 [BONUS_TACKLE_SEND]: addRaidToSummary ला पाठवलेले नाव ➔ "${cleanRaiderHeader}"`, "color: #ef4444; font-weight: bold;");
-//         addRaidToSummary(raiderTeam, cleanRaiderHeader, 'BONUS + TACKLE', 1, 'Bonus scored but Tackled');
-//     }
-
-//     // ४. करंट ॲक्शन सेट करा (स्कोर आता processPoints मधून अपडेट होईल)
-//     // 🚨 [CRITICAL]: इथल्या ॲक्शन पॅकेजमध्ये 'raiderName' चा कडक सिंक लावला!
-//     currentAction = { 
-//         team: defenderTeam, 
-//         type: 'bonus_tackle', 
-//         points: 1,
-//         raiderName: cleanRaiderHeader
-//     };
-
-//     console.log(`[FLOW] Opening Defender List for Team ${defenderTeam}`);
-//     openPlayerModal(defenderTeam, 'tackle'); 
-
-//     Swal.fire({
-//         title: 'Bonus + Tackle!',
-//         text: 'आता टॅकल करणाऱ्या डिफेंडरला निवडा.',
-//         icon: 'success',
-//         toast: true, position: 'top', timer: 2000, showConfirmButton: false
-//     });
-// }
-
 function handleBonusTackle(raiderTeam) {
     console.log(`[STRICT_LOG] 🛑 handleBonusTackle START | Raider Team: ${raiderTeam}`);
     Swal.close();
@@ -5266,77 +4929,169 @@ function closePlayerModal() {
 }
 
 // २. स्कोअर अपडेट करण्यासाठी (Local UI + Firebase)
+
 // async function updateScore(teamPrefix, points) {
-//     const { tId, mId } = matchSetupData; // आपण मॅच सेटअप वेळी हे सेव्ह केले होते
+//     // 🚨 [DYNAMIC CHECK]: चालू मॅचचा डेटा पॅनेलमध्ये हजर आहे का ते पाहणे
+//     if (typeof matchSetupData === 'undefined' || !matchSetupData || !matchSetupData.mId) {
+//         console.error("%c🚨 [Fatal Error]: matchSetupData सापडला नाही! स्कोअर अपडेट करता येणार नाही.", "color: #dc2626; font-weight: bold;");
+//         return;
+//     }
+
+//     const { tId, mId, roundName } = matchSetupData; 
 //     const scoreEl = document.getElementById(`score${teamPrefix}`);
 
-//     if (!scoreEl) return;
+//     if (!scoreEl) {
+//         console.error(`%c🚨 [DOM Error]: 'score${teamPrefix}' हा元素 स्क्रीनवर सापडला नाही!`, "color: #ef4444; font-weight: bold;");
+//         return;
+//     }
 
-//     // Local UI अपडेट
-//     let currentScore = parseInt(scoreEl.innerText);
+//     // 1️⃣ UI आणि स्क्रीनवरील आकडे तातडीने बदलणे
+//     let currentScore = parseInt(scoreEl.innerText) || 0;
 //     let newScore = currentScore + points;
 //     scoreEl.innerText = newScore;
 
-//     // Firebase अपडेट
+//     // 2️⃣ गोळा झालेले ताजे आकडे वेगाने ओढणे
+//     const sA = document.getElementById('scoreA')?.innerText || "0";
+//     const sB = document.getElementById('scoreB')?.innerText || "0";
+//     const teamNameA = document.getElementById('teamAName')?.innerText || "Team A";
+//     const teamNameB = document.getElementById('teamBName')?.innerText || "Team B";
+
+//     // 3️⃣ लोकल स्टोरेज सेव्हिंग (तुझा मूळचा सेफ बॅकअप)
+//     localStorage.setItem('liveScoreA', sA);
+//     localStorage.setItem('liveScoreB', sB);
+
+//     console.log(
+//         `%c💾 [LocalStorage Updated]: Team ${teamPrefix} ➔ +${points} Pts | चालू स्कोअर ➔ A: ${sA} vs B: ${sB}`, 
+//         "color: #10b981; font-weight: bold;"
+//     );
+
+//     // 4️⃣ ⚡ [PURE DYNAMIC PAYLOAD]: हार्डकोड पूर्णपणे साफ केला 🎯
+//     const socketPayload = {
+//         matchId: mId,
+//         tournamentId: tId || "",
+//         round: roundName || "League Match", // 🟢 जो राऊंड डेटाबेसमध्ये असेल, तोच थेट पुढे जाईल (No Hardcode)
+//         teamA: teamNameA,
+//         scoreA: Number(sA),
+//         teamB: teamNameB,
+//         scoreB: Number(sB),
+//         status: "Live"
+//     };
+
+//     // 5️⃣ 🚀 Render सॉकेट सर्व्हरच्या पाईपमध्ये डेटा ढकलणे (0 Reads Cost)
 //     try {
-//         const matchRef = db.collection("tournaments").doc(tId).collection("matches").doc(mId);
-        
-//         const updateData = {};
-//         if (teamPrefix === 'A') {
-//             updateData.scoreA = newScore;
+//         if (typeof socket !== 'undefined' && socket) {
+//             if (socket.connected) {
+                
+//                 // सर्व्हरच्या नवीन स्केलेबल फंक्शननुसार इव्हेंटचे नाव
+//                 socket.emit('match_status_changed_or_updated', socketPayload);
+                
+//                 console.log(
+//                     `%c🚀 [Socket Sent Success]: डेटा Render सर्व्हरकडे रवाना! ID: ${socket.id}`, 
+//                     "color: #f97316; font-weight: bold;", 
+//                     socketPayload
+//                 );
+//             } else {
+//                 console.warn(
+//                     `%c⚠️ [Socket Offline]: सॉकेट इंजिन चालू आहे, पण सर्व्हरशी कनेक्टेड नाही. डेटा हवेत गेला नाही.`, 
+//                     "color: #f59e0b; font-weight: bold;"
+//                 );
+//             }
 //         } else {
-//             updateData.scoreB = newScore;
+//             console.error(
+//                 `%c🚨 [Socket Missing]: 'socket' ऑब्जेक्ट 'app.js' मध्ये डिक्लेअर केलेला नाही!`, 
+//                 "color: #dc2626; font-weight: bold;"
+//             );
 //         }
-
-//         await matchRef.update(updateData);
-//         console.log(`Score Updated for Team ${teamPrefix}: ${newScore}`);
-        
-//     } catch (error) {
-//         console.error("Score Update Error:", error);
+//     } catch (socketErr) {
+//         console.error("🚨 [Socket Global Crash]: updateScore मधील ब्रॉडकास्ट इंजिन अपयशी:", socketErr);
 //     }
-
-//     // [ADD THIS]: स्कोअर LocalStorage मध्ये साठवा
-//     localStorage.setItem('liveScoreA', scoreA);
-//     localStorage.setItem('liveScoreB', scoreB);
 // }
 
+
+/**
+ * सुधारित updateScore फंक्शन (फक्त मुख्य सामन्यासाठी)
+तुझा मूळचा सॉकेटचा कडक फ्लो, कन्सोल लॉग्स आणि व्हॅलिडेशन १ टक्काही न विस्कटता हा सुधारित कोड बघून घे भावा:
+ */
 async function updateScore(teamPrefix, points) {
-    const { tId, mId } = matchSetupData; 
+    // 🚨 [DYNAMIC CHECK]: चालू मॅचचा डेटा पॅनेलमध्ये हजर आहे का ते पाहणे
+    if (typeof matchSetupData === 'undefined' || !matchSetupData || !matchSetupData.mId) {
+        console.error("%c🚨 [Fatal Error]: matchSetupData सापडला नाही! स्कोअर अपडेट करता येणार नाही.", "color: #dc2626; font-weight: bold;");
+        return;
+    }
+
+    const { tId, mId, roundName } = matchSetupData; 
     const scoreEl = document.getElementById(`score${teamPrefix}`);
 
-    if (!scoreEl) return;
+    if (!scoreEl) {
+        console.error(`%c🚨 [DOM Error]: 'score${teamPrefix}' हा元素 स्क्रीनवर सापडला नाही!`, "color: #ef4444; font-weight: bold;");
+        return;
+    }
 
-    // Local UI अपडेट (जुना कोड तसाच आहे)
-    let currentScore = parseInt(scoreEl.innerText);
+    // 1️⃣ UI आणि स्क्रीनवरील आकडे तातडीने बदलणे
+    let currentScore = parseInt(scoreEl.innerText) || 0;
     let newScore = currentScore + points;
     scoreEl.innerText = newScore;
 
-    // Firebase अपडेट (जुना कोड तसाच आहे)
+    // 2️⃣ गोळा झालेले ताजे आकडे वेगाने ओढणे
+    const sA = Number(document.getElementById('scoreA')?.innerText || 0);
+    const sB = Number(document.getElementById('scoreB')?.innerText || 0);
+    const teamNameA = document.getElementById('teamAName')?.innerText || "Team A";
+    const teamNameB = document.getElementById('teamBName')?.innerText || "Team B";
+
+    // 3️⃣ 🎯 [MASTER SCORECARD LOCAL SYNC]
+    // लोकल स्टोरेजमधून जुना मास्टर ऑब्जेक्ट आणणे किंवा नवीन तयार करणे
+    let localCard = localStorage.getItem('global_score_card');
+    let currentScoreCard = localCard ? JSON.parse(localCard) : {
+        mainMatch:  { teamA: 0, teamB: 0 },
+        fiveRaid:   { teamA: 0, teamB: 0 },
+        goldenRaid: { teamA: 0, teamB: 0 }
+    };
+
+    // 💥 फक्त मुख्य सामन्याचा (mainMatch) कप्पा अपडेट करणे!
+    currentScoreCard.mainMatch.teamA = sA;
+    currentScoreCard.mainMatch.teamB = sB;
+
+    // नवीन मास्टर कार्ड लोकल स्टोरेजमध्ये लॉक करणे
+    localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+
+    console.log(
+        `%c💾 [ScoreCard Updated]: Team ${teamPrefix} ➔ +${points} Pts | चालू मुख्य स्कोअर ➔ A: ${sA} vs B: ${sB}`, 
+        "color: #10b981; font-weight: bold;"
+    );
+
+    // 4️⃣ ⚡ [PURE DYNAMIC PAYLOAD]: सॉकेट पेलोडमध्ये सुद्धा मास्टर ऑब्जेक्ट पाठवणे 🎯
+    const socketPayload = {
+        matchId: mId,
+        tournamentId: tId || "",
+        round: roundName || "League Match",
+        teamA: teamNameA,
+        teamB: teamNameB,
+        status: "Live",
+        scoreCard: currentScoreCard // 👈 जुन्या scoreA/scoreB ऐवजी अख्खा मास्टर ऑब्जेक्ट रवाना!
+    };
+
+    // 5️⃣ 🚀 Render सॉकेट सर्व्हरच्या पाईपमध्ये डेटा ढकलणे
     try {
-        const matchRef = db.collection("tournaments").doc(tId).collection("matches").doc(mId);
-        
-        const updateData = {};
-        if (teamPrefix === 'A') {
-            updateData.scoreA = newScore;
+        if (typeof socket !== 'undefined' && socket) {
+            if (socket.connected) {
+                socket.emit('match_status_changed_or_updated', socketPayload);
+                console.log(
+                    `%c🚀 [Socket Sent Success]: मास्टर स्कोअरकार्ड Render सर्व्हरकडे रवाना!`, 
+                    "color: #f97316; font-weight: bold;"
+                );
+            } else {
+                console.warn(`%c⚠️ [Socket Offline]: सर्व्हरशी कनेक्टेड नाही.`, "color: #f59e0b; font-weight: bold;");
+            }
         } else {
-            updateData.scoreB = newScore;
+            console.error(`%c🚨 [Socket Missing]: 'socket' ऑब्जेक्ट सापडला नाही!`, "color: #dc2626; font-weight: bold;");
         }
-
-        await matchRef.update(updateData);
-        console.log(`Score Updated for Team ${teamPrefix}: ${newScore}`);
-        
-    } catch (error) {
-        console.error("Score Update Error:", error);
+    } catch (socketErr) {
+        console.error("🚨 [Socket Global Crash]: updateScore मधील ब्रॉडकास्ट इंजिन अपयशी:", socketErr);
     }
-
-    // --- [SAFE FIX]: फक्त खालील २ ओळी दुरुस्त केल्या आहेत ---
-    // आपण थेट स्क्रीनवरचा मजकूर (Text) स्टोरेजमध्ये साठवत आहोत
-    const sA = document.getElementById('scoreA')?.innerText || "0";
-    const sB = document.getElementById('scoreB')?.innerText || "0";
-
-    localStorage.setItem('liveScoreA', sA);
-    localStorage.setItem('liveScoreB', sB);
 }
+
+
+/** */
 
 let outSequenceA = [];
 let outSequenceB = [];
@@ -5532,6 +5287,8 @@ function handleEmptyRaid(team) {
     processEmptyRaidLogic(team, "DIRECT_CLICK", raiderNo);
 }
 
+/** */
+
 function processEmptyRaidLogic(team, source, raiderNo) {
     // 🎯 [🔍 CONSOLE LOG 2]: मूळ लॉजिक फंक्शन चालू झाल्यावर डेटा तपासणे
     console.log(`%c📥 [DEBUG processEmptyRaidLogic ENTER]: Raider No: "${raiderNo}" | Team: ${team} | Source: ${source}`, "color: #0284c7; font-weight: bold;");
@@ -5588,6 +5345,7 @@ function processEmptyRaidLogic(team, source, raiderNo) {
     console.log(`%c--- [DEBUG processEmptyRaidLogic END] ---`, "color: #0284c7; font-weight: bold;");
 }
 
+/** */
 function updateEmptyDots(team) {
     const dotsContainer = document.getElementById(`empty${team}`);
     
@@ -5622,7 +5380,7 @@ function updateEmptyDots(team) {
     }
 }
 
-
+/** */
 function handleAllOut(team) {
     // team = ज्या टीमने ऑल आऊट केलं आहे (जिचा स्कोअर वाढणार)
     const oppositeTeam = (team === 'A' ? 'B' : 'A');
@@ -5651,14 +5409,14 @@ function handleAllOut(team) {
         }
     });
 }
-
+/** */
 function updateOutSequenceDisplay() {
     document.getElementById('outSequenceA').innerText = outSequenceA.join(', ') || 'None';
     document.getElementById('outSequenceB').innerText = outSequenceB.join(', ') || 'None';
 }
 
 
-
+/** */
 
 function openRaiderSelectionForBonus(team) {
     console.log(`[DEBUG] Attempting to open raider list for Team: ${team}`);
@@ -5775,7 +5533,7 @@ function finishAction() {
         console.log("--- [ACTION COMPLETE & GLOBALS RESET] ---");
     }, 400);
 }
-
+/** */
 function confirmRaider(no, name, team) {
     // १. HTML मधलं नाव बदला (इथेच तुझा घोळ होत होता)
     document.getElementById('activeRaider').innerText = name; 
@@ -5791,7 +5549,7 @@ function confirmRaider(no, name, team) {
         startRaidTimer(team); 
     }
 }
-
+/** */
 function initializeDefaultPlayers() {
     console.log("[SETUP] Initializing default player numbers...");
 
@@ -5817,7 +5575,7 @@ function initializeDefaultPlayers() {
 
     renderSetupPlayerList(); // ही लिस्ट स्क्रीनवर दाखवण्यासाठी फंक्शन
 }
-
+/** */
 function renderSetupPlayerList() {
     const containerA = document.getElementById('setupTeamA');
     const containerB = document.getElementById('setupTeamB');
@@ -5846,7 +5604,7 @@ function renderSetupPlayerList() {
         </div>
     `).join('');
 }
-
+/** */
 function updatePlayerData(team, index, field, value) {
     if (team === 'A') {
         teamAPlayers[index][field] = value;
@@ -5855,7 +5613,7 @@ function updatePlayerData(team, index, field, value) {
     }
     console.log(`[UPDATE] Team ${team} Player ${index} ${field} set to: ${value}`);
 }
-
+/** */
 function resetMatchData() {
     // Team A रिसेट करा
     teamAPlayers.forEach(p => {
@@ -5873,7 +5631,7 @@ function resetMatchData() {
     renderMiniPlayers(); 
     console.log("[RESET] All players are now IN and Out-history cleared.");
 }
-
+/** */
 function initializeMatchPlayers() {
     console.log("[INITIALIZE] Clearing old out-data and resetting players...");
     
@@ -6031,7 +5789,7 @@ function handleAction(team, type, points) {
     openMultiPlayerModal(team, 1, modalHeader);
 }
 
-
+/** */
 function checkSuperTackle(defendingTeam) {
     let inCount = (defendingTeam === 'A' ? teamAPlayers : teamBPlayers).filter(p => p.status === 'In').length;
     
@@ -6043,6 +5801,7 @@ function checkSuperTackle(defendingTeam) {
     }
 }
 
+/** */
 function handleAllOut(team) {
     console.log(`>>> [ALL_OUT_START] Team ${team} gets All Out points!`);
     
@@ -6078,7 +5837,7 @@ function handleAllOut(team) {
 }
 
 
-
+/** */
 
 // खेळाडू आऊट झाला की हे फंक्शन कॉल कर (updatePlayerStatus मध्ये शेवटी हे टाक)
 function checkAllOut(team) {
@@ -6104,43 +5863,6 @@ function checkAllOut(team) {
         });
     }
 }
-
-// ऑल-आऊटची प्रत्यक्ष अंमलबजावणी
-// function executeAllOut(allOutTeam, scoringTeam) {
-//     console.log(`>>> [ALL_OUT_START] Team: ${allOutTeam} is All-Out. Scoring Team: ${scoringTeam}`);
-
-//     updateScore(scoringTeam, 2); // २ ऑल-आऊट पॉईंट्स
-//     console.log(`    [SCORE] +2 Points added to Team ${scoringTeam}`);
-
-//     let players = (allOutTeam === 'A') ? teamAPlayers : teamBPlayers;
-    
-//     // १. आउट सिक्वेन्स पूर्णपणे रिकामी करा (RESET)
-//     if (allOutTeam === 'A') {
-//         outSequenceA = [];
-//         const elA = document.getElementById('outSequenceA');
-//         if (elA) elA.innerText = 'NONE';
-//     } else {
-//         outSequenceB = [];
-//         const elB = document.getElementById('outSequenceB');
-//         if (elB) elB.innerText = 'NONE';
-//     }
-//     console.log(`    [SEQ_RESET] Out sequence for Team ${allOutTeam} cleared.`);
-
-//     // २. प्लेइंग ७ ला पुन्हा मैदानात आणा
-//     players.forEach(p => {
-//         if (p.playingStatus === "Playing") {
-//             p.status = "In"; // तुझ्या आधीच्या फंक्शनमध्ये courtStatus होतं, ते 'status' आहे का एकदा चेक कर.
-//             p.outTime = null;
-//             console.log(`    [REVIVE] Player ${p.no} (${p.name}) is back In.`);
-//         } else {
-//             p.status = "Out"; 
-//             console.log(`    [BENCH] Player ${p.no} remains on Bench.`);
-//         }
-//     });
-
-//     renderMiniPlayers();
-//     console.log(`<<< [ALL_OUT_COMPLETE] Team ${allOutTeam} is fully revived.`);
-// }
 
 // ऑल-आऊटची प्रत्यक्ष अंमलबजावणी (सुधारित आणि सुरक्षित)
 function executeAllOut(allOutTeam, scoringTeam) {
@@ -6194,6 +5916,8 @@ function executeAllOut(allOutTeam, scoringTeam) {
     console.log(`<<< [ALL_OUT_COMPLETE] Team ${allOutTeam} is fully revived.`);
 }
 
+/** */
+
 function substitutePlayer(outPlayerNo, inPlayerNo, team) {
     let players = (team === 'A') ? teamAPlayers : teamBPlayers;
     
@@ -6214,6 +5938,8 @@ function substitutePlayer(outPlayerNo, inPlayerNo, team) {
     }
 }
 
+/** */
+
 function togglePlayerRole(checkbox, playerNo) {
     // समजा तुझ्या लेबलचा ID 'role-label-1' असा आहे
     const label = document.getElementById(`role-label-${playerNo}`);
@@ -6226,6 +5952,8 @@ function togglePlayerRole(checkbox, playerNo) {
         label.className = "text-[10px] text-gray-500 font-bold"; // राखाडी रंग SUB साठी
     }
 }
+
+/** */
 
 function finalizeMatchSetup() {
     let tempTeamA = [];
@@ -6250,6 +5978,7 @@ function finalizeMatchSetup() {
     
     // यानंतर मॅच स्क्रीनवर जा
 }
+/** */
 
 function validateCheckboxes() {
     const checkedCount = document.querySelectorAll('input[type="checkbox"]:checked').length;
@@ -6259,6 +5988,7 @@ function validateCheckboxes() {
     }
     return true;
 }
+/** */
 
 function handleCheckboxChange(playerNo) {
     const checkbox = document.getElementById(`check-${playerNo}`);
@@ -6289,164 +6019,166 @@ function handleCheckboxChange(playerNo) {
 
 let raidCounter = 0;
 
-
-// function addRaidToSummary(team, raiderName, result, points, details, isLoadedFromDB = false) {
-//     const raidFeed = document.getElementById('raidFeed');
-//     const modalRaidList = document.getElementById('modalRaidList');
+/*** 
+ * जुने addRaidToSummary फंक्शन पूर्ण काढून त्या जागी हा ५-५ मोड सपोर्ट करणारा आणि टाईमलाईनला डिव्हाइडर लावणारा कडकडीत कोड
+ * 
+*/
+// function addRaidToSummary(team, raiderName, result, points, details, isLoadedFromDB = false, isFiveRaid = false) {
+//     const raidFeed = document.getElementById('raidFeed'); 
+//     const modalRaidList = document.getElementById('modalRaidList'); 
 //     const noRaidText = document.getElementById('noRaidText');
 //     const modalEmptyText = document.getElementById('modalEmptyText');
 
 //     if (noRaidText) noRaidText.remove(); 
 //     if (modalEmptyText) modalEmptyText.remove(); 
 
-//     raidCounter++;
-//     const totalRaidsEl = document.getElementById('totalRaids');
-//     if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
+//     if (!isLoadedFromDB) {
+//         raidCounter++;
+//         const totalRaidsEl = document.getElementById('totalRaids');
+//         if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
+//     }
 
-//     // --- तुझे मूळ स्टाइलिंग लॉजिक (Raid Feed साठी) ---
-//     const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
+//     // 🚨 [5-5 TIE BREAKER DIVIDER]: ५-५ मोड सुरू झाल्यावर टाईमलाईनमध्ये एकच वेळ कडक ब्रेक लावणे
+//     if (isFiveRaid && !window.fiveRaidDividerInserted && modalRaidList) {
+//         window.fiveRaidDividerInserted = true; // दोबारा डिव्हाइडर पडू नये म्हणून लॉक
+//         const dividerEntry = document.createElement('div');
+//         dividerEntry.className = "my-4 mx-1 p-2 bg-gradient-to-r from-orange-950 via-slate-900 to-orange-950 border border-orange-500/30 rounded-xl text-center shadow-lg animate-pulse";
+//         dividerEntry.innerHTML = `
+//             <p class="text-[10px] text-orange-400 font-black tracking-widest uppercase">🤝 MAIN MATCH TIE (FULL TIME ENDED)</p>
+//             <p class="text-[8px] text-white font-bold uppercase mt-0.5">🔥 5-5 TIE-BREAKER RAIDS BEGINS</p>
+//         `;
+//         modalRaidList.prepend(dividerEntry);
+//     }
+
+//     let finalHeaderName = raiderName;
+//     let finalDetailsText = (details && details !== "") ? details : "";
+
+//     if (result.toUpperCase() === 'ALL OUT') {
+//         finalHeaderName = `TEAM ${team}  +2`;
+//         if (details.toLowerCase().includes("awarded to")) {
+//             let targetAllOutTeam = team === 'A' ? 'B' : 'A';
+//             finalDetailsText = `Team ${targetAllOutTeam} All out`;
+//         }
+//     }
+
+//     // --- 🎨 १. होम स्क्रीन होरिझॉन्टल फीड (Dynamic Styling) ---
+//     // जर ५-५ मोड असेल तर टोटली सेपरेट निऑन-ऑरेंज थीम लावा
+//     let borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
 //     let actionBg = "bg-gray-900"; 
 //     let indicatorIcon = "•"; 
-//     if (result.toUpperCase().includes('TACKLE')) { actionBg = "bg-red-900/30"; indicatorIcon = "🛑"; }
-//     else if (result.toUpperCase().includes('BONUS')) { actionBg = "bg-blue-900/30"; indicatorIcon = "✨"; }
-//     else if (points > 0) { actionBg = "bg-green-900/30"; indicatorIcon = "🎯"; }
+//     let cardCustomStyle = ""; 
 
-//     const displayDetails = (details && details !== "") ? details : "";
+//     if (isFiveRaid) {
+//         actionBg = "bg-gradient-to-r from-orange-950/40 to-zinc-900";
+//         indicatorIcon = "⚡";
+//         cardCustomStyle = "border-orange-500 shadow-lg relative";
+//     }
+//     else if (result.toUpperCase() === 'ALL OUT') {
+//         actionBg = "bg-gradient-to-br from-amber-600/30 via-orange-950/40 to-black";
+//         indicatorIcon = "🚨";
+//         cardCustomStyle = "border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-pulse";
+//     } 
+//     else if (result.toUpperCase().includes('TACKLE')) { 
+//         actionBg = "bg-red-900/30"; 
+//         indicatorIcon = "🛑"; 
+//     }
+//     else if (result.toUpperCase().includes('BONUS')) { 
+//         actionBg = "bg-blue-900/30"; 
+//         indicatorIcon = "✨"; 
+//     }
+//     else if (points > 0) { 
+//         actionBg = "bg-green-900/30"; 
+//         indicatorIcon = "🎯"; 
+//     }
 
-//     // १. आडवा स्क्रोलर (Small Card) - जसाच्या तसा
 //     const raidEntry = document.createElement('div');
-//     raidEntry.className = `flex-shrink-0 w-40 ${actionBg} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
+//     raidEntry.className = `flex-shrink-0 w-48 ${actionBg} p-2 rounded-md shadow-md relative border-l-2 ${(result.toUpperCase() === 'ALL OUT' || isFiveRaid) ? cardCustomStyle : borderColor}`;
+    
+//     // ५-५ मोडसाठी लहान अक्षरात 5-5 Raid मेन्शन करणे
+//     const badgeHtml = isFiveRaid ? `<span class="absolute top-1 right-1 text-[5px] bg-orange-600/30 border border-orange-500/20 text-orange-400 px-1 py-0.5 rounded font-black uppercase">5-5 Raid</span>` : '';
+
 //     raidEntry.innerHTML = `
+//         ${badgeHtml}
 //         <div class="flex justify-between items-start mb-0.5">
-//             <span class="text-[10px] font-black text-white truncate w-28 uppercase">${raiderName}</span>
-//             <span class="text-[10px] font-bold ${points > 0 ? 'text-green-400' : 'text-red-400'}">+${points}</span>
+//             <span class="text-[10px] font-black text-white truncate w-36 uppercase tracking-wide">${finalHeaderName}</span>
 //         </div>
-//         <div class="flex items-center gap-1 mb-1 opacity-90"><span class="text-[8px] text-gray-200 font-black uppercase tracking-tighter">${indicatorIcon} ${result}</span></div>
-//         <div class="border-t border-white/10 pt-1 mt-1"><div class="text-[8px] text-white/80 leading-snug font-medium italic">${displayDetails}</div></div>
+//         <div class="flex items-center gap-1 mb-1 opacity-90">
+//             <span class="text-[9px] ${isFiveRaid ? 'text-orange-400' : 'text-amber-400'} font-black uppercase tracking-tight">${indicatorIcon} ${result}</span>
+//         </div>
+//         <div class="border-t border-white/10 pt-1 mt-1">
+//             <div class="text-[8.5px] text-gray-300 leading-snug font-bold italic uppercase tracking-tighter">${finalDetailsText}</div>
+//         </div>
 //     `;
 //     if (raidFeed) raidFeed.prepend(raidEntry);
 
-//     // २. मॉडेलमधील कॉमेंट्री स्टाईल लिस्ट - जशीच्या तशी
+//     // --- 🎨 २. [MATCH TIMELINE]: मॅच टाईमलाईनवरील रचना (MATCH CENTRE) ---
 //     if (modalRaidList) {
 //         const modalEntry = document.createElement('div');
-//         modalEntry.className = "py-2.5 border-b border-gray-100 flex gap-3 items-start bg-white";
         
-//         const ptsBg = points > 0 ? 'bg-green-600' : 'bg-red-600';
-//         const teamName = (team === 'A') ? (document.getElementById('teamAName')?.innerText || 'Team A') : (document.getElementById('teamBName')?.innerText || 'Team B');
+//         // ५-५ मोडसाठी मॅच सेंटरमध्ये स्वतंत्र निऑन-ऑरेंज उभे प्रीमियम कार्ड रचना
+//         let cardBg = (team === 'A') ? 'bg-green-500/5 border-l-4 border-green-500' : 'bg-blue-500/5 border-l-4 border-blue-500';
+//         let ptsBg = (team === 'A') ? 'bg-green-600 text-white' : 'bg-blue-600 text-white';
+
+//         if (isFiveRaid) {
+//             cardBg = 'bg-orange-500/5 border-l-4 border-orange-500 shadow-[inset_0_0_10px_rgba(249,115,22,0.05)]';
+//             ptsBg = 'bg-orange-500 text-black';
+//         } else if (result.toUpperCase() === 'ALL OUT') {
+//             cardBg = 'bg-amber-500/10 border-l-4 border-amber-500 shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]';
+//             ptsBg = 'bg-amber-500 text-black';
+//         }
+
+//         modalEntry.className = `p-3 mb-2 mx-1 rounded-r-xl flex gap-3 items-center shadow-sm ${cardBg} relative overflow-hidden`;
+        
+//         const centerBadgeHtml = isFiveRaid ? `<span class="absolute top-1.5 right-1.5 text-[5px] bg-orange-600/20 border border-orange-500/20 text-orange-400 px-1 py-0.5 rounded font-black uppercase tracking-tighter">5-5 Raid</span>` : '';
 
 //         modalEntry.innerHTML = `
-//             <div class="shrink-0 w-6 h-6 ${ptsBg} text-white text-[10px] font-black flex items-center justify-center rounded shadow-sm">
-//                 ${points}
+//             ${centerBadgeHtml}
+//             <div class="shrink-0 w-7 h-7 ${ptsBg} text-[11px] font-black flex items-center justify-center rounded-full shadow">
+//                 +${points}
 //             </div>
-//             <div class="flex-1 text-[11px] leading-relaxed text-gray-800">
-//                 <span class="font-bold text-black uppercase">${raiderName}</span> 
-//                 <span class="text-gray-400 text-[9px] font-bold">[${teamName}]</span>: 
-//                 <span class="font-bold text-blue-800 uppercase tracking-tighter">${result}</span>. 
-//                 <span class="text-gray-500 italic ml-1">${displayDetails}</span>
+//             <div class="flex-1 text-[11px] leading-relaxed text-gray-300">
+//                 <div class="flex items-center gap-1.5 flex-wrap">
+//                     <span class="font-black text-white uppercase tracking-wide">${finalHeaderName}</span> 
+//                     <span class="text-gray-500 font-medium">➔</span>
+//                     <span class="font-black ${isFiveRaid ? 'text-orange-400' : 'text-amber-400'} uppercase tracking-tight">${result}</span>
+//                 </div>
+//                 ${finalDetailsText ? `<div class="text-[9.5px] ${isFiveRaid ? 'text-orange-400/80' : 'text-amber-500/80'} font-bold italic mt-0.5 flex items-center gap-1">🚨 ${finalDetailsText}</div>` : ''}
 //             </div>
 //         `;
 //         modalRaidList.prepend(modalEntry);
 //     }
 
-//     // 🔒 [LOCAL MEMORY & SECURE STORAGE SYNC]: फ्रेश रेड असल्यास डेटाबेसला कॉल न मारता साठवा!
+//     // --- 🔒 LOCAL STORAGE SYNC ---
 //     if (!isLoadedFromDB && typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId) {
 //         if (!window.activeRaidsList) window.activeRaidsList = [];
 
 //         window.activeRaidsList.push({
 //             team: team,
-//             raiderName: raiderName,
+//             raiderName: finalHeaderName, 
 //             result: result,
 //             points: Number(points),
-//             details: details || "",
-//             timestamp: new Date().getTime()
+//             details: finalDetailsText,
+//             timestamp: new Date().getTime(),
+//             isFiveRaid: isFiveRaid // ५-५ आयडेंटिफायर स्टोरेजमध्ये लॉक करणे
 //         });
 
-//         // Base64 सुरक्षित कोडींग (मराठी फॉन्ट सेफ्टीसह)
 //         try {
 //             const rawString = JSON.stringify(window.activeRaidsList);
 //             const encodedData = btoa(unescape(encodeURIComponent(rawString)));
 //             localStorage.setItem(`raids_secure_log_${matchSetupData.mId}`, encodedData);
-//             console.log(`💾 [Local Sync]: रेड सुरक्षितरित्या साठवली. (एकूण: ${window.activeRaidsList.length})`);
+//             console.log(`💾 [Local Sync Success]: ५-५ डेटा 'raids_secure_log' मध्ये कडक लॉक केला!`);
 //         } catch (err) {
 //             console.error("🚨 LocalStorage Save Error:", err);
 //         }
 //     }
-// }
 
-// function addRaidToSummary(team, raiderName, result, points, details) {
-//     const raidFeed = document.getElementById('raidFeed'); // होम स्क्रीन फीड
-//     const modalRaidList = document.getElementById('modalRaidList'); // मॅच टाईमलाईन लिस्ट
-//     const noRaidText = document.getElementById('noRaidText');
-//     const modalEmptyText = document.getElementById('modalEmptyText');
-
-//     if (noRaidText) noRaidText.remove(); 
-//     if (modalEmptyText) modalEmptyText.remove(); 
-
-//     raidCounter++;
-//     const totalRaidsEl = document.getElementById('totalRaids');
-//     if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
-
-//     // --- 🎨 १. होम स्क्रीन फीड स्टाईलिंग (Horizontal Scroll) ---
-//     const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
-//     let actionBg = "bg-gray-900"; 
-//     let indicatorIcon = "•"; 
-//     if (result.toUpperCase().includes('TACKLE')) { actionBg = "bg-red-900/30"; indicatorIcon = "🛑"; }
-//     else if (result.toUpperCase().includes('BONUS')) { actionBg = "bg-blue-900/30"; indicatorIcon = "✨"; }
-//     else if (points > 0) { actionBg = "bg-green-900/30"; indicatorIcon = "🎯"; }
-
-//     const displayDetails = (details && details !== "") ? details : "";
-
-//     const raidEntry = document.createElement('div');
-//     raidEntry.className = `flex-shrink-0 w-40 ${actionBg} border-l-2 ${borderColor} p-2 rounded-md shadow-md relative`;
-//     raidEntry.innerHTML = `
-//         <div class="flex justify-between items-start mb-0.5">
-//             <span class="text-[10px] font-black text-white truncate w-28 uppercase">${raiderName}</span>
-//             <span class="text-[10px] font-bold ${points > 0 ? 'text-green-400' : 'text-red-400'}">+${points}</span>
-//         </div>
-//         <div class="flex items-center gap-1 mb-1 opacity-90"><span class="text-[8px] text-gray-200 font-black uppercase tracking-tighter">${indicatorIcon} ${result}</span></div>
-//         <div class="border-t border-white/10 pt-1 mt-1"><div class="text-[8px] text-white/80 leading-snug font-medium italic">${displayDetails}</div></div>
-//     `;
-//     if (raidFeed) raidFeed.prepend(raidEntry);
-
-//     // --- 🎨 २. [BEAUTIFIED MATCH TIMELINE]: मॅच टाईमलाईनचा कडक प्रो लुक ---
-//     if (modalRaidList) {
-//         const modalEntry = document.createElement('div');
-        
-//         // 📊 टीम वाईज कडक मॉडर्न कलर शेड्स (बॅकग्राउंड आणि बॉर्डर)
-//         // टीम A साठी हलकी हिरवी शेड, टीम B साठी हलकी निळी शेड 🟢🔵
-//         const cardBg = (team === 'A') ? 'bg-green-500/5 border-l-4 border-green-500' : 'bg-blue-500/5 border-l-4 border-blue-500';
-//         const ptsBg = (team === 'A') ? 'bg-green-600' : 'bg-blue-600';
-        
-//         // 🚨 [TEAM NAME BUG FIX]: रायडरची खरी टीम ओळखणे
-//         // जर पॉईंट टीम A ला मिळालाय आणि तो टॅकल आहे, तर रायडर नक्कीच टीम B चा असणार!
-//         let raiderTrueTeam = "";
-//         if (result.toUpperCase().includes('TACKLE')) {
-//             raiderTrueTeam = (team === 'A') ? "Team B" : "Team A";
-//         } else {
-//             raiderTrueTeam = (team === 'A') ? "Team A" : "Team B";
-//         }
-
-//         modalEntry.className = `p-3 mb-2 mx-1 rounded-r-xl flex gap-3 items-center shadow-sm transition-all ${cardBg}`;
-//         modalEntry.innerHTML = `
-//             <div class="shrink-0 w-7 h-7 ${ptsBg} text-white text-[11px] font-black flex items-center justify-center rounded-full shadow">
-//                 +${points}
-//             </div>
-            
-//             <div class="flex-1 text-[11px] leading-relaxed text-gray-300">
-//                 <div class="flex items-center gap-1.5 flex-wrap">
-//                     <span class="font-black text-white uppercase tracking-wide">${raiderName}</span> 
-//                     <span class="px-1 py-0.2 bg-white/10 text-gray-400 text-[8px] font-extrabold rounded uppercase tracking-tight">[${raiderTrueTeam}]</span>
-//                     <span class="text-gray-400 font-medium">➔</span>
-//                     <span class="font-black text-orange-400 uppercase tracking-tight">${result}</span>
-//                 </div>
-//                 ${displayDetails ? `<div class="text-[9.5px] text-gray-400 font-semibold italic mt-0.5 flex items-center gap-1">⚡ ${displayDetails}</div>` : ''}
-//             </div>
-//         `;
-//         modalRaidList.prepend(modalEntry);
+//     if (typeof calculateTopStats === "function") {
+//         calculateTopStats();
 //     }
 // }
-/** */
-function addRaidToSummary(team, raiderName, result, points, details, isLoadedFromDB = false) {
+
+/*** */
+function addRaidToSummary(team, raiderName, result, points, details, isLoadedFromDB = false, isFiveRaid = false, isGoldenRaid = false) {
     const raidFeed = document.getElementById('raidFeed'); 
     const modalRaidList = document.getElementById('modalRaidList'); 
     const noRaidText = document.getElementById('noRaidText');
@@ -6461,14 +6193,35 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
         if (totalRaidsEl) totalRaidsEl.innerText = `Raids: ${raidCounter}`;
     }
 
-    // 🚨 [ALL OUT EXCLUSIVE TEXT FIX]: ऑल-आऊटसाठी मजकूर तुझ्या रचनेनुसार सेट करणे
+    // 🚨 [5-5 TIE BREAKER DIVIDER]: ५-५ मोड सुरू झाल्यावर टाईमलाईनमध्ये एकच वेळ ब्रेक लावणे
+    if (isFiveRaid && !window.fiveRaidDividerInserted && modalRaidList) {
+        window.fiveRaidDividerInserted = true; 
+        const dividerEntry = document.createElement('div');
+        dividerEntry.className = "my-4 mx-1 p-2 bg-gradient-to-r from-orange-950 via-slate-900 to-orange-950 border border-orange-500/30 rounded-xl text-center shadow-lg animate-pulse";
+        dividerEntry.innerHTML = `
+            <p class="text-[10px] text-orange-400 font-black tracking-widest uppercase">🤝 MAIN MATCH TIE (FULL TIME ENDED)</p>
+            <p class="text-[8px] text-white font-bold uppercase mt-0.5">🔥 5-5 TIE-BREAKER RAIDS BEGINS</p>
+        `;
+        modalRaidList.prepend(dividerEntry);
+    }
+
+    // 🚨 [GOLDEN RAID DIVIDER]: गोल्डन रेड सुरू झाल्यावर टाईमलाईनमध्ये सोनेरी ब्रेक लावणे 🔥
+    if (isGoldenRaid && !window.goldenRaidDividerInserted && modalRaidList) {
+        window.goldenRaidDividerInserted = true;
+        const goldenDivider = document.createElement('div');
+        goldenDivider.className = "my-4 mx-1 p-2 bg-gradient-to-r from-yellow-950 via-slate-900 to-yellow-950 border border-yellow-500/40 rounded-xl text-center shadow-[0_0_15px_rgba(234,179,8,0.15)] animate-pulse";
+        goldenDivider.innerHTML = `
+            <p class="text-[10px] text-yellow-500 font-black tracking-widest uppercase">⚡ 5-5 RAIDS MODE TIED AGAIN</p>
+            <p class="text-[8px] text-white font-bold uppercase mt-0.5">👑 GOLDEN RAID (SUDDEN DEATH) STARTED</p>
+        `;
+        modalRaidList.prepend(goldenDivider);
+    }
+
     let finalHeaderName = raiderName;
     let finalDetailsText = (details && details !== "") ? details : "";
 
     if (result.toUpperCase() === 'ALL OUT') {
-        // जर ऑल-आऊट इव्हेंट असेल, तर हेडिंग 'Team A  +2' करा
         finalHeaderName = `TEAM ${team}  +2`;
-        // डिटेल्स खाली सुटसुटीत 'Team X All out' करा (allOutTeam चे नाव डिटेल्समधून काढून फक्त नाव घ्या)
         if (details.toLowerCase().includes("awarded to")) {
             let targetAllOutTeam = team === 'A' ? 'B' : 'A';
             finalDetailsText = `Team ${targetAllOutTeam} All out`;
@@ -6476,13 +6229,24 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
     }
 
     // --- 🎨 १. होम स्क्रीन होरिझॉन्टल फीड (Dynamic Styling) ---
-    const borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
+    let borderColor = (team === 'A') ? 'border-green-500' : 'border-blue-500';
     let actionBg = "bg-gray-900"; 
     let indicatorIcon = "•"; 
-    let cardCustomStyle = ""; // ऑल-आऊटसाठी स्पेशल स्टाईल शीट
+    let cardCustomStyle = ""; 
 
-    // 🚨 [COLOR BREAKTHROUGH]: ऑल-आऊट कार्डचा रंग पूर्णपणे वेगळा आणि प्रीमियम (Amber/Orange Glow) करणे 🔥
-    if (result.toUpperCase() === 'ALL OUT') {
+    // 🪙 कंडिशन अ: जर गोल्डन रेड असेल तर कडक सोनेरी प्रिमियम लूक
+    if (isGoldenRaid) {
+        actionBg = "bg-gradient-to-r from-yellow-950/30 to-zinc-900";
+        indicatorIcon = "🪙";
+        cardCustomStyle = "border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.1)] relative";
+    }
+    // कंडिशन ब: जर ५-५ मोड असेल तर निऑन-ऑरेंज थीम
+    else if (isFiveRaid) {
+        actionBg = "bg-gradient-to-r from-orange-950/40 to-zinc-900";
+        indicatorIcon = "⚡";
+        cardCustomStyle = "border-orange-500 shadow-lg relative";
+    }
+    else if (result.toUpperCase() === 'ALL OUT') {
         actionBg = "bg-gradient-to-br from-amber-600/30 via-orange-950/40 to-black";
         indicatorIcon = "🚨";
         cardCustomStyle = "border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-pulse";
@@ -6501,14 +6265,22 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
     }
 
     const raidEntry = document.createElement('div');
-    // जर ऑल-आऊट असेल तर कस्टम स्टाईल आणि बॉर्डर लावा, नाहीतर तुझा मूळ बॉर्डर क्लास
-    raidEntry.className = `flex-shrink-0 w-48 ${actionBg} p-2 rounded-md shadow-md relative border-l-2 ${result.toUpperCase() === 'ALL OUT' ? cardCustomStyle : borderColor}`;
+    raidEntry.className = `flex-shrink-0 w-48 ${actionBg} p-2 rounded-md shadow-md relative border-l-2 ${(result.toUpperCase() === 'ALL OUT' || isFiveRaid || isGoldenRaid) ? cardCustomStyle : borderColor}`;
+    
+    // बॅज मॅनेजमेंट (५-५ की गोल्डन रेड)
+    let badgeText = "";
+    if (isGoldenRaid) badgeText = "Golden Raid";
+    else if (isFiveRaid) badgeText = "5-5 Raid";
+
+    const badgeHtml = badgeText ? `<span class="absolute top-1 right-1 text-[5px] ${isGoldenRaid ? 'bg-yellow-600/30 border border-yellow-500/20 text-yellow-400' : 'bg-orange-600/30 border border-orange-500/20 text-orange-400'} px-1 py-0.5 rounded font-black uppercase">${badgeText}</span>` : '';
+
     raidEntry.innerHTML = `
+        ${badgeHtml}
         <div class="flex justify-between items-start mb-0.5">
             <span class="text-[10px] font-black text-white truncate w-36 uppercase tracking-wide">${finalHeaderName}</span>
         </div>
         <div class="flex items-center gap-1 mb-1 opacity-90">
-            <span class="text-[9px] text-amber-400 font-black uppercase tracking-tight">${indicatorIcon} ${result}</span>
+            <span class="text-[9px] ${isGoldenRaid ? 'text-yellow-400' : (isFiveRaid ? 'text-orange-400' : 'text-amber-400')} font-black uppercase tracking-tight">${indicatorIcon} ${result}</span>
         </div>
         <div class="border-t border-white/10 pt-1 mt-1">
             <div class="text-[8.5px] text-gray-300 leading-snug font-bold italic uppercase tracking-tighter">${finalDetailsText}</div>
@@ -6516,19 +6288,30 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
     `;
     if (raidFeed) raidFeed.prepend(raidEntry);
 
-    // --- 🎨 २. [MATCH TIMELINE]: मॅच टाईमलाईनवरील ऑल-आऊट रचना ---
+    // --- 🎨 २. [MATCH TIMELINE]: मॅच सेंटरमधील रचना ---
     if (modalRaidList) {
         const modalEntry = document.createElement('div');
         
-        // टाईमलाईनवर देखील ऑल-आऊट कार्डला कडक ऑरेंज ग्लो बॉर्डर द्या
-        const cardBg = (result.toUpperCase() === 'ALL OUT') 
-                     ? 'bg-amber-500/10 border-l-4 border-amber-500 shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]' 
-                     : ((team === 'A') ? 'bg-green-500/5 border-l-4 border-green-500' : 'bg-blue-500/5 border-l-4 border-blue-500');
-                     
-        const ptsBg = (result.toUpperCase() === 'ALL OUT') ? 'bg-amber-500 text-black' : ((team === 'A') ? 'bg-green-600 text-white' : 'bg-blue-600 text-white');
+        let cardBg = (team === 'A') ? 'bg-green-500/5 border-l-4 border-green-500' : 'bg-blue-500/5 border-l-4 border-blue-500';
+        let ptsBg = (team === 'A') ? 'bg-green-600 text-white' : 'bg-blue-600 text-white';
 
-        modalEntry.className = `p-3 mb-2 mx-1 rounded-r-xl flex gap-3 items-center shadow-sm ${cardBg}`;
+        if (isGoldenRaid) {
+            cardBg = 'bg-yellow-500/5 border-l-4 border-yellow-500 shadow-[inset_0_0_10px_rgba(234,179,8,0.05)]';
+            ptsBg = 'bg-yellow-500 text-black';
+        } else if (isFiveRaid) {
+            cardBg = 'bg-orange-500/5 border-l-4 border-orange-500 shadow-[inset_0_0_10px_rgba(249,115,22,0.05)]';
+            ptsBg = 'bg-orange-500 text-black';
+        } else if (result.toUpperCase() === 'ALL OUT') {
+            cardBg = 'bg-amber-500/10 border-l-4 border-amber-500 shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]';
+            ptsBg = 'bg-amber-500 text-black';
+        }
+
+        modalEntry.className = `p-3 mb-2 mx-1 rounded-r-xl flex gap-3 items-center shadow-sm ${cardBg} relative overflow-hidden`;
+        
+        const centerBadgeHtml = badgeText ? `<span class="absolute top-1.5 right-1.5 text-[5px] ${isGoldenRaid ? 'bg-yellow-600/20 border border-yellow-500/20 text-yellow-400' : 'bg-orange-600/20 border border-orange-500/20 text-orange-400'} px-1 py-0.5 rounded font-black uppercase tracking-tighter">${badgeText}</span>` : '';
+
         modalEntry.innerHTML = `
+            ${centerBadgeHtml}
             <div class="shrink-0 w-7 h-7 ${ptsBg} text-[11px] font-black flex items-center justify-center rounded-full shadow">
                 +${points}
             </div>
@@ -6536,9 +6319,9 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
                 <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-black text-white uppercase tracking-wide">${finalHeaderName}</span> 
                     <span class="text-gray-500 font-medium">➔</span>
-                    <span class="font-black text-amber-400 uppercase tracking-tight">${result}</span>
+                    <span class="font-black ${isGoldenRaid ? 'text-yellow-400' : (isFiveRaid ? 'text-orange-400' : 'text-amber-400')} uppercase tracking-tight">${result}</span>
                 </div>
-                ${finalDetailsText ? `<div class="text-[9.5px] text-amber-500/80 font-bold italic mt-0.5 flex items-center gap-1">🚨 ${finalDetailsText}</div>` : ''}
+                ${finalDetailsText ? `<div class="text-[9.5px] ${isGoldenRaid ? 'text-yellow-400/80' : (isFiveRaid ? 'text-orange-400/80' : 'text-amber-500/80')} font-bold italic mt-0.5 flex items-center gap-1">🚨 ${finalDetailsText}</div>` : ''}
             </div>
         `;
         modalRaidList.prepend(modalEntry);
@@ -6554,20 +6337,21 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
             result: result,
             points: Number(points),
             details: finalDetailsText,
-            timestamp: new Date().getTime()
+            timestamp: new Date().getTime(),
+            isFiveRaid: isFiveRaid,
+            isGoldenRaid: isGoldenRaid // स्टोरेज मध्ये देखील मॅप करणे
         });
 
         try {
             const rawString = JSON.stringify(window.activeRaidsList);
             const encodedData = btoa(unescape(encodeURIComponent(rawString)));
             localStorage.setItem(`raids_secure_log_${matchSetupData.mId}`, encodedData);
-            console.log(`💾 [Local Sync Success]: ऑल-आऊट स्पेशल कार्ड लोकल स्टोरेजमध्ये लॉक केले!`);
+            console.log(`💾 [Local Sync Success]: डेटा लोकल स्टोरेजमध्ये सुरक्षित ट्रॅक केला!`);
         } catch (err) {
             console.error("🚨 LocalStorage Save Error:", err);
         }
     }
 
-    // 🎯 [LIVE OVERLAY TRIGGER]: प्रत्येक रेड सबमिट झाल्यावर लाइव्ह आकडे रिफ्रेश करा! ⚡
     if (typeof calculateTopStats === "function") {
         calculateTopStats();
     }
@@ -6577,41 +6361,283 @@ function addRaidToSummary(team, raiderName, result, points, details, isLoadedFro
 /**
 // १. मॉडेल उघडण्यासाठी
 //  */
-function openSummaryModal() {
-    console.log("--- [ULTIMATE_FIX_START] ---");
+/**
+ * सुधारित openSummaryModal फंक्शन (मास्टर ऑब्जेक्टसह)
+आपण ठरवल्याप्रमाणे कोणताही मूळचा फ्लो न विस्कटता, 
+फक्त लोकल स्टोरेजमधून आपला नवा global_score_card ऑब्जेक्ट ओढून तो चालू मॅचच्या स्टेटस (dbStatus किंवा मेमरी फ्लॅग्ज) नुसार स्क्रीनवर सेट करूया.
+ */
+
+/** */
+// function openSummaryModal() {
+//     console.log("%c====================================================================", "color: #9333ea; font-weight: bold;");
+//     console.log("%c🚨 [STEP 1 - ENGINE START]: openSummaryModal() ट्रिगर झाले!", "background: #9333ea; color: #fff; font-weight: bold; padding: 3px;");
+
+//     const modal = document.getElementById('summaryModal');
+//     console.log("➡️ [STAGE 1.1 - DOM CHECK]: 'summaryModal' कंटेनर स्थिती ➔", modal ? "✅ हजर आहे" : "❌ गायब आहे!");
+
+//     // १. टीमची नावे (फक्त मजकूर)
+//     const nameA = document.getElementById('teamAName')?.innerText || "Team A";
+//     const nameB = document.getElementById('teamBName')?.innerText || "Team B";
+//     console.log(`➡️ [STAGE 1.2 - RAW NAMES FROM SCREEN]: घेतलेली नावे ➔ Team A: "${nameA}" | Team B: "${nameB}"`);
+
+//     // २. [MASTER SCORECARD ENGINE] - लोकल स्टोरेजवरून ऑब्जेक्ट ओढणे
+//     const localCard = localStorage.getItem('global_score_card');
+//     console.log("➡️ [STAGE 1.3 - LOCALSTORAGE SNAPSHOT]: global_score_card चा रॅा डेटा ➔", localCard);
+
+//     const currentScoreCard = localCard ? JSON.parse(localCard) : {
+//         mainMatch:  { teamA: 0, teamB: 0 },
+//         fiveRaid:   { teamA: 0, teamB: 0 },
+//         goldenRaid: { teamA: 0, teamB: 0 }
+//     };
+
+//     // ३. चालू मॅचच्या स्टेटस ओळखून अचूक स्कोअर फायनल करणे
+//     let finalScoreA = currentScoreCard.mainMatch.teamA;
+//     let finalScoreB = currentScoreCard.mainMatch.teamB;
+//     let activeMode = "Main Match (मुख्य वेळ)";
+
+//     if (window.isFiveRaidModeOn === true) {
+//         activeMode = "Five Raid (५-५ मोड)";
+//         finalScoreA = currentScoreCard.fiveRaid.teamA;
+//         finalScoreB = currentScoreCard.fiveRaid.teamB;
+//     } else if (window.isGoldenRaidActiveNow === true) {
+//         activeMode = "Golden Raid (सुवर्ण मोड)";
+//         finalScoreA = currentScoreCard.goldenRaid.teamA;
+//         finalScoreB = currentScoreCard.goldenRaid.teamB;
+//     }
+
+//     console.log(`➡️ [STAGE 1.4 - RESOLVED LIVE MODE]: मोड ठरला ➔ "${activeMode}" | पास होणारे आकडे ➔ A: ${finalScoreA} vs B: ${finalScoreB}`);
+
+//     // ४. मॉडेलमध्ये डेटा सेट करा
+//     const mNameA = document.getElementById('modalTeamAName');
+//     const mNameB = document.getElementById('modalTeamBName');
+//     const mScoreA = document.getElementById('modalTeamAScore');
+//     const mScoreB = document.getElementById('modalTeamBScore');
+
+//     console.log("➡️ [STAGE 1.5 - HEADER TARGET ELEMENTS]: हेडरच्या कप्प्यांची डोममधील जिवंत स्थिती:", {
+//         "modalTeamAName कप्पा": mNameA ? "✅ हजर" : "❌ गायब",
+//         "modalTeamBName कप्पा": mNameB ? "✅ हजर" : "❌ गायब",
+//         "modalTeamAScore (Team A हेडर स्कोअर कप्पा)": mScoreA ? "✅ हजर" : "❌ गायब",
+//         "modalTeamBScore (Team B हेडर स्कोअर कप्पा)": mScoreB ? "✅ हजर" : "❌ गायब"
+//     });
+
+//     // 🎯 प्रत्यक्ष व्हॅल्यू भरताना कन्सोलमध्ये लॉग करणे
+//     if (mNameA) { mNameA.innerText = nameA; console.log(`✍️ [Header Injection]: Team A नाव सेट केले ➔ "${nameA}"`); }
+//     if (mNameB) { mNameB.innerText = nameB; console.log(`✍️ [Header Injection]: Team B नाव सेट केले ➔ "${nameB}"`); }
+    
+//     if (mScoreA) { 
+//         mScoreA.innerText = finalScoreA; 
+//         console.log(`✍️ [Header Injection]: Team A चा स्कोअर ${finalScoreA} मॅन्युअली भरला! नवीन innerText ➔ "${mScoreA.innerText}"`);
+//     }
+//     if (mScoreB) { 
+//         mScoreB.innerText = finalScoreB; 
+//         console.log(`✍️ [Header Injection]: Team B चा स्कोअर ${finalScoreB} मॅन्युअली भरला! नवीन innerText ➔ "${mScoreB.innerText}"`);
+//     }
+
+//     // ५. मॉडेल उघडा
+//     if (modal) {
+//         modal.classList.remove('hidden');
+//         modal.classList.add('flex');
+//         document.body.style.overflow = 'hidden';
+//         console.log("🔓 [STAGE 1.6 - MODAL FLEX DISPLAY]: मोडल स्क्रीनवर दाखवले गेले.");
+//     }
+//     console.log("%c🚨 [STEP 1 END]: openSummaryModal() चे काम संपले.", "color: #9333ea; font-weight: bold;");
+//     console.log("%c====================================================================", "color: #9333ea; font-weight: bold;");
+// }
+/** */
+async function openSummaryModal(tId, mId) {
+    // =========================================================================
+    // 📂 SECTION 1: INITIAL ENGINE START & DOM CHECK
+    // =========================================================================
+    console.log("%c====================================================================", "color: #9333ea; font-weight: bold;");
+    console.log("%c🚨 [STEP 1 - ENGINE START]: openSummaryModal() ट्रिगर झाले!", "background: #9333ea; color: #fff; font-weight: bold; padding: 3px;");
+
     const modal = document.getElementById('summaryModal');
+    console.log("➡️ [STAGE 1.1 - DOM CHECK]: 'summaryModal' कंटेनर स्थिती ➔", modal ? "✅ हजर आहे" : "❌ गायब आहे!");
 
-    // १. टीमची नावे (फक्त मजकूर)
-    const nameA = document.getElementById('teamAName')?.innerText || "Team A";
-    const nameB = document.getElementById('teamBName')?.innerText || "Team B";
+    // आयडी रिकव्हरी (जर पॅरामिटर्स नसतील तर ग्लोबल किंवा स्टोरेजमधून ओढणे)
+    let finalTId = tId || matchSetupData?.tId || currentMatchData?.tId;
+    let finalMId = mId || matchSetupData?.mId || currentMatchData?.mId;
 
-    // २. स्कोअर (LocalStorage मधून फक्त नंबर काढा)
-    // यामुळे <h1 id="scoreA"> वाला गोंधळ कायमचा संपेल
-    const finalScoreA = localStorage.getItem('liveScoreA') || "0";
-    const finalScoreB = localStorage.getItem('liveScoreB') || "0";
+    if (!finalTId || !finalMId) {
+        const savedMatchRaw = localStorage.getItem('squad_editing_match');
+        if (savedMatchRaw) {
+            const parsed = JSON.parse(savedMatchRaw);
+            finalTId = finalTId || parsed.tId;
+            finalMId = finalMId || parsed.mId;
+        }
+    }
 
-    console.log("[FIXED_LOG] Final Values:", nameA, finalScoreA, "vs", nameB, finalScoreB);
+    console.log(`👉 [IDs DETECTED]: Tournament ID: ${finalTId} | Match ID: ${finalMId}`);
 
-    // ३. मॉडेलमध्ये डेटा सेट करा
+    // मोडल उघडण्यापूर्वी जुनी रेंडर झालेली टाइमलाईन लिस्ट साफ करणे (Clean UI)
+    const mList = document.getElementById('modalRaidList');
+    if (mList) mList.innerHTML = `<div class="text-center py-10 text-gray-500 text-[10px] animate-pulse">डेटा लोड होत आहे...</div>`;
+
+
+    // =========================================================================
+    // 📂 SECTION 2: LIVE FIRESTORE DATA SNAPSHOT (🎯 THE BLANK TIMELINE FIX)
+    // =========================================================================
+    let matchData = null;
+    if (finalTId && finalMId) {
+        try {
+            console.log("🔄 [Firestore Fetch]: डेटाबेसच्या विहिरीतून ताजा इतिहास ओढत आहे...");
+            const mDoc = await db.collection("tournaments").doc(finalTId).collection("matches").doc(finalMId).get();
+            if (mDoc.exists) {
+                matchData = mDoc.data();
+                console.log("📦 [Firestore Success]: ताजा मॅच डेटा मिळाला ➔", matchData);
+                
+                // 🚨 [💥 CRITICAL]: टाइमलाईन आणि प्लेयर समरी चालण्यासाठी जागतिक कप्पे भरणे!
+                window.activeRaidsList = matchData.raidsHistory || matchData.timeline || [];
+                window.currentMatchData = matchData;
+            }
+        } catch (err) {
+            console.error("🚨 [Firestore Fetch Error]: डेटा ओढताना तांत्रिक चूक:", err);
+        }
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 3: RAW NAMES RESOLUTION
+    // =========================================================================
+    const nameA = matchData?.teamA || document.getElementById('teamAName')?.innerText || "Team A";
+    const nameB = matchData?.teamB || document.getElementById('teamBName')?.innerText || "Team B";
+    console.log(`➡️ [STAGE 1.2 - NAMES RESOLVED]: घेतलेली नावे ➔ Team A: "${nameA}" | Team B: "${nameB}"`);
+
+
+    // =========================================================================
+    // 📂 SECTION 4: MASTER SCORECARD ENGINE & STATUS MODE DECISION
+    // =========================================================================
+    // डेटाबेसचा स्कोरकार्ड प्राधान्य, नसल्यास लोकलस्टोरेज बॅकअप
+    const localCard = localStorage.getItem('global_score_card');
+    const currentScoreCard = matchData?.scoreCard || (localCard ? JSON.parse(localCard) : {
+        mainMatch:  { teamA: 0, teamB: 0 },
+        fiveRaid:   { teamA: 0, teamB: 0 },
+        goldenRaid: { teamA: 0, teamB: 0 }
+    });
+
+    console.log("➡️ [STAGE 1.3 - CARD DATA]: scoreCard ऑब्जेक्ट स्थिती ➔", currentScoreCard);
+
+    // चालू मॅचचा स्टेटस ओळखून अचूक स्कोअर फायनल करणे
+    let finalScoreA = currentScoreCard.mainMatch.teamA;
+    let finalScoreB = currentScoreCard.mainMatch.teamB;
+    let activeMode = "Main Match (मुख्य वेळ)";
+
+    const currentStatus = (matchData?.status || matchData?.match_status || "").trim();
+
+    // 🟢 मेमरी फ्लॅग उडाला असेल तर डेटाबेसच्या 'status' वरून अचूक मोड निवडणे!
+    if (window.isFiveRaidModeOn === true || currentStatus === "five_raid") {
+        activeMode = "Five Raid (५-५ मोड)";
+        finalScoreA = currentScoreCard.fiveRaid.teamA;
+        finalScoreB = currentScoreCard.fiveRaid.teamB;
+    } else if (window.isGoldenRaidActiveNow === true || currentStatus === "golden_raid") {
+        activeMode = "Golden Raid (सुवर्ण मोड)";
+        finalScoreA = currentScoreCard.goldenRaid.teamA;
+        finalScoreB = currentScoreCard.goldenRaid.teamB;
+    }
+
+    console.log(`➡️ [STAGE 1.4 - RESOLVED LIVE MODE]: मोड ठरला ➔ "${activeMode}" | पास होणारे आकडे ➔ A: ${finalScoreA} vs B: ${finalScoreB}`);
+
+
+// =========================================================================
+    // 📂 SECTION 5: DOM INJECTION & DYNAMIC BADGE OVERWRITE (🎯 WINNER TRACKER ON)
+    // =========================================================================
     const mNameA = document.getElementById('modalTeamAName');
     const mNameB = document.getElementById('modalTeamBName');
     const mScoreA = document.getElementById('modalTeamAScore');
     const mScoreB = document.getElementById('modalTeamBScore');
 
-    if (mNameA) mNameA.innerText = nameA;
-    if (mNameB) mNameB.innerText = nameB;
-    if (mScoreA) mScoreA.innerText = finalScoreA;
-    if (mScoreB) mScoreB.innerText = finalScoreB;
+    if (mNameA) { mNameA.innerText = nameA; }
+    if (mNameB) { mNameB.innerText = nameB; }
+    if (mScoreA) { mScoreA.innerText = finalScoreA; console.log(`✍️ [Injection]: modalTeamAScore innerText ➔ "${mScoreA.innerText}"`); }
+    if (mScoreB) { mScoreB.innerText = finalScoreB; console.log(`✍️ [Injection]: modalTeamBScore innerText ➔ "${mScoreB.innerText}"`); }
 
-    // ४. मॉडेल उघडा
+    // 🏆 [💥 DYNAMIC STATUS OVERVIEW BADGE]: ओव्हरव्ह्यू डब्याचा रंग आणि विनर टेक्स्ट बदलणे
+    const overviewBadge = document.getElementById('matchOverviewStatusBadge') || document.querySelector('[class*="5-5 RAIDS IN PROGRESS"]') || document.querySelector('[class*="MATCH IN PROGRESS"]');
+    
+    if (overviewBadge) {
+        if (currentStatus === "Finished") {
+            console.log("⚙️ [WINNER CALCULATION]: सामना संपला आहे, विजेता शोधत आहे...");
+            
+            // १. ५-५ स्कोरकार्ड किंवा मुख्य स्कोरकार्ड मधील फायनल आकडे गोळा करणे
+            let finalScoreA_Num = Number(currentScoreCard?.fiveRaid?.teamA || currentScoreCard?.mainMatch?.teamA || 0);
+            let finalScoreB_Num = Number(currentScoreCard?.fiveRaid?.teamB || currentScoreCard?.mainMatch?.teamB || 0);
+            
+            let winnerText = "🏆 MATCH FINISHED / सामना संपला";
+            
+            // २. मॅथेमॅटिकल चेक करून जिंकलेल्या टीमचे नाव ठरवणे
+            if (finalScoreA_Num > finalScoreB_Num) {
+                winnerText = `🏆 WINNER: ${nameA.toUpperCase()}🥇`;
+            } else if (finalScoreB_Num > finalScoreA_Num) {
+                winnerText = `🏆 WINNER: ${nameB.toUpperCase()}🥇`;
+            } else if (matchData?.winner) {
+                // बॅकअप चेक: जर डेटाबेसमध्ये थेट विजेता सेव्ह असेल
+                winnerText = `🏆 WINNER: ${matchData.winner.toUpperCase()}🥇`;
+            } else {
+                winnerText = "🤝 MATCH TIED / सामना बरोबरीत सुटला";
+            }
+
+            console.log(`🎯 [WINNER RESOLVED] ➔ Text: "${winnerText}"`);
+
+            // ३. स्क्रीनवरील बॅज कडक हिरव्या रंगात विनरच्या नावासह अपडेट करणे
+            overviewBadge.innerText = winnerText;
+            overviewBadge.className = "w-full bg-green-950/80 text-green-400 py-3 rounded-2xl text-[11px] font-black uppercase text-center border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)] tracking-wide";
+            
+        } else if (currentStatus === "five_raid") {
+            overviewBadge.innerText = "⚔️ 5-5 RAIDS IN PROGRESS (महासंग्राम चालू)";
+            overviewBadge.className = "w-full bg-orange-950/40 text-orange-400 py-3 rounded-2xl text-[10px] font-black uppercase text-center border border-orange-500/30 shadow-md animate-pulse";
+        } else {
+            // जर सामना अजून चालू असेल (Live स्थिती)
+            overviewBadge.innerText = "MATCH IN PROGRESS / सामना सुरू आहे...";
+            overviewBadge.className = "w-full bg-orange-950/40 text-orange-400 py-3 rounded-2xl text-[10px] font-black uppercase text-center border border-orange-500/30 shadow-md";
+        }
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 6: RE-RENDER TIMELINE & TRIGGER MODAL IGNITION
+    // =========================================================================
+    if (mList) mList.innerHTML = ""; // लोडिंग स्टेट साफ केला
+
+    // डेटाबेसमधून आलेल्या खऱ्याखुऱ्या रेड्स लूपद्वारे टाइमलाईन समरी फीडमध्ये पाठवणे
+    if (window.activeRaidsList && window.activeRaidsList.length > 0) {
+        console.log(`🔄 [Timeline Re-build]: एकूण ${window.activeRaidsList.length} रेड्स मोडलमध्ये ढकलत आहे...`);
+        window.activeRaidsList.forEach(r => {
+            if (typeof addRaidToSummary === "function") {
+                addRaidToSummary(r.team, r.raiderName, r.result, r.points, r.details, true, r.isFiveRaid || false, r.isGoldenRaid || false);
+            }
+        });
+
+        // एकूण रेड्स संख्या ओव्हरव्ह्यू डब्यात दाखवणे
+        const totalRaidsWitnessedEl = document.querySelector('[class*="Total Raids Witnessed"]');
+        if (totalRaidsWitnessedEl) {
+            totalRaidsWitnessedEl.innerText = `Total Raids Witnessed: ${window.activeRaidsList.length}`;
+        }
+    } else {
+        if (mList) mList.innerHTML = `<div class="text-center py-16 text-gray-500 text-xs font-bold">No raids recorded yet.</div>`;
+    }
+
+    // टॉप परफॉर्मर्सचे आकडे मोजणे
+    if (typeof calculateTopStats === "function") {
+        calculateTopStats();
+    }
+
+    // मॉडेल स्क्रीनवर उघडणे
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
+        console.log("🔓 [STAGE 1.6 - MODAL FLEX DISPLAY]: मोडल स्क्रीनवर यशस्वीरीत्या उघडले गेले.");
+        
+        // मोडल उघडल्यावर बाय-डिफॉल्ट ओव्हरव्ह्यू किंवा समरी टॅबवर जाणे
+        if (typeof switchTimelineTab === "function") {
+            switchTimelineTab('match_summary'); 
+        }
     }
-    console.log("--- [ULTIMATE_FIX_END] ---");
-}
 
+    console.log("%c🚨 [STEP 1 END]: openSummaryModal() चे काम संपले.", "color: #9333ea; font-weight: bold;");
+    console.log("%c====================================================================", "color: #9333ea; font-weight: bold;");
+}
+/** */
 // २. मॉडेल बंद करण्यासाठी
 function closeSummaryModal() {
     const modal = document.getElementById('summaryModal');
@@ -6620,8 +6646,7 @@ function closeSummaryModal() {
     
     // बॉडी स्क्रोल पुन्हा सुरू करा
     document.body.style.overflow = 'auto';
-}
-
+}/** */
 
 //१. नवीन addEventToSummary फंक्शन
 //हे फंक्शन तुझे रेड कार्ड्स आणि इव्हेंट कार्ड्स यांच्यात सुसंगतता ठेवेल.
@@ -6679,7 +6704,7 @@ function addEventToSummary(type, team, message) {
     }
 }
 
-
+/** */
 
 function updateVisualPlayers() {
     console.log("--- [ICON_DEBUG_START] ---");
@@ -6758,41 +6783,7 @@ function formatMatchTime(seconds) {
 }
 
 // २. टायमर सुरू/पॉज करणे (हे तुमच्या 'Pause Match' बटणासाठी)
-// function toggleMatchTimer() {
-//     const btn = document.getElementById('mainMatchBtn'); 
-    
-//     // १. सर्वात आधी जुना कोणताही इंटरव्हल असेल तर तो थांबवा (Safety Check)
-//     clearInterval(matchInterval);
 
-//     if (isMatchPaused) {
-//         // २. मॅच सुरू/रिझ्युम करा
-//         isMatchPaused = false;
-//         if (btn) {
-//             btn.innerText = "PAUSE MATCH";
-//             btn.classList.replace('bg-green-600', 'bg-red-600'); // कलर पण बदलू शकतोस
-//         }
-
-//         matchInterval = setInterval(() => {
-//             if (matchTotalSeconds > 0) {
-//                 matchTotalSeconds--;
-//                 updateMatchUI();
-//                 localStorage.setItem('savedMatchTime', matchTotalSeconds);
-//             } else {
-//                 clearInterval(matchInterval); // वेळ संपल्यावर थांबवा
-//                 handleMatchTimeEnd();
-//             }
-//         }, 1000);
-//     } else {
-//         // ३. मॅच पॉज करा
-//         isMatchPaused = true;
-//         if (btn) {
-//             btn.innerText = "RESUME MATCH";
-//             btn.classList.replace('bg-red-600', 'bg-green-600');
-//         }
-//         // clearInterval आपण वरच (Line 5) केला आहे, तरी इथे राहू दे.
-//         clearInterval(matchInterval);
-//     }
-// }
 
 /**अपडेटेड toggleMatchTimer (Locking सह) 🚀
 यामध्ये मी तुझे मूळ लॉजिक तसेच ठेवले आहे, फक्त बटण अनलॉक करण्याचे आणि नेव्हिगेशन लॉक करण्याचे काम वाढवले आहे.
@@ -7007,60 +6998,6 @@ function updateMatchUI() {
 
 
 
-/*Refresh reload*
-
-// १. पेज लोड होताच जुना डेटा चेक करा
-window.addEventListener('DOMContentLoaded', () => {
-    const savedTime = localStorage.getItem('savedMatchTime');
-    const savedStatus = localStorage.getItem('isMatchPaused');
-
-    if (savedTime !== null) {
-        matchTotalSeconds = parseInt(savedTime);
-        updateMatchUI();
-    }
-
-    // [STRICT RULE]: पुन्हा आल्यावर मॅच नेहमी 'PAUSE' मोडमध्येच असावी
-    isMatchPaused = true; 
-    const btn = document.getElementById('mainMatchBtn');
-    if (btn) {
-        btn.innerText = "RESUME MATCH";
-        btn.classList.replace('bg-red-900/40', 'bg-green-900/40');
-    }
-    clearInterval(matchInterval); 
-});
-
-// २. पेज रिफ्रेश करताना वॉर्निंग
-window.onbeforeunload = function() {
-    // १. जाताना डेटा सेव्ह करा
-    saveMatchProgress();
-
-    // २. जर मॅच सुरू असेल, तर पॉज करा
-    if (!isMatchPaused) {
-        isMatchPaused = true;
-        clearInterval(matchInterval);
-    }
-
-    // ३. युजरला वॉर्निंग द्या
-    if (matchTotalSeconds > 0 && matchTotalSeconds < 1200) {
-        return "Match is in progress. Your data is saved and match is paused.";
-    }
-};
-
-
-// १. वेळ सेव्ह करण्यासाठी फंक्शन (टायमर रन होत असताना हे कॉल होईल)
-function saveMatchProgress() {
-    localStorage.setItem('savedMatchTime', matchTotalSeconds);
-    localStorage.setItem('isMatchPaused', isMatchPaused);
-}
-
-// २. मॅच आपोआप पॉज करणे (जेव्हा युजर पेज सोडून जातो)
-window.addEventListener('blur', () => {
-    // युजरने दुसऱ्या टॅबवर क्लिक केले किंवा मिनीमाइज केले तरी पॉज होईल
-    if (!isMatchPaused) {
-        toggleMatchTimer(); // हे फंक्शन मॅच पॉज करेल
-    }
-});
-*/
 
 /* ==========================================
    🔄 REFRESH / RELOAD MANAGEMENT (SAFE INTEGRATION)
@@ -7894,91 +7831,365 @@ async function handleMainAction() {
     console.log(`%c==================================================`, "color: #a855f7; font-weight: bold;");
 }
 
+/** End Match Confirmation */
 
-async function confirmEndMatch() {
-    // १. युजरला कन्फर्मेशन विचारा
-    const result = await Swal.fire({
-        title: 'मॅच संपवायची का?',
-        text: "यानंतर स्कोअरमध्ये कोणताही बदल करता येणार नाही!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'हो, मॅच संपवा!',
-        cancelButtonText: 'चूक झाली',
-        background: '#111',
-        color: '#fff',
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#4b5563'
-    });
+/**
+ * आपल्याला यातच कबड्डीच्या ५-५ रेड्स (5-5 Raids) चा हायब्रिड फ्लो बसवायचा आहे. 
+ * जेव्हा स्कोअरर 'End Match' दाबेल आणि स्कोअर सारखा (sA === sB) असेल, 
+ * तेव्हा आपण त्याला थेट मॅच संपवू देणार नाही. 
+ * तिथे SweetAlert2 (Swal.fire) चा वापर करून एक कडक Decision Dialog दाखवू, 
+ * ज्यामध्ये त्याला २ पर्याय मिळतील:
+ * @returns 
+ */
+// async function confirmEndMatch() {
+//     console.log("🔍 [END MATCH MASTER CHECK]: 'End Match' बटण क्लिक झाले. लोकल स्टोरेज आणि डीबी तपासत आहे...");
 
-    if (result.isConfirmed) {
-        const { tId, mId } = matchSetupData;
+//     if (!matchSetupData || !matchSetupData.tId || !matchSetupData.mId) {
+//         console.error("🚨 [CRITICAL]: matchSetupData चे आयडी सापडले नाहीत!");
+//         return;
+//     }
 
-        // 🚨 [CRITICAL FIX]: थेट स्क्रीनवर असलेल्या एलिमेंट्समधून लेटेस्ट चालू स्कोअर गोळा करा! ⚡
-        const elA = document.getElementById('scoreA');
-        const elB = document.getElementById('scoreB');
+//     const { tId, mId } = matchSetupData;
 
-        const sA = elA ? Number(elA.innerText || 0) : Number(currentMatchData.scoreA || 0);
-        const sB = elB ? Number(elB.innerText || 0) : Number(currentMatchData.scoreB || 0);
+//     // 🚨 [⚡ LOCAL STORAGE SECURITY]: १ मिलीसेकंदात लोकल स्टोरेजवरून 'Finished' स्टेटस ब्लॉक करणे!
+//     const localStatus = localStorage.getItem(`match_status_${mId}`);
+//     console.log(`💾 [LOCAL STORAGE STATUS]: ब्राउझर मेमरी स्टेटस ➔ "${localStatus}"`);
+
+//     if (localStatus === 'Finished') {
+//         console.log("🛑 [LOCAL BLOCK]: सामना आधीच 'Finished' झाला आहे! ५-५ विंडो ब्लॉक केली.");
+//         Swal.fire({
+//             title: 'सामना आधीच संपला आहे! 🏁',
+//             text: 'या सामन्याचा अंतिम निकाल लागला असून तो जतन केला आहे.',
+//             icon: 'info',
+//             background: '#111', color: '#fff', confirmButtonColor: '#3b82f6'
+//         });
+//         return; 
+//     }
+
+//     // ☁️ [BACKUP FIREBASE FETCH]: लोकल स्टोरेज रिकामे असेल तरच डीबी कडून 'Finished' तपासणे
+//     try {
+//         const liveMatchDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+//         if (liveMatchDoc.exists) {
+//             const liveData = liveMatchDoc.data();
+//             const liveStatus = liveData.status || liveData.match_status || "";
+            
+//             if (liveStatus === 'Finished') {
+//                 localStorage.setItem(`match_status_${mId}`, "Finished");
+//                 console.log("🛑 [CLOUD BLOCK]: सामना डीबीनुसार आधीच 'Finished' आहे. ५-५ ब्लॉक केले.");
+//                 Swal.fire({
+//                     title: 'सामना आधीच संपला आहे! 🏁',
+//                     text: 'या सामन्याचा अंतिम निकाल लागला असून तो जतन केला आहे.',
+//                     icon: 'info',
+//                     background: '#111', color: '#fff', confirmButtonColor: '#3b82f6'
+//                 });
+//                 return;
+//             }
+//         }
+//     } catch (fetchErr) {
+//         console.error("🚨 [DB FETCH ERROR]: ताजा स्टेटस तपासताना एरर:", fetchErr);
+//     }
+
+//     // १. युजरला कन्फर्मेशन विचारा
+//     const result = await Swal.fire({
+//         title: 'मॅच संपवायची का?',
+//         text: "यानंतर स्कोअरमध्ये कोणताही बदल करता येणार नाही!",
+//         icon: 'warning',
+//         showCancelButton: true,
+//         confirmButtonText: 'हो, मॅच संपवा!',
+//         cancelButtonText: 'चूक झाली',
+//         background: '#111', color: '#fff',
+//         confirmButtonColor: '#ef4444', cancelButtonColor: '#4b5563'
+//     });
+
+//     if (result.isConfirmed) {
+//         const elA = document.getElementById('scoreA');
+//         const elB = document.getElementById('scoreB');
+//         const sA = elA ? Number(elA.innerText || 0) : Number(currentMatchData?.scoreA || 0);
+//         const sB = elB ? Number(elB.innerText || 0) : Number(currentMatchData?.scoreB || 0);
         
-        console.log(`%c🏁 [Winner Decision]: तपासणी सुरू ➔ Team A Score: ${sA} | Team B Score: ${sB}`, "color: #06b6d4; font-weight: bold;");
+//         // =============================================================
+//         // 🎯 🚀 [THE KABADDI TIE HYBRID FILTER]: मुख्य स्कोर टाय निर्णय
+//         // =============================================================
+//         if (sA === sB && sA > 0) {
+//             const tieDecision = await Swal.fire({
+//                 title: 'सामना बरोबरीत सुटला! (Match Tied)',
+//                 text: 'हा सामना बाद फेरीचा (Knockout) आहे की लीग सामना आहे? पुढील पर्याय निवडा:',
+//                 icon: 'question',
+//                 showCancelButton: true, showDenyButton: true,
+//                 confirmButtonText: '🏃‍♂️ ५-५策 रेड्स सुरू करा',
+//                 denyButtonText: '🤝 थेट टाय घोषित करा',
+//                 cancelButtonText: 'स्कोअरिंगवर परत जा',
+//                 confirmButtonColor: '#f97316', denyButtonColor: '#3b82f6', cancelButtonColor: '#4b5563',
+//                 background: '#111', color: '#fff',
+//                 customClass: { actions: 'flex flex-col sm:flex-row gap-2 w-full px-4' }
+//             });
 
-        let winnerText = "";
-        let winnerTeam = "";
-        let winnerTeamId = ""; // डेटाबेसमध्ये आयडी सेव्ह करण्यासाठी
+//             if (tieDecision.isConfirmed) {
+//                 console.log("☁️ [DB & LOCAL SYNC]: ५-५ मोड सुरू होत आहे. स्टेटस अपडेट करत आहे...");
+                
+//                 localStorage.setItem(`match_status_${mId}`, "five_raid");
+                
+//                 try {
+//                     await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+//                         status: "five_raid",          
+//                         isFiveRaidModeOn: true,        
+//                         fiveRaidCount: 1,             
+//                         lastUpdated: new Date().getTime()
+//                     });
+//                 } catch (dbErr) { console.error("🚨 [DB UPDATE FAIL]:", dbErr); }
+                
+//                 if (typeof currentMatchData !== 'undefined' && currentMatchData) currentMatchData.status = 'five_raid';
 
-        // २. लेटेस्ट स्कोअरनुसार अचूक विजेता ठरवा
-        if (sA > sB) {
-            winnerTeam = currentMatchData.teamA || "Team A";
-            winnerTeamId = currentMatchData.teamA_id || "TM_A";
-            winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
-        } else if (sB > sA) {
-            winnerTeam = currentMatchData.teamB || "Team B";
-            winnerTeamId = currentMatchData.teamB_id || "TM_B";
-            winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
-        } else {
-            winnerTeam = "Tie";
-            winnerTeamId = "TIE";
-            winnerText = "मॅच टाय (Tie) झाली आहे! 🤝";
-        }
+//                 if (typeof startFiveRaidsSystem === "function") {
+//                     startFiveRaidsSystem(sA, sB);
+//                 } else {
+//                     window.isFiveRaidModeOn = true; window.fiveRaidCount = 0;
+//                     Swal.fire({ title: '५-५策 रेड्स मोड ऑन!', text: 'मूळ स्क्रीनवरच स्कोअरिंग सुरू ठेवा.', icon: 'info', confirmButtonColor: '#f97316', background: '#111', color: '#fff' });
+//                 }
+//                 return; 
+                
+//             } else if (tieDecision.isDenied) {
+//                 localStorage.setItem(`match_status_${mId}`, "Finished");
+//                 console.log("🤝 स्कोअररने थेट टाय घोषित केला.");
+//             } else {
+//                 return;
+//             }
+//         }
+//         // =============================================================
 
-        try {
-            // ३. डेटाबेसमध्ये स्टेटस 'Finished', अंतिम स्कोअर आणि विजेत्याची अचूक माहिती अपडेट करा
-            await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
-                status: "Finished",
-                scoreA: sA,                       // 🎯 डेटाबेसमधील अंतिम स्कोअर पण सिंक करून घ्या
-                scoreB: sB,
-                winner: winnerTeam,               // विजेत्या संघाचे नाव
-                winner_id: winnerTeamId,          // 📊 पुढे पॉइंट्स टेबल जनरेट करताना हा आयडी खूप कामाला येईल!
-                finalScore: `${sA}-${sB}`,
-                isMatchPaused: true,
-                lastUpdated: new Date().getTime()
-            });
+//         // २. लेटेस्ट स्कोअरनुसार अचूक विजेता ठरवा
+//         let winnerText = ""; let winnerTeam = ""; let winnerTeamId = "";
+//         if (sA > sB) {
+//             winnerTeam = currentMatchData?.teamA || "Team A"; winnerTeamId = currentMatchData?.teamA_id || "TM_A"; winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
+//         } else if (sB > sA) {
+//             winnerTeam = currentMatchData?.teamB || "Team B"; winnerTeamId = currentMatchData?.teamB_id || "TM_B"; winnerText = `${winnerTeam} ने मॅच जिंकली आहे! 🏆`;
+//         } else {
+//             winnerTeam = "Tie"; winnerTeamId = "TIE"; winnerText = "मॅच टाय झाली आहे! 🤝";
+//         }
 
-            console.log(`%c✅ [Firestore Updated]: मॅच यशस्वीरित्या Finished झाली. विजेता: ${winnerTeam}`, "color: #22c55e; font-weight: bold;");
+//         try {
+//             localStorage.setItem(`match_status_${mId}`, "Finished");
+//             await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+//                 status: "Finished", scoreA: sA, scoreB: sB, winner: winnerTeam, winner_id: winnerTeamId, finalScore: `${sA}-${sB}`, isMatchPaused: true, lastUpdated: new Date().getTime()
+//             });
+//             if (typeof lockScoringUI === "function") lockScoringUI();
+//             Swal.fire({ title: 'MATCH FINISHED!', html: `<div class="text-xl font-bold text-orange-500">${winnerText}</div><div class="mt-4 text-white text-lg">Final Score: ${sA} - ${sB}</div>`, icon: 'success', confirmButtonText: 'Dashboard ला जा', background: '#111', color: '#fff' }).then(() => { 
+//                 if (typeof loadPage === "function") loadPage('matches');
+//             });
+//         } catch (e) { console.error("🚨 [Error]:", e); }
+//     }
+// }
 
-            // ४. स्कोअरिंग लॉक करा (Disable Buttons)
-            if (typeof lockScoringUI === "function") lockScoringUI();
+/** नवीन मास्टर confirmEndMatch() फंक्शन (All-In-One क्लोजिंग इंजिन)
+हा एकच कोड तुझ्या फाईलमध्ये टाकून घे भावा, जो तिन्ही परिस्थिती एकाच जागी लीलया हँडल करेल:*/
+async function confirmEndMatch(goldenWinnerTag = null, goldenLogDetails = "") {
+    // =========================================================================
+    // 📂 SECTION 1: MASTER INITIALIZATIONS & STATUS DETECTIVE
+    // =========================================================================
+    console.log("%c==================================================", "color: #ef4444; font-weight: bold;");
+    console.log("🏁 [MASTER END MATCH ENGINE]: क्लोजिंग फ्लो सुरू झाला...");
 
-            // ५. निकाल दाखवा (Result Alert - हुबेहूब तुझा मूळ डिझाईन पॅटर्न)
-            Swal.fire({
-                title: 'MATCH FINISHED!',
-                html: `<div class="text-xl font-bold text-orange-500">${winnerText}</div>
-                       <div class="mt-4 text-white text-lg">Final Score: ${sA} - ${sB}</div>`,
-                icon: 'success',
-                confirmButtonText: 'Dashboard ला जा',
-                background: '#111',
-                color: '#fff'
-            }).then(() => {
-                // मॅच संपल्यावर बॅक जाणे किंवा रिफ्रेश करणे
-                window.location.reload(); 
-            });
+    if (!matchSetupData || !matchSetupData.tId || !matchSetupData.mId) {
+        console.error("🚨 [CRITICAL]: matchSetupData चे आवश्यक IDs मेमरीमध्ये सापडले नाहीत!");
+        return;
+    }
 
-        } catch (e) {
-            console.error("🚨 [End Match Critical Error]:", e);
-            Swal.fire("त्रुटी", "डेटाबेस अपडेट करताना तांत्रिक चूक झाली.", "error");
+    const { tId, mId } = matchSetupData;
+
+    // ब्राउझरच्या मेमरीमधून चालू सामना कोणत्या मोडवर आहे ते अचूक तपासणे
+    const localCard = localStorage.getItem('global_score_card');
+    const currentScoreCard = localCard ? JSON.parse(localCard) : null;
+    
+    // फायरबेसमधील चालू स्टेटस बॅकअप
+    const currentStatus = (currentMatchData?.status || "").trim();
+
+    const nameA = currentMatchData?.teamA || document.getElementById('teamAName')?.innerText || "Team A";
+    const nameB = currentMatchData?.teamB || document.getElementById('teamBName')?.innerText || "Team B";
+    const idA = currentMatchData?.teamA_id || "TM_A";
+    const idB = currentMatchData?.teamB_id || "TM_B";
+
+    console.log(`📊 [DIAGNOSTIC]: Current Match Status ➔ "${currentStatus}"`);
+
+
+    // =========================================================================
+    // 📂 SECTION 2: USER CONSENT / CONFIRMATION WIZARD (🚨 STEP BY STEP)
+    // =========================================================================
+    // जर गोल्डन रेड संपवून डायरेक्ट कोड आला नसेल, तरच युझरला पॉपअप विचारणे
+    if (!goldenWinnerTag) {
+        const userPrompt = await Swal.fire({
+            title: 'सामना अधिकृत संपवायचा का?',
+            text: "यानंतर स्कोअरमध्ये कोणताही बदल करता येणार नाही!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'हो, सामना संपवा! 🏁',
+            cancelButtonText: 'स्कोअरिंग चालू ठेवा',
+            background: '#111', color: '#fff',
+            confirmButtonColor: '#ef4444', cancelButtonColor: '#4b5563'
+        });
+
+        if (!userPrompt.isConfirmed) {
+            console.log("❌ [CANCELLED]: युझरने क्लोजिंग फ्लो रद्द केला.");
+            return;
         }
     }
+
+
+    // =========================================================================
+    // 📂 SECTION 3: MATHEMATICAL WINNER CALCULATION (🎯 THE DYNAMIC RESOLVER)
+    // =========================================================================
+    let winnerTeam = "Tie";
+    let winnerTeamId = "TIE";
+    let winnerText = "सामना टाय झाला आहे! 🤝";
+    let finalScoreDisplay = "";
+
+    // 🔥 परिस्थिती अ: जर सामना सुवर्ण रेड (GOLDEN RAID) मोडवर संपला असेल!
+    if (currentStatus === "golden_raid" || goldenWinnerTag) {
+        let finalTag = goldenWinnerTag || window.goldenRaidTeam; // जर मॅन्युअली पास केला नसेल तर मेमरी ओढणे
+        winnerTeam = (finalTag === 'A') ? nameA : nameB;
+        winnerTeamId = (finalTag === 'A') ? idA : idB;
+        finalScoreDisplay = `Golden Raid Winner: ${winnerTeam}`;
+        winnerText = `👑 GOLDEN RAID MAHA-WINNER: ${winnerTeam}! 🔥 (${goldenLogDetails || 'Sudden Death'})`;
+    } 
+    // ⚡ परिस्थिती ब: जर सामना ५-५ (FIVE RAID) मोडवर संपला असेल!
+    else if (currentStatus === "five_raid" || window.isFiveRaidModeOn === true) {
+        let fA = Number(currentScoreCard?.fiveRaid?.teamA || 0);
+        let fB = Number(currentScoreCard?.fiveRaid?.teamB || 0);
+        finalScoreDisplay = `5-5 Score: ${fA} - ${fB}`;
+
+        if (fA === fB) {
+            // 🚨 जर ५-५ मध्ये पण स्कोअर टाय झाला, तर क्लोजिंग न करता गोल्डन रेड ट्रिगर करणे सर्वात सेफ!
+            console.log("🤝 [5-5 TIED AGAIN]: ५-५ मध्ये पण मॅच टाय झाली! गोल्डन रेडची गरज आहे.");
+            // (इथे तू गोल्डन रेड सुरू करण्याचे स्वतःचे मोडल ट्रिगर करू शकतोस, पण जर युझरने थेट टाय घोषित केला तर:)
+            winnerTeam = "Tie"; winnerTeamId = "TIE"; winnerText = "५-५ महासंग्राम बरोबरीत सुटला! 🤝";
+        } else if (fA > fB) {
+            winnerTeam = nameA; winnerTeamId = idA; winnerText = `५-५ मोडमध्ये ${nameA} संघ जिंकला! 🏆`;
+        } else {
+            winnerTeam = nameB; winnerTeamId = idB; winnerText = `५-५ मोडमध्ये ${nameB} संघ जिंकला! 🏆`;
+        }
+    } 
+    // 🏃‍♂️ परिस्थिती क: जर नेहमीचा सामना (NORMAL MATCH FULL-TIME) संपला असेल!
+    else {
+        const elA = document.getElementById('scoreA');
+        const elB = document.getElementById('scoreB');
+        const sA = elA ? Number(elA.innerText || 0) : Number(currentMatchData?.scoreA || 0);
+        const sB = elB ? Number(elB.innerText || 0) : Number(currentMatchData?.scoreB || 0);
+        finalScoreDisplay = `Final Score: ${sA} - ${sB}`;
+
+        // 🚨 जर फ्रेश सामन्यात मुख्य स्कोअर टाय झाला, तर टाय फिल्टर दाखवणे (५-५ सुरू करण्यासाठी)
+        if (sA === sB && sA > 0) {
+            const tieDecision = await Swal.fire({
+                title: 'सामना बरोबरीत सुटला! (Match Tied)',
+                text: 'हा सामना बाद फेरीचा (Knockout) आहे की लीग सामना आहे? पर्याय निवडा:',
+                icon: 'question',
+                showCancelButton: true, showDenyButton: true,
+                confirmButtonText: '🏃‍♂️ ५-५ रेड्स सुरू करा',
+                denyButtonText: '🤝 थेट टाय घोषित करा',
+                cancelButtonText: 'स्कोअरिंगवर परत जा',
+                confirmButtonColor: '#f97316', denyButtonColor: '#3b82f6', cancelButtonColor: '#4b5563',
+                background: '#111', color: '#fff',
+                customClass: { actions: 'flex flex-col sm:flex-row gap-2 w-full px-4' }
+            });
+
+            if (tieDecision.isConfirmed) {
+                console.log("⚙️ [5-5 ENGINE INITIATION]: ५-५ कप्पा ऑन करत आहे...");
+                localStorage.setItem(`match_status_${mId}`, "five_raid");
+                try {
+                    await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+                        status: "five_raid", isFiveRaidModeOn: true, fiveRaidCount: 1, lastUpdated: new Date().getTime()
+                    });
+                } catch (err) { console.error(err); }
+                if (typeof startFiveRaidsSystem === "function") startFiveRaidsSystem(sA, sB);
+                return; // फ्लो इथूनच थांबवून बाहेर काढला, जेणेकरून मॅच Finished होणार नाही!
+            } else if (tieDecision.isDenied) {
+                console.log("🤝 स्कोअररने थेट सामना टाय घोषित करून संपवला.");
+                winnerTeam = "Tie"; winnerTeamId = "TIE"; winnerText = "सामना अधिकृत बरोबरीत सुटला! 🤝";
+            } else {
+                return; // स्कोअरिंगवर परत जा
+            }
+        } else if (sA > sB) {
+            winnerTeam = nameA; winnerTeamId = idA; winnerText = `${nameA} ने सामना जिंकला! 🏆`;
+        } else {
+            winnerTeam = nameB; winnerTeamId = idB; winnerText = `${nameB} ने सामना जिंकला! 🏆`;
+        }
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 4: THE MASTER LOCAL STORAGE DUAL SYNC (🎯 NO GAP PROTECTION)
+    // =========================================================================
+    try {
+        // अ. तू सांगितलेली तंतोतंत युनिक की: tournamentId_matchId_winner
+        const exactWinnerKey = `${tId}_${mId}_winner`;
+        localStorage.setItem(exactWinnerKey, winnerTeam);
+        
+        // ब. मॅच स्टेटस की क्लोज करणे
+        localStorage.setItem(`match_status_${mId}`, "Finished");
+        
+        console.log(`💾 [MASTER LOCAL STORAGE SYNC SUCCESS]: "${exactWinnerKey}" मध्ये विजेता "${winnerTeam}" सुरक्षित लॉक केला!`);
+    } catch (localErr) {
+        console.error("🚨 [LOCAL SYNC CRASH]:", localErr);
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 5: MASTER FIRESTORE DEPLOYMENT & SUMMARY MODAL IGNITION
+    // =========================================================================
+    try {
+        console.log("📤 [Firestore Update]: डेटाबेसवर 'Finished' आणि विनर डेटा जतन करत आहे...");
+        
+        let updatePayload = {
+            status: "Finished",
+            match_status: "Finished",
+            winner: winnerTeam,
+            winner_id: winnerTeamId,
+            finalScore: finalScoreDisplay,
+            isMatchPaused: true,
+            endTime: new Date().getTime(),
+            lastUpdated: new Date().getTime()
+        };
+
+        // जर ५-५ किंवा गोल्डन कार्ड उपलब्ध असेल तर ते देखील डेटाबेसवर फायनल पाठवून देणे
+        if (currentScoreCard) {
+            updatePayload.scoreCard = currentScoreCard;
+        }
+
+        await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update(updatePayload);
+        console.log("✅ [FIRESTORE ENGINE LOCKED]: डेटाबेस पूर्ण जतन झाला!");
+
+        if (typeof lockScoringUI === "function") lockScoringUI();
+
+        // स्कोरिंगचे पॅनेल्स हायड करणे
+        const fivePanel = document.getElementById('fiveRaidBattleGroundPanel');
+        if (fivePanel) fivePanel.classList.add('hidden');
+        window.isFiveRaidModeOn = false;
+        window.isGoldenRaidActiveNow = false;
+
+        // 🏆 [confirmEndMatch च्या शेवटी]: सामना अधिकृत संपल्याचा गोड मेसेज आणि थेट मोडल ओपनिंग
+        Swal.fire({
+            title: 'सामना अधिकृत संपला! 🏁',
+            html: `<div class="text-xl font-bold text-green-500 mb-2">${winnerText}</div><div class="text-zinc-400 font-mono text-sm">${finalScoreDisplay}</div>`,
+            icon: 'success',
+            confirmButtonText: '📊 View Match Summary',
+            background: '#111', color: '#fff', confirmButtonColor: '#22c55e',
+            allowOutsideClick: false
+        }).then(() => {
+            console.log("%c🚀 [ALERT INTERACTION]: युझरने 'View Match Summary' बटण क्लिक केले! थेट मास्टर मोडल उघडत आहे...", "color: #22c55e; font-weight: bold;");
+            
+            // थेट मूळ मास्टर इंजिनला ताबा देणे
+            if (typeof openSummaryModal === "function") {
+                openSummaryModal(tId, mId);
+            } else {
+                console.error("🚨 [CRITICAL]: openSummaryModal() फंक्शन फाईलमध्ये सापडले नाही!");
+            }
+        });
+
+    } catch (dbErr) {
+        console.error("🚨 [DATABASE END UPDATE FAIL]:", dbErr);
+    }
+    console.log("%c==================================================", "color: #ef4444; font-weight: bold;");
 }
+
+/** */
 
 function lockScoringUI() {
     console.log("[LOCK] Match Finished. Disabling all scoring controls.");
@@ -9143,210 +9354,6 @@ let currentViewingTeamId = null;
 let currentViewingTournamentId = null;
 
 // १. मुख्य एंट्री फंक्शन जे बटण क्लिकवर कॉल होईल
-// async function viewTeamPlayers(teamId, tId) {
-//     console.log(`[Team Profile]: 🚀 Adjusting hero details into Top Header Row...`);
-//     currentViewingTeamId = teamId;
-//     currentViewingTournamentId = tId;
-
-//     const content = document.getElementById('mainContent') || document.getElementById('tabContent'); 
-//     if (!content) return;
-
-//     // १. सुरुवातीला साचा रेंडर करा (लोडिंग स्टेटसह)
-//     content.innerHTML = `
-//     <div class="space-y-4 animate-fadeIn pb-12 px-2 min-h-screen bg-black text-white absolute inset-0 z-[120] p-4 overflow-y-auto">
-
-//         <div class="flex items-center justify-between p-2.5 bg-[#111] border border-gray-800/80 shadow-lg rounded-2xl mt-2 gap-2">
-//             <div class="flex items-center gap-3 min-w-0 flex-1">
-//                 <button onclick="exitTeamProfileAndReturn('${tId}')" class="text-orange-500 hover:bg-orange-500/10 p-1.5 rounded-full transition-all active:scale-75 shrink-0">
-//                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-//                     </svg>
-//                 </button>
-                
-//                 <div id="profHeaderLogo" class="w-9 h-9 bg-gray-950 rounded-full border border-orange-500/30 flex items-center justify-center p-0.5 shrink-0 shadow-inner">
-//                     <div class="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-//                 </div>
-                
-//                 <div class="min-w-0 flex-1 leading-tight">
-//                     <h2 id="profTeamNameHeader" class="text-sm font-black text-white uppercase tracking-tighter italic truncate">Loading...</h2>
-//                     <p id="profTeamAreaHeader" class="text-[8px] text-gray-500 uppercase font-bold tracking-wider truncate mt-0.5">📍 Loading...</p>
-//                 </div>
-//             </div>
-
-//             <div id="profTeamFormHeader" class="flex gap-0.5 shrink-0 bg-gray-950/80 p-1 rounded-lg border border-gray-900"></div>
-//         </div>
-
-//         <div class="px-1 sticky top-0 z-20 bg-black/80 backdrop-blur-md py-1">
-//             <div class="flex bg-[#111] p-1 rounded-2xl border border-gray-800 shadow-inner overflow-x-auto gap-1">
-//                 <button id="btnTeamTabOverview" onclick="switchTeamProfileTab('overview')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Overview
-//                 </button>
-//                 <button id="btnTeamTabPlayers" onclick="switchTeamProfileTab('players')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Players
-//                 </button> 
-//                 <button id="btnTeamTabMatches" onclick="switchTeamProfileTab('matches')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Matches
-//                 </button>
-//                 <button id="btnTeamTabStats" onclick="switchTeamProfileTab('stats')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Statistics
-//                 </button>
-//             </div>
-//         </div>
-
-//         <div id="teamProfileTabContent" class="min-h-[450px] py-1"></div>
-
-//     </div>
-//     `;
-
-//     try {
-//         const teamDoc = await db.collection("master_teams").doc(teamId).get();
-//         if (!teamDoc.exists) {
-//             document.getElementById('teamProfileTabContent').innerHTML = "<p class='text-gray-500 text-xs text-center py-10'>माहिती सापडली नाही.</p>";
-//             return;
-//         }
-
-//         const teamData = teamDoc.data();
-//         window.currentLoadedTeamData = teamData; // ओव्हरव्ह्यूसाठी डेटा सेव्ह केला
-
-//         // 🟢 टॉप हेडरमध्ये डेटा भरणे
-//         document.getElementById('profTeamNameHeader').innerText = teamData.teamName || "No Name";
-//         document.getElementById('profTeamAreaHeader').innerText = `📍 ${teamData.area || 'N/A'} | ${teamData.pincode || '------'}`;
-
-//         // कॉम्पॅक्ट लोगो सेट करणे
-//         const logoDiv = document.getElementById('profHeaderLogo');
-//         if (teamData.teamLogo) {
-//             logoDiv.innerHTML = `<img src="${teamData.teamLogo}" class="w-full h-full object-contain rounded-full">`;
-//         } else {
-//             const firstLetter = teamData.teamName ? teamData.teamName.charAt(0).toUpperCase() : "?";
-//             logoHTML = `<span class="text-orange-500 font-black text-xs font-mono italic">${firstLetter}</span>`;
-//             logoDiv.innerHTML = logoHTML;
-//         }
-
-//         // कॉम्पॅक्ट फॉर्म बॅजेस (W/L) सेट करणे
-//         const sampleForm = ['W', 'L', 'L', 'W', 'W']; 
-//         document.getElementById('profTeamFormHeader').innerHTML = sampleForm.map(res => `
-//             <span class="${res === 'W' ? 'text-green-500' : 'text-red-500'} text-[8px] font-black font-mono px-0.5">${res}</span>
-//         `).join('');
-
-//         // डीफॉल्ट पहिला टॅब 'overview' उघडा
-//         switchTeamProfileTab('overview');
-
-//     } catch (error) {
-//         console.error("[Fatal Error in viewTeamPlayers]:", error);
-//     }
-// }
-
-// async function viewTeamPlayers(teamId, tId) {
-//     console.log("%c========================================", "color: #f97316; font-weight: bold;");
-//     if (!tId || tId === "") {
-//         console.log(`%c[Team Profile Routing]: 📂 Route opened from OUTSIDE (Team Master List)`, "color: #3b82f6; font-weight: bold;");
-//     } else {
-//         console.log(`%c[Team Profile Routing]: 🏆 Route opened from INSIDE Tournament (ID: ${tId})`, "color: #a855f7; font-weight: bold;");
-//     }
-//     console.log(`[Team Profile Target]: Team Firestore Doc ID -> ${teamId}`);
-//     console.log("%c========================================", "color: #f97316; font-weight: bold;");
-
-//     currentViewingTeamId = teamId;
-//     currentViewingTournamentId = tId;
-
-//     // ⚡ फिक्स: स्क्रीन ओव्हरलॅपिंग टाळण्यासाठी आपण थेट 'body' किंवा मुख्य 'app' रूट कंटेनर पकडू
-//     const content = document.getElementById('mainContent') || document.getElementById('app') || document.body; 
-//     if (!content) return;
-
-//     // १. जुना प्रोफाईल ओव्हरले आधीच चालू असेल तर तो उडवून टाकू (डुप्लिकेशन रोखण्यासाठी)
-//     const oldOverlay = document.getElementById('fullTeamProfileOverlay');
-//     if (oldOverlay) oldOverlay.remove();
-
-//     // २. नवीन स्वतंत्र फुल स्क्रीन डबा (Overlay) तयार करा
-//     const profileOverlay = document.createElement('div');
-//     profileOverlay.id = 'fullTeamProfileOverlay';
-    
-//     // 🚀 CSS MAGIC: 'fixed inset-0 z-[150]' मुळे हा डबा आता मोबाईल स्क्रीनवर कशाच्याही मागे लपणार नाही!
-//     profileOverlay.className = "fixed inset-0 z-[150] p-4 bg-black text-white overflow-y-auto space-y-4 pb-12 animate-fadeIn";
-
-//     profileOverlay.innerHTML = `
-//         <div class="flex items-center justify-between p-2.5 bg-[#111] border border-gray-800/80 shadow-lg rounded-2xl mt-2 gap-2">
-//             <div class="flex items-center gap-3 min-w-0 flex-1">
-//                 <button onclick="closeTeamProfileOverlay('${tId}')" class="text-orange-500 hover:bg-orange-500/10 p-1.5 rounded-full transition-all active:scale-75 shrink-0">
-//                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-//                     </svg>
-//                 </button>
-                
-//                 <div id="profHeaderLogo" class="w-9 h-9 bg-gray-950 rounded-full border border-orange-500/30 flex items-center justify-center p-0.5 shrink-0 shadow-inner">
-//                     <div class="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-//                 </div>
-                
-//                 <div class="min-w-0 flex-1 leading-tight">
-//                     <h2 id="profTeamNameHeader" class="text-sm font-black text-white uppercase tracking-tighter italic truncate">Loading...</h2>
-//                     <p id="profTeamAreaHeader" class="text-[8px] text-gray-500 uppercase font-bold tracking-wider truncate mt-0.5">📍 Loading...</p>
-//                 </div>
-//             </div>
-
-//             <div id="profTeamFormHeader" class="flex gap-0.5 shrink-0 bg-gray-950/80 p-1 rounded-lg border border-gray-900"></div>
-//         </div>
-
-//         <div class="px-1 sticky top-0 z-20 bg-black/80 backdrop-blur-md py-1">
-//             <div class="flex bg-[#111] p-1 rounded-2xl border border-gray-800 shadow-inner overflow-x-auto gap-1">
-//                 <button id="btnTeamTabOverview" onclick="switchTeamProfileTab('overview')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Overview
-//                 </button>
-//                 <button id="btnTeamTabPlayers" onclick="switchTeamProfileTab('players')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Players
-//                 </button> 
-//                 <button id="btnTeamTabMatches" onclick="switchTeamProfileTab('matches')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Matches
-//                 </button>
-//                 <button id="btnTeamTabStats" onclick="switchTeamProfileTab('stats')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
-//                     Statistics
-//                 </button>
-//             </div>
-//         </div>
-
-//         <div id="teamProfileTabContent" class="min-h-[450px] py-1">
-//             <div class="flex justify-center py-20 text-orange-500 text-[10px] font-black uppercase tracking-widest animate-pulse">डेटा लोड होत आहे...</div>
-//         </div>
-//     `;
-
-//     // 🚀 स्क्रीनवर ओव्हरले डोक्यावर फेका
-//     content.appendChild(profileOverlay);
-
-//     try {
-//         const teamDoc = await db.collection("master_teams").doc(teamId).get();
-//         if (!teamDoc.exists) {
-//             document.getElementById('teamProfileTabContent').innerHTML = "<p class='text-gray-500 text-xs text-center py-10'>माहिती सापडली नाही.</p>";
-//             return;
-//         }
-
-//         const teamData = teamDoc.data();
-//         window.currentLoadedTeamData = teamData; // ओव्हरव्ह्यूसाठी डेटा सेव्ह केला
-
-//         // टॉप हेडरमध्ये डेटा भरणे
-//         document.getElementById('profTeamNameHeader').innerText = teamData.teamName || "No Name";
-//         document.getElementById('profTeamAreaHeader').innerText = `📍 ${teamData.area || 'N/A'} | ${teamData.pincode || '------'}`;
-
-//         // लोगो सेट करणे
-//         const logoDiv = document.getElementById('profHeaderLogo');
-//         if (teamData.teamLogo) {
-//             logoDiv.innerHTML = `<img src="${teamData.teamLogo}" class="w-full h-full object-contain rounded-full">`;
-//         } else {
-//             const firstLetter = teamData.teamName ? teamData.teamName.charAt(0).toUpperCase() : "?";
-//             logoDiv.innerHTML = `<span class="text-orange-500 font-black text-xs font-mono italic">${firstLetter}</span>`;
-//         }
-
-//         // फॉर्म बॅजेस (W/L)
-//         const sampleForm = ['W', 'L', 'L', 'W', 'W']; 
-//         document.getElementById('profTeamFormHeader').innerHTML = sampleForm.map(res => `
-//             <span class="${res === 'W' ? 'text-green-500' : 'text-red-500'} text-[8px] font-black font-mono px-0.5">${res}</span>
-//         `).join('');
-
-//         // डीफॉल्ट पहिला टॅब 'overview' उघडा
-//         switchTeamProfileTab('overview');
-
-//     } catch (error) {
-//         console.error("[Fatal Error in viewTeamPlayers]:", error);
-//     }
-// }
 
 async function viewTeamPlayers(teamId, tId) {
     // 🔥 [FRONTEND LIVE LOG]: प्रोफाइल कार्डवर क्लिक करताच आयडीची कुंडली फ्रंटएंडला उघडेल
@@ -9688,43 +9695,94 @@ async function renderTeamOverviewTab() {
 संघातील सर्व खेळाडूंची लिस्ट (रोल, मॅचेस आणि पॉईंट्ससह) दाखवण्यासाठी:
  */
 
-// function renderTeamPlayersTab() {
+// async function renderTeamPlayersTab() {
+//     console.log(`[Team Profile]: Fetching players from master_players for Team: ${currentViewingTeamId}`);
 //     const subContent = document.getElementById('teamProfileTabContent');
-    
-//     // सॅम्पल लिस्ट (भविष्यात तुझ्या 'players' सब-कलेक्शन किंवा ॲरेमधून लूप होईल)
-//     const samplePlayers = [
-//         { name: "Milind Aeer", role: "Rider", matches: 21, points: 104 },
-//         { name: "Amod Parab", role: "Defender", matches: 18, points: 52 },
-//         { name: "Aranav Jadhav", role: "All Rounder", matches: 20, points: 88 }
-//     ];
+//     if (!subContent) return;
 
-//     let playersHTML = `
-//     <div class="space-y-2 animate-fadeIn">
-//         <div class="flex justify-between items-center mb-2 px-1">
-//             <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">खेळाडू यादी (Squad)</p>
-//             <button class="bg-orange-600/10 text-orange-500 border border-orange-500/20 px-2 py-1 rounded-lg text-[9px] font-black uppercase">+ Add Player</button>
-//         </div>`;
+//     // चालू सीझन निश्चित करा (उदा. 2026-2027)
+//     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027";
 
-//     samplePlayers.forEach(p => {
-//         playersHTML += `
-//         <div class="bg-[#111] p-3 rounded-xl border border-gray-800 flex justify-between items-center shadow-md">
-//             <div class="flex items-center gap-3">
-//                 <div class="w-8 h-8 bg-gray-900 rounded-full border border-gray-800 flex items-center justify-center text-xs font-black text-gray-500 uppercase">${p.name.charAt(0)}</div>
-//                 <div>
-//                     <p class="text-xs font-black text-white uppercase tracking-tighter leading-tight">${p.name}</p>
-//                     <p class="text-[8px] text-gray-500 uppercase font-bold tracking-wide">${p.role}</p>
+//     // तुझ्या renderTeamPlayersTab मधील बटण सेक्शन फक्त असा बदलून घे:
+//     subContent.innerHTML = `
+//         <div class="flex justify-between items-center mb-4 px-1">
+//             <div>
+//                 <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">खेळाडू यादी (Squad)</p>
+//                 <p class="text-[8px] text-orange-500 font-bold font-mono">Season: ${currentSeason}</p>
+//             </div>
+            
+//             <button onclick="openExistingPlayerSelector()" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md italic">
+//                 + Add / Create Player
+//             </button>
+//         </div>
+//         <div id="teamPlayersContainer" class="space-y-2">
+//             <p class="text-gray-500 text-[10px] text-center py-10 uppercase tracking-widest animate-pulse">खेळाडू शोधत आहे...</p>
+//         </div>
+//     `;
+
+//     try {
+//         const container = document.getElementById('teamPlayersContainer');
+        
+//         // 🟢 'master_players' कलेक्शन् मधून या सीझनचे खेळाडू शोधा
+//         const snapshot = await db.collection("master_players")
+//             .where(`seasons.${currentSeason}.teamId`, "==", currentViewingTeamId)
+//             .get();
+
+//         if (snapshot.empty) {
+//             container.innerHTML = `
+//                 <div class="text-center py-12 bg-gray-950/40 rounded-2xl border border-gray-900">
+//                     <p class="text-gray-600 text-[10px] uppercase font-bold tracking-wider">या सीझनमध्ये अजून एकही खेळाडू जोडलेला नाही.</p>
+//                 </div>`;
+//             return;
+//         }
+
+//         let playersHTML = "";
+//         snapshot.forEach(doc => {
+//             const p = doc.data();
+//             const seasonDetails = p.seasons[currentSeason] || {};
+//             const stats = seasonDetails.stats || { matches: 0, raidPoints: 0, tacklePoints: 0 };
+
+//             let skillColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+//             if (p.skill === "Defender") skillColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+//             if (p.skill === "All Rounder") skillColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+
+//             playersHTML += `
+//             <div class="bg-[#111] p-3 rounded-2xl border border-gray-800 flex justify-between items-center shadow-md">
+//                 <div class="flex items-center gap-3 min-w-0">
+//                     <div class="w-9 h-9 bg-gray-950 rounded-full border border-gray-800 flex items-center justify-center font-black text-xs text-gray-400 uppercase shrink-0">
+//                         ${p.photoURL ? `<img src="${p.photoURL}" class="w-full h-full object-cover rounded-full">` : p.name.charAt(0)}
+//                     </div>
+//                     <div class="min-w-0">
+//                         <p class="text-xs font-black text-white uppercase tracking-tighter truncate leading-tight">${p.name}</p>
+//                         <div class="flex items-center gap-1.5 mt-0.5">
+//                             <span class="text-[7px] font-mono font-bold text-gray-500 bg-gray-950 px-1 py-0.2 rounded border border-gray-900">Reg: ${seasonDetails.registerId || 'N/A'}</span>
+//                             <span class="text-[7px] border px-1 py-0.2 rounded font-black uppercase tracking-wide ${skillColor}">${p.skill}</span>
+//                         </div>
+//                     </div>
 //                 </div>
-//             </div>
-//             <div class="text-right font-mono">
-//                 <p class="text-[10px] text-white font-bold">${p.matches} <span class="text-[8px] text-gray-500 font-normal">Mat</span></p>
-//                 <p class="text-[9px] text-orange-500 font-black">${p.points} <span class="text-[7px] text-gray-600 font-normal">Pts</span></p>
-//             </div>
-//         </div>`;
-//     });
+                
+//                 <div class="text-right font-mono shrink-0 flex gap-4 items-center">
+//                     <div class="text-center">
+//                         <p class="text-[10px] text-white font-black leading-none">${stats.matches || 0}</p>
+//                         <p class="text-[7px] text-gray-600 font-bold uppercase tracking-tighter mt-0.5">Mat</p>
+//                     </div>
+//                     <div class="text-center min-w-8">
+//                         <p class="text-[10px] text-orange-500 font-black leading-none">${(stats.raidPoints || 0) + (stats.tacklePoints || 0)}</p>
+//                         <p class="text-[7px] text-gray-600 font-bold uppercase tracking-tighter mt-0.5">Pts</p>
+//                     </div>
+//                 </div>
+//             </div>`;
+//         });
 
-//     playersHTML += `</div>`;
-//     subContent.innerHTML = playersHTML;
+//         container.innerHTML = playersHTML;
+
+//     } catch (err) {
+//         console.error("Error loading master players into squad:", err);
+//     }
 // }
+/**
+ * Player Profile page open
+ */
 
 async function renderTeamPlayersTab() {
     console.log(`[Team Profile]: Fetching players from master_players for Team: ${currentViewingTeamId}`);
@@ -9734,7 +9792,6 @@ async function renderTeamPlayersTab() {
     // चालू सीझन निश्चित करा (उदा. 2026-2027)
     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027";
 
-    // तुझ्या renderTeamPlayersTab मधील बटण सेक्शन फक्त असा बदलून घे:
     subContent.innerHTML = `
         <div class="flex justify-between items-center mb-4 px-1">
             <div>
@@ -9754,7 +9811,7 @@ async function renderTeamPlayersTab() {
     try {
         const container = document.getElementById('teamPlayersContainer');
         
-        // 🟢 'master_players' कलेक्शन् मधून या सीझनचे खेळाडू शोधा
+        // 'master_players' कलेक्शन् मधून या सीझनचे खेळाडू शोधा
         const snapshot = await db.collection("master_players")
             .where(`seasons.${currentSeason}.teamId`, "==", currentViewingTeamId)
             .get();
@@ -9769,6 +9826,8 @@ async function renderTeamPlayersTab() {
 
         let playersHTML = "";
         snapshot.forEach(doc => {
+            // 🚨 [BUG PREVENTER]: फायरबेसमधून doc.id हाच खेळाडूचा अधिकृत pId असतो, तो आधी सुरक्षित मिळवू
+            const pId = doc.id; 
             const p = doc.data();
             const seasonDetails = p.seasons[currentSeason] || {};
             const stats = seasonDetails.stats || { matches: 0, raidPoints: 0, tacklePoints: 0 };
@@ -9777,8 +9836,12 @@ async function renderTeamPlayersTab() {
             if (p.skill === "Defender") skillColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
             if (p.skill === "All Rounder") skillColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
 
+            // 🎯 [💥 THE MASTER INTERFACE CONNECT]: मुख्य कार्डच्या सुरुवातीला आपण onclick जोडला आहे!
+            // १. तो 'profile' फाईल व्ह्यू लोड करेल.
+            // २. १५० मिलीसेकंदानंतर या खेळाडूचा pId पास करून त्याचा सखोल अनालिसिस रिपोर्ट रेंडर करेल.
             playersHTML += `
-            <div class="bg-[#111] p-3 rounded-2xl border border-gray-800 flex justify-between items-center shadow-md">
+            <div onclick="loadPage('profile'); setTimeout(() => { initPlayerProfileView('${pId}'); }, 150);" 
+                 class="bg-[#111] hover:bg-zinc-900/60 p-3 rounded-2xl border border-gray-800 flex justify-between items-center shadow-md cursor-pointer active:scale-[0.98] transition-all">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-9 h-9 bg-gray-950 rounded-full border border-gray-800 flex items-center justify-center font-black text-xs text-gray-400 uppercase shrink-0">
                         ${p.photoURL ? `<img src="${p.photoURL}" class="w-full h-full object-cover rounded-full">` : p.name.charAt(0)}
@@ -10071,96 +10134,6 @@ function generateMasterPlayerId() {
 
 
 // ३. फॉर्ममधील डेटा गोळा करून 'master_players' मध्ये सेव्ह करणे
-// async function saveNewPlayerToMaster() {
-//     console.log("[Player Master]: 💾 Saving new player directly to master_players...");
-
-//     // फॉर्ममधून डेटा गोळा करा
-//     const name = document.getElementById('pName')?.value.trim();
-//     const registerId = document.getElementById('pRegisterId')?.value.trim().toUpperCase();
-//     const mobile = document.getElementById('pMobile')?.value.trim();
-//     const dob = document.getElementById('pDob')?.value.trim() || "";
-//     const aadharLast4 = document.getElementById('pAadhar')?.value.trim();
-//     const weight = document.getElementById('pWeight')?.value.trim();
-//     const skill = document.getElementById('pSkill')?.value;
-//     const role = document.getElementById('pRole')?.value;
-//     const email = document.getElementById('pEmail')?.value.trim().toLowerCase();
-
-//     // आवश्यक फील्ड्सचे व्हॅलिडेशन
-//     if (!name || !registerId) {
-//         alert("🚨 कृपया खेळाडूचे नाव आणि सीझन Register ID अनिवार्यपणे भरा!");
-//         return;
-//     }
-
-//     // आपण ज्या टीमच्या प्रोफाइलमध्ये आहोत, त्याचा आयडी आणि सीझन डेटा घ्या
-//     const teamId = currentViewingTeamId; 
-//     const teamName = window.currentLoadedTeamData?.teamName || "Unknown Team";
-//     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027"; 
-
-//     if (!teamId) {
-//         alert("🚨 एरर: चालू संघाची माहिती सापडली नाही!");
-//         return;
-//     }
-
-//     if (dob && dob.length !== 10) {
-//         alert("🚨 कृपया जन्म तारीख पूर्ण भरा किंवा कॅलेंडरमधून निवडा (DD/MM/YYYY)!");
-//         return;
-//     }
-//     console.log(`[प्लेअर मास्टर]: 💾 फायरस्टोअरमध्ये जतन होणारी जन्मतारीख -> ${dob}`);
-
-//     // 🟢 १. इथे ऑटोमॅटिक ४ अंकी अल्फा-न्यूमेरिक आयडी जनरेट होईल
-//     const generatedId = generateMasterPlayerId();
-
-//     // फायरस्टोअरसाठी ऑब्जेक्ट तयार करा (सीझन-वाईज मॅप स्ट्रक्चर)
-//     const playerData = {
-//         playerID: generatedId, // 🟢 २. हा खेळाडूचा आयुष्यभराचा कायमस्वरूपी आयडी बनला!
-//         name: name,
-//         email: email || "",
-//         mobile: mobile || "",
-//         dob: dob || "",
-//         aadharLast4: aadharLast4 || "",
-//         weight: weight ? parseInt(weight) : null,
-//         skill: skill,
-//         role: role,
-//         status: "Approved", 
-//         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-//         seasons: {
-//             [currentSeason]: {
-//                 teamId: teamId,
-//                 teamName: teamName,
-//                 registerId: registerId,
-//                 stats: { matches: 0, raidPoints: 0, tacklePoints: 0, superRaids: 0, superTackles: 0 }
-//             }
-//         }
-//     };
-
-//     try {
-//         // ईमेल युनिक आहे का ते तपासा (जर ईमेल टाकला असेल तर)
-//         if (email) {
-//             const emailCheck = await db.collection("master_players").where("email", "==", email).get();
-//             if (!emailCheck.empty) {
-//                 alert("🚨 या ईमेल आयडीचा खेळाडू आधीच नोंदणीकृत आहे!");
-//                 return;
-//             }
-//         }
-
-//         // 'master_players' कलेक्शनमध्ये डेटा जतन करा
-//         const docRef = await db.collection("master_players").add(playerData);
-//         console.log(`[Success]: New Master Player saved! ID -> ${docRef.id}`);
-        
-//         alert(`🎉 खेळाडू "${name}" ची नवीन नोंदणी यशस्वी झाली आणि तो या संघात जोडला गेला!`);
-        
-//         // मोडल बंद करा आणि खेळाडूंचा टॅब लाइव्ह रिफ्रेश करा
-//         closeNewPlayerModal();
-//         if (typeof renderTeamPlayersTab === 'function') {
-//             renderTeamPlayersTab();
-//         }
-
-//     } catch (error) {
-//         console.error("[Error saving new player]:", error);
-//         alert("🚨 तांत्रिक अडचणीमुळे खेळाडू सेव्ह करता आला नाही.");
-//     }
-// }
-
 async function saveNewPlayerToMaster() {
     console.log("%c[Player Master]: 💾 Saving new player directly with Custom Unique ID...", "color: #3b82f6; font-weight: bold;");
 
@@ -10415,6 +10388,8 @@ function calculateTopStats() {
  * buildMatchSummaryTab() (खेळाडूंची कुंडली काढण्यासाठी)
 जेव्हा युझर मोडलमधील 'Match Summary' टॅबवर क्लिक करेल, 
 तेव्हा हा संपूर्ण ॲनालिसिस डेटा काढून HTML चे सुंदर टेबल बनवणारे हे मुख्य फंक्शन:
+🛠️ फक्त एक छोटा 'Null-Safe' सुधारणा (Crash Protection)
+जरी कोड परफेक्ट असला, तरी प्रेक्षकांच्या बाजूने किंवा रिफ्रेश झाल्यावर btnSubTabTeamA आणि btnSubTabTeamB हे DOM एलिमेंट्स स्क्रीनवर हजर नसतील, तर कोड मधेच अडकून पुढचे टेबल रेंडर करायचे थांबवू शकतो (Crash).
  */
 
 // function buildMatchSummaryTab() {
@@ -10422,11 +10397,10 @@ function calculateTopStats() {
 //     const containerB = document.getElementById('teamBSummaryTableContainer');
 //     if (!containerA || !containerB) return;
 
-//     console.log("%c📊 [SUMMARY ENGINE START] ----------------------------------", "color: #00bfff; font-weight: bold; font-size: 12px;");
+//     console.log("%c📊 [ADVANCED ANALYTICS ENGINE START] ----------------------------------", "color: #ff007f; font-weight: bold; font-size: 12px;");
 
 //     if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
-//         console.warn("⚠️ [SUMMARY]: activeRaidsList रिकामी आहे.");
-//         let emptyHtml = `<div class="text-center p-8 text-gray-500 font-bold">अजून एकही रेड झालेली नाही!</div>`;
+//         let emptyHtml = `<div class="text-center p-8 text-gray-500 font-bold">अजून एकही領 रेड झालेली नाही!</div>`;
 //         containerA.innerHTML = emptyHtml; containerB.innerHTML = emptyHtml; return;
 //     }
 
@@ -10434,48 +10408,75 @@ function calculateTopStats() {
 
 //     function initStatsObj(team, name) {
 //         if (!stats[team][name]) {
-//             stats[team][name] = { totalRaids: 0, touch: 0, bonus: 0, empty: 0, out: 0, tackle: 0, superT: 0 };
+//             stats[team][name] = { R: 0, TP: 0, B: 0, E: 0, RO: 0, DO: 0, TK: 0, STK: 0 };
 //         }
 //     }
 
-//     // 🔍 मुख्य लूप - प्रत्येक रेडचे अचूक गॅरंटीड वर्गीकरण
+//     function detectRealTeamOfPlayer(fullName, defaultTeam) {
+//         let nameUpper = fullName.toUpperCase();
+//         if (nameUpper.includes("[A]") || nameUpper.includes("(A)")) return 'A';
+//         if (nameUpper.includes("[B]") || nameUpper.includes("(B)")) return 'B';
+        
+//         let jerseyMatch = nameUpper.match(/\d+/);
+//         if (jerseyMatch) {
+//             let jNo = parseInt(jerseyMatch[0]);
+//             return (jNo >= 21) ? 'B' : 'A';
+//         }
+//         return defaultTeam;
+//     }
+
 //     window.activeRaidsList.forEach((raid, idx) => {
 //         const resultUpper = raid.result ? raid.result.toUpperCase() : "";
 //         const points = Number(raid.points) || 0;
-        
-//         let rTeam = raid.team; // रायडरची टीम ('A' किंवा 'B')
-//         let dTeam = (rTeam === 'A') ? 'B' : 'A'; // डिफेंडरची विरोधी टीम
 
 //         let cleanRaider = raid.raiderName.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+//         let rTeam = detectRealTeamOfPlayer(raid.raiderName, raid.team);
+//         let dTeam = (rTeam === 'A') ? 'B' : 'A';
 
-//         // 🏃‍♂️ A. रायडर डेटा कॅल्क्युलेशन (🚨 STRICT SINGLE-ENTRY IF-ELSE)
 //         if (cleanRaider !== "OFFICIALS" && !resultUpper.includes("ALL OUT") && !resultUpper.includes("TECHNICAL")) {
 //             initStatsObj(rTeam, cleanRaider);
-//             stats[rTeam][cleanRaider].totalRaids += 1;
+//             stats[rTeam][cleanRaider].R += 1;
 
 //             if (resultUpper === "TOUCH POINT" || resultUpper === "TOUCH") {
-//                 stats[rTeam][cleanRaider].touch += points;
+//                 stats[rTeam][cleanRaider].TP += points;
 //             }
 //             else if (resultUpper === "BONUS + TOUCH") {
-//                 stats[rTeam][cleanRaider].bonus += 1;
-//                 stats[rTeam][cleanRaider].touch += (points - 1);
+//                 stats[rTeam][cleanRaider].B += 1;
+//                 stats[rTeam][cleanRaider].TP += (points - 1);
 //             }
 //             else if (resultUpper === "BONUS + TACKLE") {
-//                 stats[rTeam][cleanRaider].bonus += 1;
-//                 stats[rTeam][cleanRaider].out += 1; // रायडरला बोनस मिळाला पण तो बाद झाला
+//                 stats[rTeam][cleanRaider].B += 1;
+//                 stats[rTeam][cleanRaider].RO += 1;
 //             }
 //             else if (resultUpper === "BONUS" || resultUpper === "BONUS POINT") {
-//                 stats[rTeam][cleanRaider].bonus += 1;
+//                 stats[rTeam][cleanRaider].B += 1;
 //             }
 //             else if (resultUpper === "EMPTY RAID" || resultUpper === "EMPTY") {
-//                 stats[rTeam][cleanRaider].empty += 1;
+//                 stats[rTeam][cleanRaider].E += 1;
 //             }
 //             else if (resultUpper.includes("TACKLE") || resultUpper.includes("OUT")) {
-//                 stats[rTeam][cleanRaider].out += 1; // इतर साधी टॅकल असेल तर फक्त आऊट काउंट वाढवा
+//                 stats[rTeam][cleanRaider].RO += 1;
 //             }
 //         }
 
-//         // 🛡️ B. डिफेंडर डेटा कॅल्क्युलेशन
+//         if (raid.details && (resultUpper === "TOUCH POINT" || resultUpper === "TOUCH" || resultUpper === "BONUS + TOUCH")) {
+//             let detailsText = raid.details.toUpperCase();
+//             if (detailsText.includes("OUT ")) {
+//                 let outPart = raid.details.split(/out /i)[1];
+//                 if (outPart) {
+//                     outPart.split(',').forEach(defRaw => {
+//                         let cleanDef = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+//                         let actualDefTeam = detectRealTeamOfPlayer(defRaw, dTeam);
+                        
+//                         if (cleanDef && cleanDef !== cleanRaider && cleanDef !== "PLAYER") {
+//                             initStatsObj(actualDefTeam, cleanDef);
+//                             stats[actualDefTeam][cleanDef].DO += 1;
+//                         }
+//                     });
+//                 }
+//             }
+//         }
+
 //         if (raid.details && (resultUpper.includes("TACKLE") || resultUpper.includes("SUPER TACKLE"))) {
 //             let detailsText = raid.details.toUpperCase();
 //             if (detailsText.includes("CAUGHT BY")) {
@@ -10483,15 +10484,15 @@ function calculateTopStats() {
 //                 if (defenderPart) {
 //                     defenderPart.split(',').forEach(defRaw => {
 //                         let cleanDef = defRaw.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+//                         let actualDefTeam = detectRealTeamOfPlayer(defRaw, dTeam);
                         
 //                         if (cleanDef && cleanDef !== cleanRaider && cleanDef !== "DEFENDER") { 
-//                             initStatsObj(dTeam, cleanDef);
+//                             initStatsObj(actualDefTeam, cleanDef);
                             
 //                             if (resultUpper.includes("SUPER TACKLE")) {
-//                                 stats[dTeam][cleanDef].superT += 1;
-//                                 stats[dTeam][cleanDef].tackle += 1;
+//                                 stats[actualDefTeam][cleanDef].STK += 1;
 //                             } else {
-//                                 stats[dTeam][cleanDef].tackle += 1;
+//                                 stats[actualDefTeam][cleanDef].TK += 1;
 //                             }
 //                         }
 //                     });
@@ -10500,59 +10501,75 @@ function calculateTopStats() {
 //         }
 //     });
 
-//     // ३. HTML टेबल जनरेशन हेल्पर
 //     function generateTableHTML(teamData, themeColor) {
 //         if (Object.keys(teamData).length === 0) {
 //             return `<div class="text-center p-6 text-gray-600 italic text-[11px]">अद्याप कोणतीही नोंद नाही.</div>`;
 //         }
 
 //         let html = `
-//             <div class="overflow-x-auto border border-gray-800/60 rounded-xl bg-black/20">
-//                 <table class="w-full text-left text-[11px] text-gray-300">
-//                     <thead class="bg-gray-900/80 text-${themeColor}-400 uppercase text-[8.5px] font-black tracking-wider border-b border-gray-800">
+//             <div class="w-full overflow-hidden border border-gray-800/60 rounded-xl bg-black/20">
+//                 <table class="w-full text-left text-[11px] text-gray-300 table-fixed border-collapse">
+//                     <thead class="bg-gray-900/80 text-${themeColor}-400 uppercase text-[8px] font-black tracking-tight border-b border-gray-800 text-center">
 //                         <tr>
-//                             <th class="p-2.5">Player Name</th>
-//                             <th class="p-2.5 text-center">Raids</th>
-//                             <th class="p-2.5 text-center text-green-400">Touch</th>
-//                             <th class="p-2.5 text-center text-blue-400">Bonus</th>
-//                             <th class="p-2.5 text-center text-gray-500">Empty</th>
-//                             <th class="p-2.5 text-center text-red-400">Out</th>
-//                             <th class="p-2.5 text-center text-orange-400">Tackles</th>
+//                             <th class="p-2 text-left w-[32%] tracking-tighter">Player Name</th>
+//                             <th class="p-1 w-[7.5%]">R</th>
+//                             <th class="p-1 w-[7.5%] text-green-400">TP</th>
+//                             <th class="p-1 w-[7.5%] text-blue-400">B</th>
+//                             <th class="p-1 w-[7.5%] text-gray-500">E</th>
+//                             <th class="p-1 w-[7.5%] text-red-400">RO</th>
+//                             <th class="p-1 w-[7.5%] text-red-300">DO</th>
+//                             <th class="p-1 w-[7.5%] text-orange-400">TK</th>
+//                             <th class="p-1 w-[8.5%] text-purple-400">STK</th>
+//                             <th class="p-1 w-[9%] text-yellow-400 font-black bg-yellow-500/5">PT</th>
 //                         </tr>
 //                     </thead>
-//                     <tbody class="divide-y divide-gray-850">`;
+//                     <tbody class="divide-y divide-gray-850 text-center font-bold text-[10px]">`;
 
 //         Object.keys(teamData).forEach(name => {
 //             let p = teamData[name];
+//             let totalPoints = p.TP + p.B + p.TK + (p.STK * 2);
+
 //             html += `
 //                 <tr class="hover:bg-white/5 transition-colors">
-//                     <td class="p-2.5 font-black text-white uppercase tracking-tight">${name}</td>
-//                     <td class="p-2.5 text-center font-bold">${p.totalRaids}</td>
-//                     <td class="p-2.5 text-center font-black text-green-400">${p.touch}</td>
-//                     <td class="p-2.5 text-center font-black text-blue-400">${p.bonus}</td>
-//                     <td class="p-2.5 text-center text-gray-400">${p.empty}</td>
-//                     <td class="p-2.5 text-center font-black text-red-500">${p.out}</td>
-//                     <td class="p-2.5 text-center font-black text-orange-400">${p.tackle}</td>
+//                     <td class="p-2 text-left font-black text-white uppercase tracking-tighter whitespace-normal break-words leading-tight border-r border-gray-850/30">${name}</td>
+//                     <td class="p-1">${p.R}</td>
+//                     <td class="p-1 text-green-400 font-black">${p.TP}</td>
+//                     <td class="p-1 text-blue-400 font-black">${p.B}</td>
+//                     <td class="p-1 text-gray-400">${p.E}</td>
+//                     <td class="p-1 text-red-400">${p.RO}</td>
+//                     <td class="p-1 text-red-300">${p.DO}</td>
+//                     <td class="p-1 text-orange-400">${p.TK}</td>
+//                     <td class="p-1 text-purple-400">${p.STK}</td>
+//                     <td class="p-1 font-black text-yellow-400 bg-yellow-500/5">${totalPoints}</td>
 //                 </tr>`;
 //         });
 
-//         html += `</tbody></table></div>`; return html;
+//         html += `</tbody></table></div>
+//             <div class="mt-2.5 p-2 bg-gray-900/60 rounded-lg flex flex-wrap gap-x-1.5 gap-y-1 text-[8.5px] text-gray-400 border border-gray-800 justify-center font-bold uppercase tracking-tighter">
+//                 <span><b>R:</b> Raid</span> | <span><b class="text-green-400">TP:</b> Touch</span> | <span><b class="text-blue-400">B:</b> Bonus</span> | <span><b>E:</b> Empty</span> | 
+//                 <span><b class="text-red-400">RO:</b> Raid Out</span> | <span><b class="text-red-300">DO:</b> Def Out</span> | <span><b class="text-orange-400">TK:</b> Tackle</span> | <span><b class="text-purple-400">STK:</b> Super Tackle</span> | <span><b class="text-yellow-400">PT:</b> Points</span>
+//             </div>`; 
+            
+//         return html;
 //     }
 
-//     let nameA = (typeof matchSetupData !== 'undefined' && matchSetupData.tAName) ? matchSetupData.tAName.toUpperCase() : "TEAM A";
-//     let nameB = (typeof matchSetupData !== 'undefined' && matchSetupData.tBName) ? matchSetupData.tBName.toUpperCase() : "TEAM B";
+//     // 🎯 [buildMatchSummaryTab च्या आतल्या शेवटच्या ओळी सुरक्षित केल्या]
+//     let nameA = (window.matchSetupData && window.matchSetupData.tAName) ? window.matchSetupData.tAName.toUpperCase() : "TEAM A";
+//     let nameB = (window.matchSetupData && window.matchSetupData.tBName) ? window.matchSetupData.tBName.toUpperCase() : "TEAM B";
 
-//     document.getElementById('btnSubTabTeamA').innerText = `${nameA} STATS`;
-//     document.getElementById('btnSubTabTeamB').innerText = `${nameB} STATS`;
+//     // 🚨 [💥 CRITICAL NULL-SAFE ELEMENT CHECK]: बटने हजर असतील तरच नावे भरणे
+//     const btnA = document.getElementById('btnSubTabTeamA');
+//     const btnB = document.getElementById('btnSubTabTeamB');
+//     if (btnA) btnA.innerText = `${nameA} STATS`;
+//     if (btnB) btnB.innerText = `${nameB} STATS`;
 
 //     containerA.innerHTML = generateTableHTML(stats.A, 'green');
 //     containerB.innerHTML = generateTableHTML(stats.B, 'blue');
 
-//     console.log("%c✅ [SUMMARY ENGINE COMPLETED]: HTML Tables Re-rendered successfully.", "color: #10b981; font-weight: bold;");
-//     console.log("%c📊 [SUMMARY ENGINE END] ------------------------------------", "color: #00bfff; font-weight: bold;");
+//     console.log("%c✅ [SUMMARY ENGINE ADVANCED COMPLETED]", "color: #10b981; font-weight: bold;");
 // }
 
-
+/***player stats push in db  */
 function buildMatchSummaryTab() {
     const containerA = document.getElementById('teamASummaryTableContainer');
     const containerB = document.getElementById('teamBSummaryTableContainer');
@@ -10662,12 +10679,11 @@ function buildMatchSummaryTab() {
         }
     });
 
-  function generateTableHTML(teamData, themeColor) {
+    function generateTableHTML(teamData, themeColor) {
         if (Object.keys(teamData).length === 0) {
             return `<div class="text-center p-6 text-gray-600 italic text-[11px]">अद्याप कोणतीही नोंद नाही.</div>`;
         }
 
-        // 🚨 बदल: min-w काढून टाकले जेणेकरून टेबल एकाच व्ह्यूमध्ये फिट बसेल. table-fixed अनिवार्य ठेवले.
         let html = `
             <div class="w-full overflow-hidden border border-gray-800/60 rounded-xl bg-black/20">
                 <table class="w-full text-left text-[11px] text-gray-300 table-fixed border-collapse">
@@ -10715,24 +10731,132 @@ function buildMatchSummaryTab() {
         return html;
     }
 
-    // 🚨 रियल टीम नावे बटनांवर सेट करणे
-    let nameA = (typeof matchSetupData !== 'undefined' && matchSetupData.tAName) ? matchSetupData.tAName.toUpperCase() : "TEAM A";
-    let nameB = (typeof matchSetupData !== 'undefined' && matchSetupData.tBName) ? matchSetupData.tBName.toUpperCase() : "TEAM B";
+    let nameA = (window.matchSetupData && window.matchSetupData.tAName) ? window.matchSetupData.tAName.toUpperCase() : "TEAM A";
+    let nameB = (window.matchSetupData && window.matchSetupData.tBName) ? window.matchSetupData.tBName.toUpperCase() : "TEAM B";
 
-    document.getElementById('btnSubTabTeamA').innerText = `${nameA} STATS`;
-    document.getElementById('btnSubTabTeamB').innerText = `${nameB} STATS`;
+    const btnA = document.getElementById('btnSubTabTeamA');
+    const btnB = document.getElementById('btnSubTabTeamB');
+    if (btnA) btnA.innerText = `${nameA} STATS`;
+    if (btnB) btnB.innerText = `${nameB} STATS`;
 
     containerA.innerHTML = generateTableHTML(stats.A, 'green');
     containerB.innerHTML = generateTableHTML(stats.B, 'blue');
 
     console.log("%c✅ [SUMMARY ENGINE ADVANCED COMPLETED]", "color: #10b981; font-weight: bold;");
+
+
+// =========================================================================
+    // 🚨 📂 SECTION 5: AUTOMATIC PLAYER STATS DATABASE SYNC WITH GAIN & LOSS ☁️
+    // =========================================================================
+    let mId = window.matchSetupData?.mId || window.currentMatchData?.mId || "";
+    let tId = window.matchSetupData?.tId || window.currentMatchData?.tId || "";
+    let currentStatus = (window.currentMatchData?.status || localStorage.getItem(`match_status_${mId}`) || "").trim().toLowerCase();
+
+    if (tId && mId && currentStatus === "finished") {
+        console.log("%c🔄 [FIREBASE ADVANCED STATS SYNC]: Gain, Loss आणि Empty Raids चा हिशोब सुरू...", "color: #a855f7; font-weight: bold;");
+        
+        (async () => {
+            try {
+                const matchDoc = await db.collection("tournaments").doc(tId).collection("matches").doc(mId).get();
+                if (!matchDoc.exists) return;
+                
+                const matchData = matchDoc.data();
+                let teamAPlayers = matchData.teamAPlayers || matchData.teamA_players || [];
+                let teamBPlayers = matchData.teamBPlayers || matchData.teamB_players || [];
+
+                // नावांमधील स्पेस आणि केसचा घोळ मिटवणारे हेल्पर फंक्शन
+                function getCleanKey(name) {
+                    return name.trim().toLowerCase().replace(/\s+/g, '');
+                }
+
+                // अ. Team A प्लेयर्सचे सखोल मॅपिंग (Gain - Loss - Empty)
+                teamAPlayers = teamAPlayers.map(p => {
+                    let dbPlayerKey = getCleanKey(p.name);
+                    let foundName = Object.keys(stats.A).find(calcName => getCleanKey(calcName) === dbPlayerKey);
+                    
+                    if (foundName) {
+                        let pData = stats.A[foundName];
+                        
+                        // 🧮 कबड्डी नियम हिशोब:
+                        let tkGain = Number(pData.TK || 0) + (Number(pData.STK || 0) * 2); // १ टॅकल = १ पॉईंट, १ सुपर टॅकल = २ पॉईंट
+                        let rdGain = Number(pData.TP || 0) + Number(pData.B || 0);        // टच + बोनस
+                        let ptTotal = rdGain + tkGain;                                    // एकूण कमावलेले गुण
+                        
+                        p.stats = {
+                            raids: Number(pData.R || 0),
+                            raid_gain: rdGain,
+                            raid_loss: Number(pData.RO || 0),       // रेडर आऊट झाला म्हणजे तो लॉस आहे
+                            bonus: Number(pData.B || 0),
+                            empty_raids: Number(pData.E || 0),      // 🎯 [EMPTY RAID INJECTION]
+                            
+                            tackles: Number(pData.TK || 0) + Number(pData.STK || 0) + Number(pData.DO || 0), // एकूण केलेले प्रयत्ने
+                            tackle_gain: tkGain,
+                            tackle_loss: Number(pData.DO || 0),     // डिफेन्स करताना आऊट झाला म्हणजे तो लॉस आहे
+                            super_tackles: Number(pData.STK || 0),
+                            
+                            points: ptTotal
+                        };
+                        console.log(`✅ [DB Sync A]: ${p.name} ➔ Gain: ${p.stats.points} | Loss: ${p.stats.raid_loss + p.stats.tackle_loss} | Empty: ${p.stats.empty_raids}`);
+                    }
+                    return p;
+                });
+
+                // ब. Team B प्लेयर्सचे सखोल मॅपिंग (Gain - Loss - Empty)
+                teamBPlayers = teamBPlayers.map(p => {
+                    let dbPlayerKey = getCleanKey(p.name);
+                    let foundName = Object.keys(stats.B).find(calcName => getCleanKey(calcName) === dbPlayerKey);
+                    
+                    if (foundName) {
+                        let pData = stats.B[foundName];
+                        
+                        let tkGain = Number(pData.TK || 0) + (Number(pData.STK || 0) * 2);
+                        let rdGain = Number(pData.TP || 0) + Number(pData.B || 0);
+                        let ptTotal = rdGain + tkGain;
+                        
+                        p.stats = {
+                            raids: Number(pData.R || 0),
+                            raid_gain: rdGain,
+                            raid_loss: Number(pData.RO || 0),
+                            bonus: Number(pData.B || 0),
+                            empty_raids: Number(pData.E || 0),      // 🎯 [EMPTY RAID INJECTION]
+                            
+                            tackles: Number(pData.TK || 0) + Number(pData.STK || 0) + Number(pData.DO || 0),
+                            tackle_gain: tkGain,
+                            tackle_loss: Number(pData.DO || 0),
+                            super_tackles: Number(pData.STK || 0),
+                            
+                            points: ptTotal
+                        };
+                        console.log(`✅ [DB Sync B]: ${p.name} ➔ Gain: ${p.stats.points} | Loss: ${p.stats.raid_loss + p.stats.tackle_loss} | Empty: ${p.stats.empty_raids}`);
+                    }
+                    return p;
+                });
+
+                // 🔥 अंतिम डेटाबेस अपडेट (Single Source of Truth)
+                await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+                    teamAPlayers: teamAPlayers,
+                    teamBPlayers: teamBPlayers,
+                    statsCalculatedOn: new Date().getTime()
+                });
+                
+                console.log("%c🚀 [ADVANCED FIREBASE WRITE SUCCESS]: रिकाम्या रेड्स आणि गेन-लॉससह सर्व प्लेयर्सचा डेटा जतन झाला!", "background: #22c55e; color: #fff; font-weight: bold; padding: 2px;");
+            } catch (err) {
+                console.error("🚨 [ADVANCED DB SYNC CRASH]:", err);
+            }
+        })();
+    }
 }
 /**
  * switchTimelineTab(tabName) (टॅब्स अदलाबदल करण्यासाठी)
 मोडल उघडल्यावर 'Timeline' आणि 'Player Summary' या दोन बटणामध्ये टॉगल करण्यासाठी हे सोपं नेव्हिगेटर फंक्शन:
+🛠️ कोड क्लीनअप (फक्त कन्सोल ट्रॅकिंगसह)
+तुझा मूळचा टॅब हायडिंग, क्लासेस रिमूव्हल आणि buildMatchSummaryTab() चा संपूर्ण फ्लो जसाच्या तसा ठेवून, 
+आपण यात फक्त एक छोटा कन्सोल ट्रॅकर जोडूया, जेणेकरून टॅब बदलताना सिस्टीम अचूक सिंक होतेय की नाही हे तुला कन्सोलमध्ये स्पष्ट दिसेल:
  */
 
 function switchTimelineTab(tabName) {
+    console.log(`🎛️ [TAB SWITCH]: युझरने "${tabName}" टॅबवर क्लिक केले.`);
+
     const tabTimeline = document.getElementById('modalRaidList');
     const tabPlayerSummary = document.getElementById('modalSummaryTabContent');
     const tabMatchSummary = document.getElementById('modalMatchSummaryTabContent');
@@ -10777,7 +10901,7 @@ function switchTimelineTab(tabName) {
             btnMatchSummary.classList.add('bg-orange-600', 'text-black');
             btnMatchSummary.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
         }
-        // नवीन मॅच ओव्हरव्ह्यू/समरी रेंडर करा!
+        // नवीन कडक मॅच ओव्हरव्ह्यू/समरी रेंडर करा!
         renderMatchSummaryOverview();
     }
 }
@@ -10811,66 +10935,209 @@ function switchTeamSummarySubTab(teamLetter) {
     }
 }
 
+/** renderMatchSummaryOverview
+ * ओव्हरव्ह्यूमध्ये scoreCard चा मास्टर सिंक लावणे
+आपण तुझा मूळचा संपूर्ण लेआउट, क्रिकहिरोज डिझाईन, बॅनर कलर्सचे नियम आणि कडक Top Raiders/Defenders कॅल्क्युलेशनचे गणिताचे लॉजिक १ टक्काही विस्कटणार नाही.
+ */
 
 function renderMatchSummaryOverview() {
+        // =========================================================================
+            // 📂 SECTION 1: ENGINE START & ADVANCED ID RECOVERY 🧪 (🎯 THE CRITICAL BUG FIX)
+            // =========================================================================
+    console.log("%c====================================================================", "color: #10b981; font-weight: bold;");
+    console.log("%c📊 [ENGINE START]: renderMatchSummaryOverview() इंजिन ट्रिगर झाले!", "background: #10b981; color: #fff; font-weight: bold; padding: 4px; font-size: 11px;");
+
     const container = document.getElementById('modalMatchSummaryTabContent');
-    if (!container) return;
-
-    // १. चालू सामन्याचे लाईव्ह आकडे ओढणे
-    let sA = Number(document.getElementById('modalTeamAScore')?.innerText) || Number(document.getElementById('scoreA')?.innerText) || 0;
-    let sB = Number(document.getElementById('modalTeamBScore')?.innerText) || Number(document.getElementById('scoreB')?.innerText) || 0;
-    let tA = document.getElementById('modalTeamAName')?.innerText || "TEAM A";
-    let tB = document.getElementById('modalTeamBName')?.innerText || "TEAM B";
-
-    // २. विनर लॉजिक आणि बॅनर कलर्स निश्चित करणे
-    let winText = "MATCH IN PROGRESS";
-    let subWinText = "सामना अद्याप सुरू आहे";
-    let badgeColor = "from-orange-600 to-amber-600 text-white shadow-orange-900/30";
-    
-    if (sA > sB) { 
-        winText = `${tA.toUpperCase()}`; 
-        subWinText = `won by ${sA - sB} points 👑`;
-        badgeColor = "from-green-600 to-emerald-600 text-white shadow-green-900/30";
-    } else if (sB > sA) { 
-        winText = `${tB.toUpperCase()}`; 
-        subWinText = `won by ${sB - sA} points 👑`;
-        badgeColor = "from-green-600 to-emerald-600 text-white shadow-green-900/30";
-    } else if (sA === sB && sA > 0) { 
-        winText = "MATCH TIED 🤝"; 
-        subWinText = "दोन्ही संघ बरोबरीत सुटले";
-        badgeColor = "from-blue-600 to-indigo-600 text-white shadow-blue-900/30";
+    if (!container) {
+        console.error("🚨 [DOM CRITICAL ERROR]: 'modalMatchSummaryTabContent' कंटेनर DOM मध्ये सापडला नाही!");
+        return;
     }
 
-    // ३. डेटा विश्लेषण करून दोन्ही संघांचे टॉप रेडर्स आणि डिफेंडर्स शोधणे
-    let raiders = { A: [], B: [] };
-    let defenders = { A: [], B: [] };
+    // 🚨 [💥 THE EXACT BUG RECOVERY]: आयडी पूर्ण रिकामे येऊ नयेत म्हणून ३ लेव्हलचा कडक बॅकअप!
+    let mId = window.matchSetupData?.mId || window.currentMatchData?.mId || "";
+    let tId = window.matchSetupData?.tId || window.currentMatchData?.tId || "";
 
+    // जर अजूनही आयडी रिकामे असतील, तर स्कोरिंग चालू असलेल्या 'squad_editing_match' मधून ओढणे
+    if (!mId || !tId) {
+        const savedMatchRaw = localStorage.getItem('squad_editing_match');
+        if (savedMatchRaw) {
+            const parsed = JSON.parse(savedMatchRaw);
+            tId = tId || parsed.tId || "";
+            mId = mId || parsed.mId || "";
+            console.log("📦 [OVERVIEW ID RECOVERY]: window मेमरी रिकामी होती, म्हणून Storage मधून आयडी शोधले!");
+        }
+    }
+
+    const combinedKey = `${tId}_${mId}`;
+    console.log("%c🔍 [CORE CONFIG CHECKS]:", "color: #38bdf8; font-weight: bold;");
+    console.log(`👉 Match ID: "${mId}" | Tournament ID: "${tId}" | Key: "${combinedKey}"`);
+
+    let currentMatchStatus = "Live";
+    let matchRawData = window.currentMatchData || {};
+
+    // जर आयडी परफेक्ट मिळाले असतील, तरच आता स्टेटस फेचिंग १००% अचूक काम करेल!
+    if (mId && mId !== "") {
+        if (typeof homeLiveMatchesStorage !== 'undefined' && homeLiveMatchesStorage[combinedKey]) {
+            currentMatchStatus = homeLiveMatchesStorage[combinedKey].status || "Live";
+            matchRawData = homeLiveMatchesStorage[combinedKey];
+            console.log("%c✅ [DATA SOURCE]: homeLiveMatchesStorage मधून डेटा यशस्वीरीत्या ओढला!", "color: #22c55e; font-weight: bold;");
+        } else {
+            const localSavedStatus = localStorage.getItem(`match_status_${mId}`);
+            if (localSavedStatus) {
+                currentMatchStatus = localSavedStatus;
+                console.log(`✅ [DATA SOURCE]: LocalStorage कडून स्टेटस मिळाला ➔ "${localSavedStatus}"`);
+            }
+        }
+    }
+
+    // जर डेटाबेसमधून थेट स्टेटस 'Finished' मिळाला असेल (window.currentMatchData च्या आत)
+    if (window.currentMatchData?.status && (!mId || currentMatchStatus === "Live")) {
+        currentMatchStatus = window.currentMatchData.status;
+        console.log(`✅ [DATA SOURCE]: window.currentMatchData वरून थेट स्टेटस ओढला ➔ "${currentMatchStatus}"`);
+    }
+
+    const cleanStatus = currentMatchStatus.trim().toLowerCase();
+    console.log(`📋 [RESOLVED RAW STATUS] ➔ DB Status: "${currentMatchStatus}" | Cleaned Status: "${cleanStatus}"`);
+
+
+    // =========================================================================
+    // 📂 SECTION 2: OBJECT SCORECARD PARSING & DEEP AUDIT 📊
+    // =========================================================================
+    let localCard = localStorage.getItem('global_score_card');
+    let currentScoreCard = matchRawData.scoreCard || (localCard ? JSON.parse(localCard) : {
+        mainMatch:  { teamA: 0, teamB: 0 },
+        fiveRaid:   { teamA: 0, teamB: 0 },
+        goldenRaid: { teamA: 0, teamB: 0 }
+    });
+
+    console.log("%c📊 [SCORECARD OBJECT SNAPSHOT]:", "color: #a855f7; font-weight: bold;");
+    console.log("   👉 Main Match Score ➔", currentScoreCard.mainMatch);
+    console.log("   👉 5-5 Raids Score  ➔", currentScoreCard.fiveRaid);
+    console.log("   👉 Golden Raid Score➔", currentScoreCard.goldenRaid);
+
+    // 🎯 [ARCHITECTURAL RULE]: ओव्हरव्ह्यूच्या मुख्य स्कोअर डब्यांवर नेहमी 'mainMatch' चाच मूळ स्कोअर दाखवणे
+    let sA = Number(currentScoreCard?.mainMatch?.teamA ?? 0);
+    let sB = Number(currentScoreCard?.mainMatch?.teamB ?? 0);
+
+    const domNameA = document.getElementById('modalTeamAName')?.innerText;
+    const domNameB = document.getElementById('modalTeamBName')?.innerText;
+    let tA = matchRawData.teamA || domNameA || "TEAM A";
+    let tB = matchRawData.teamB || domNameB || "TEAM B";
+
+    let dbWinner = matchRawData.winner || window.currentMatchData?.winner || localStorage.getItem(`${tId}_${mId}_winner`) || "";
+    console.log(`🏆 [WINNER RECOVERY CHECK]: सिस्टीमला सापडलेला विजेतासंघ ➔ "${dbWinner}"`);
+
+
+    // =========================================================================
+    // 📂 SECTION 3: WINNER LOGIC & DYNAMIC BANNER GENERATOR 🏆
+    // =========================================================================
+    let winText = "MATCH IN PROGRESS";
+    let subWinText = "सामना अद्याप सुरू आहे, रोमांचक वळणावर... 🔥";
+    let badgeColor = "from-orange-600 to-amber-600 text-white shadow-orange-900/30";
+    
+    if (cleanStatus === "completed" || cleanStatus === "finished") {
+        badgeColor = "from-green-600 to-emerald-600 text-white shadow-green-900/30";
+        console.log("%c🏁 [STATUS MATCHED Finished]: सामना संपलेला आहे. निकाल काढत आहे...", "color: #10b981; font-weight: bold;");
+        
+        if (dbWinner && dbWinner !== "Tie" && dbWinner !== "Tied") {
+            winText = `🏆 WINNER: ${dbWinner.toUpperCase()} 🥇`;
+            
+            // ५-५ किंवा गोल्डन रेडनुसार पोट-मेसेज (Subtitle) ठरवणे
+            let fA_check = Number(currentScoreCard?.fiveRaid?.teamA || 0);
+            let fB_check = Number(currentScoreCard?.fiveRaid?.teamB || 0);
+            let gA_check = Number(currentScoreCard?.goldenRaid?.teamA || 0);
+            let gB_check = Number(currentScoreCard?.goldenRaid?.teamB || 0);
+
+            if (gA_check > 0 || gB_check > 0) {
+                subWinText = `Won in Golden Raid Sudden Death! 👑`;
+            } else if (fA_check > 0 || fB_check > 0) {
+                subWinText = `Won in 5-5 Tie-Breaker Raids! 👑 [${fA_check}-${fB_check}]`;
+            } else {
+                subWinText = `Main Match Full-Time Victory by ${Math.abs(sA - sB)} points! 👑`;
+            }
+        } else {
+            // जर मेमरीत विनर नसेल तर गणितावरून काढणे
+            if (sA > sB) { 
+                winText = `🏆 WINNER: ${tA.toUpperCase()} 🥇`; 
+                subWinText = `Won by ${sA - sB} points in Main Match! 👑`;
+            } else if (sB > sA) { 
+                winText = `🏆 WINNER: ${tB.toUpperCase()} 🥇`; 
+                subWinText = `Won by ${sB - sA} points in Main Match! 👑`;
+            } else { 
+                winText = "🤝 MATCH TIED / सामना बरोबरीत"; 
+                subWinText = "दोन्ही संघ महासंग्रामात बरोबरीत सुटले";
+                badgeColor = "from-blue-600 to-indigo-600 text-white shadow-blue-900/30";
+            }
+        }
+    } else {
+        if (cleanStatus === "five_raid") {
+            winText = "⚔️ 5-5 RAIDS IN PROGRESS";
+            subWinText = `महासंग्राम: ५-५ टायब्रेकर फेरी सुरू आहे 🏃‍♂️`;
+            badgeColor = "from-orange-500 to-red-600 animate-pulse";
+        } else if (cleanStatus === "golden_raid") {
+            winText = "⚡ GOLDEN RAID ACTIVE";
+            subWinText = "सुवर्ण थरार: निकाल फक्त पुढील १ रेडवर! 👑";
+            badgeColor = "from-amber-500 to-yellow-600 shadow-[0_0_15px_rgba(234,179,8,0.3)] animate-pulse";
+        }
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 4: EXTRA BREAKDOWN SCORE SUB-PANELS ⚡ (🎯 THE TARGET REQ)
+    // =========================================================================
+    let extraScoresHtml = "";
+    let fA = Number(currentScoreCard?.fiveRaid?.teamA ?? 0);
+    let fB = Number(currentScoreCard?.fiveRaid?.teamB ?? 0);
+    let gA = Number(currentScoreCard?.goldenRaid?.teamA ?? 0);
+    let gB = Number(currentScoreCard?.goldenRaid?.teamB ?? 0);
+
+    // अ. ५-५ चा स्कोअर असल्यास त्याचा स्वतंत्र डबा उभा करणे
+    if (fA > 0 || fB > 0 || cleanStatus === "five_raid") {
+        console.log(`🔥 [OVERVIEW INJECTION]: 5-5 स्कोअर [${fA}-${fB}] रेंडर केला.`);
+        extraScoresHtml += `
+            <div class="mt-2.5 text-[10px] bg-gradient-to-r from-orange-950/80 to-slate-900/90 border border-orange-500/30 px-3 py-2 rounded-xl font-black uppercase tracking-wider flex justify-between items-center w-full shadow-inner animate-fade-in">
+                <span class="flex items-center gap-1"><span class="text-orange-500">⚡</span> 5-5 Raids Score:</span>
+                <span class="font-mono text-xs text-orange-400 bg-orange-950/40 px-2.5 py-0.5 rounded-md border border-orange-500/10">${fA} - ${fB}</span>
+            </div>`;
+    }
+
+    // ब. गोल्डन रेडचा स्कोअर असल्यास त्याचा स्वतंत्र प्रीमियम डबा उभा करणे
+    if (gA > 0 || gB > 0 || cleanStatus === "golden_raid") {
+        console.log(`🪙 [OVERVIEW INJECTION]: Golden Raid स्कोअर [${gA}-${gB}] रेंडर केला.`);
+        extraScoresHtml += `
+            <div class="mt-1.5 text-[10px] bg-gradient-to-r from-yellow-950/80 to-slate-900/90 border border-yellow-500/30 px-3 py-2 rounded-xl font-black uppercase tracking-wider flex justify-between items-center w-full shadow-inner animate-fade-in">
+                <span class="flex items-center gap-1"><span class="text-yellow-500">👑</span> Golden Raid Score:</span>
+                <span class="font-mono text-xs text-yellow-400 bg-yellow-950/40 px-2.5 py-0.5 rounded-md border border-yellow-500/10">${gA} - ${gB}</span>
+            </div>`;
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 5: PERFORMANCE METRICS & STATISTICS (SAFE MODE)
+    // =========================================================================
+    let raiders = { A: [], B: [] }, defenders = { A: [], B: [] };
     function getTeamOfPlayer(fullName, defaultTeam) {
         let nameUpper = fullName.toUpperCase();
         if (nameUpper.includes("[A]") || nameUpper.includes("(A)")) return 'A';
         if (nameUpper.includes("[B]") || nameUpper.includes("(B)")) return 'B';
-        let j = fullName.match(/\d+/);
-        if (j) return (parseInt(j[0]) >= 21) ? 'B' : 'A';
         return defaultTeam;
     }
 
     if (window.activeRaidsList && window.activeRaidsList.length > 0) {
         let rScores = {}; let dScores = {};
-
-        window.activeRaidsList.forEach(raid => {
+        window.activeRaidsList.forEach((raid) => {
             const res = raid.result ? raid.result.toUpperCase() : "";
             const pts = Number(raid.points) || 0;
-            let rTeam = getTeamOfPlayer(raid.raiderName, raid.team);
+            let rTeam = getTeamOfPlayer(raid.raiderName || "", raid.team);
             let dTeam = (rTeam === 'A') ? 'B' : 'A';
-            let name = raid.raiderName.replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
-            let no = raid.raiderName.match(/\d+/) ? `#${raid.raiderName.match(/\d+/)[0]}` : "";
+            let name = (raid.raiderName || "Raider").replace(/#\d+\s+/, '').split('[')[0].split('(')[0].trim();
+            let no = (raid.raiderName || "").match(/\d+/) ? `#${(raid.raiderName || "").match(/\d+/)[0]}` : "";
 
             if (name !== "OFFICIALS" && !res.includes("ALL OUT") && !res.includes("TECHNICAL")) {
                 if (!rScores[name]) rScores[name] = { score: 0, no: no, team: rTeam };
                 if (res === "TOUCH POINT" || res === "TOUCH" || res === "BONUS + TOUCH") rScores[name].score += pts;
                 else if (res.includes("BONUS")) rScores[name].score += 1;
             }
-
             if (raid.details && (res.includes("TACKLE") || res.includes("SUPER TACKLE"))) {
                 let defPart = raid.details.split(/caught by/i)[1];
                 if (defPart) {
@@ -10886,34 +11153,39 @@ function renderMatchSummaryOverview() {
                 }
             }
         });
-
-        // सॉर्टिंग
         let sortedR = Object.keys(rScores).map(n => ({ name: n, ...rScores[n] })).sort((a,b) => b.score - a.score);
         let sortedD = Object.keys(dScores).map(n => ({ name: n, ...dScores[n] })).sort((a,b) => b.score - a.score);
-
         raiders.A = sortedR.filter(r => r.team === 'A').slice(0, 1);
         raiders.B = sortedR.filter(r => r.team === 'B').slice(0, 1);
         defenders.A = sortedD.filter(d => d.team === 'A').slice(0, 1);
         defenders.B = sortedD.filter(d => d.team === 'B').slice(0, 1);
     }
 
-    // मदतनीस: जर परफॉर्मर नसेल तर ब्लँक कार्ड मॅनेजमेंट
     let heroRA = raiders.A[0] ? `${raiders.A[0].name} (${raiders.A[0].score} Pts)` : "No Data";
     let heroRB = raiders.B[0] ? `${raiders.B[0].name} (${raiders.B[0].score} Pts)` : "No Data";
     let heroDA = defenders.A[0] ? `${defenders.A[0].name} (${defenders.A[0].score} Tk)` : "No Data";
     let heroDB = defenders.B[0] ? `${defenders.B[0].name} (${defenders.B[0].score} Tk)` : "No Data";
 
-    // 🎨 ४. ब्रँड न्यू क्रिकहिरोज स्टाईल प्रिमियम HTML लेआउट जनरेशन
+
+    // =========================================================================
+    // 📂 SECTION 6: PURE HIGH-END DOM LAYOUT RENDERING 🚀
+    // =========================================================================
+    console.log(`✍️ [DOM INJECTION SUCCESS]: HTML जनरेट करून कप्प्यात ढकलले. रेंडर होणारे स्कोअर ➔ A: ${sA} vs B: ${sB}`);
+
     container.innerHTML = `
         <div class="w-full space-y-4 font-sans text-gray-200 antialiased anim-fade-in animate-duration-300">
             
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden backdrop-blur-sm">
                 <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
                 
-                <p class="text-[9px] font-black tracking-widest text-yellow-500/80 uppercase mb-2">✨ MATCH RESULT ✨</p>
+                <p class="text-[9px] font-black tracking-widest text-yellow-500/80 uppercase mb-2">🏆 MATCH SUMMARY REPORT 🏆</p>
                 <div class="bg-gradient-to-br ${badgeColor} px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-tight shadow-lg min-w-[220px]">
-                    <div class="text-[13px] leading-tight truncate max-w-[240px] mx-auto">${winText}</div>
-                    <div class="text-[10px] text-white/90 font-medium tracking-normal lowercase mt-0.5">${subWinText}</div>
+                    <div class="text-[12px] leading-tight font-black">${winText}</div>
+                    <div class="text-[9px] text-white/90 font-medium tracking-normal mt-0.5">${subWinText}</div>
+                </div>
+                
+                <div class="w-full max-w-[260px]">
+                    ${extraScoresHtml}
                 </div>
                 
                 <div class="mt-3 text-[10px] text-slate-500 font-bold tracking-tight">
@@ -10929,7 +11201,7 @@ function renderMatchSummaryOverview() {
                     </div>
                     <div class="py-4 text-left">
                         <span class="text-4xl font-black text-white font-mono tracking-tighter">${sA}</span>
-                        <span class="text-[10px] font-black text-slate-500 tracking-wider block mt-1">TOTAL POINTS</span>
+                        <span class="text-[10px] font-black text-slate-500 tracking-wider block mt-1">MAIN MATCH POINTS</span>
                     </div>
                 </div>
 
@@ -10940,7 +11212,7 @@ function renderMatchSummaryOverview() {
                     </div>
                     <div class="py-4 text-right">
                         <span class="text-4xl font-black text-white font-mono tracking-tighter">${sB}</span>
-                        <span class="text-[10px] font-black text-slate-500 tracking-wider block mt-1">TOTAL POINTS</span>
+                        <span class="text-[10px] font-black text-slate-500 tracking-wider block mt-1">MAIN MATCH POINTS</span>
                     </div>
                 </div>
             </div>
@@ -10949,29 +11221,26 @@ function renderMatchSummaryOverview() {
                 <p class="text-[10px] font-black tracking-wider text-slate-400 uppercase border-b border-slate-850 pb-2 flex items-center gap-1.5">
                     <i class="fa-solid fa-trophy text-yellow-500"></i> Match Top Performers
                 </p>
-                
                 <div class="grid grid-cols-2 gap-4 text-[11px] relative">
                     <div class="absolute inset-y-0 left-1/2 w-[1px] bg-slate-850/80 -translate-x-1/2"></div>
-                    
                     <div class="space-y-3 pr-1">
                         <div>
-                            <span class="text-[9px] font-bold text-green-400 block uppercase mb-1"><i class="fa-solid fa-bolt mr-1"></i> Top Raider</span>
-                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroRA}</span>
+                            <span class="text-[9px] font-bold text-green-400 block uppercase mb-1">⚡ Top Raider</span>
+                            <span class="font-black text-white uppercase tracking-tight block leading-tight">${heroRA}</span>
                         </div>
                         <div class="pt-1.5">
-                            <span class="text-[9px] font-bold text-orange-400 block uppercase mb-1"><i class="fa-solid fa-shield mr-1"></i> Top Defender</span>
-                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroDA}</span>
+                            <span class="text-[9px] font-bold text-orange-400 block uppercase mb-1">🛡️ Top Defender</span>
+                            <span class="font-black text-white uppercase tracking-tight block leading-tight">${heroDA}</span>
                         </div>
                     </div>
-
                     <div class="space-y-3 pl-3 text-right">
                         <div>
-                            <span class="text-[9px] font-bold text-blue-400 block uppercase mb-1">Top Raider <i class="fa-solid fa-bolt ml-1"></i></span>
-                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroRB}</span>
+                            <span class="text-[9px] font-bold text-blue-400 block uppercase mb-1">Top Raider ⚡</span>
+                            <span class="font-black text-white uppercase tracking-tight block leading-tight">${heroRB}</span>
                         </div>
                         <div class="pt-1.5">
-                            <span class="text-[9px] font-bold text-orange-400 block uppercase mb-1">Top Defender <i class="fa-solid fa-shield ml-1"></i></span>
-                            <span class="font-black text-white uppercase tracking-tight block truncate whitespace-normal leading-tight">${heroDB}</span>
+                            <span class="text-[9px] font-bold text-orange-400 block uppercase mb-1">Top Defender 🛡️</span>
+                            <span class="font-black text-white uppercase tracking-tight block leading-tight">${heroDB}</span>
                         </div>
                     </div>
                 </div>
@@ -10985,6 +11254,2531 @@ function renderMatchSummaryOverview() {
                     <i class="fa-brands fa-whatsapp text-xs text-green-400"></i> WHATSAPP SHARE
                 </button>
             </div>
-
         </div>`;
+
+    console.log("%c✅ [STEP 3 COMPLETE]: renderMatchSummaryOverview() रेंडरिंग संपले. सर्व स्कोअर्स ऑन स्क्रीन!", "background: #10b981; color: #fff; font-weight: bold; padding: 2px;");
+    console.log("%c====================================================================", "color: #10b981; font-weight: bold;");
+}
+
+
+///
+// 🏠 १. होम पेजवर फक्त चालू सामने दाखवणारे मुख्य फंक्शन (Viewer View)
+// 🏠 १. लाईव्ह मॅच कार्ड्सचे प्रिमियम स्माल डिझाईन (Horizontal Scroll View)
+
+// 🧠 होम पेज मेमरी: सॉकेटवरून आलेला ताजा डेटा इथे साठवला जाईल
+let homeLiveMatchesStorage = {};
+
+
+
+/**
+ * सुधारित renderLiveMatchesForViewers फंक्शन
+तुझा मूळचा सुंदर ब्लिंक इफेक्ट (live-blink), टुरिस्ट टॅग क्लीनर, 
+कन्सोल लॉग्स आणि हॉरिझॉन्टल स्नॅप लेआउट (snap-center) १ टक्काही न बदलता हा मास्टर अपडेटेड कोड बघून घे भावा:
+ * *** */
+
+async function renderLiveMatchesForViewers() {
+    const container = document.getElementById('liveScoreCardContainer');
+    if (!container) return;
+
+    // १. टूर्नामेंट्स नेहमीप्रमाणे लोड ठेवणे
+    renderDynamicTournaments();
+
+    if (typeof socket !== 'undefined' && socket) {
+        
+        socket.off("live_matches_update");
+        socket.on("live_matches_update", (liveMatchesArray) => {
+            
+            console.log("%c============== 📥 [SOCKET DATA ARRIVED] ==============", "background: #22c55e; color: #fff; font-weight: bold; padding: 2px;");
+            console.log("📝 सर्व्हरकडून आलेला मूळ अरे (liveMatchesArray):", liveMatchesArray);
+
+            if (!liveMatchesArray || liveMatchesArray.length === 0) {
+                container.innerHTML = `
+                    <div class="w-full bg-zinc-950 border border-zinc-900 rounded-2xl p-6 text-center text-zinc-600 italic text-xs font-bold snap-center">
+                        <i class="fa-solid fa-circle-nodes text-zinc-800 text-lg block mb-1 animate-pulse"></i>
+                        सध्या मैदानावर कोणताही सामना सुरू नाही.
+                    </div>`;
+                return;
+            }
+
+            let htmlContent = "";
+
+            // 🎯 [💥 THE ABSOLUTE SCOPE FIX]: जर वरचा let कप्पा चुकून रिकामी झाला असेल तर री-इश्यू करणे (No Window स्कोप)
+            if (typeof homeLiveMatchesStorage === 'undefined' || !homeLiveMatchesStorage) {
+                homeLiveMatchesStorage = {};
+            }
+
+            liveMatchesArray.forEach((match, index) => {
+                try {
+                    const finalMatchId = match.matchId || match.mId;
+                    const finalTourId = match.tournamentId || match.tId;
+
+                    if (!finalMatchId) {
+                        console.warn(`⚠️ Loop Index ${index} वर मॅच आयडी मिळाला नाही, म्हणून हा लूप पुढे सरकवला.`);
+                        return;
+                    }
+
+                    const matchKey = `${finalTourId}_${finalMatchId}`;
+
+                    // 🎯 [THE EXACT LINE CORRECTION]: 'window.' पूर्णपणे हटवला. आता थेट तुझ्या 'let' कप्प्यात डेटा लॉक होईल!
+                    homeLiveMatchesStorage[matchKey] = match;
+                    
+                    console.log(`✅ [DATA LOCKED]: Key "${matchKey}" वर डेटा यशस्वी साठवला!`);
+
+                    let dbStatus = match.status ? match.status.trim() : "Live";
+                    
+                    if (dbStatus === "Finished") {
+                        return;
+                    }
+
+                    const card = match.scoreCard || {
+                        mainMatch:  { teamA: Number(match.scoreA || 0), teamB: Number(match.scoreB || 0) },
+                        fiveRaid:   { teamA: 0, teamB: 0 },
+                        goldenRaid: { teamA: 0, teamB: 0 }
+                    };
+
+                    let displayScoreA = card.mainMatch.teamA;
+                    let displayScoreB = card.mainMatch.teamB;
+
+                    let statusBadge = "LIVE";
+                    let badgeStyle = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+
+                    if (dbStatus === "1st_Half_End" || dbStatus === "1st_half_end") {
+                        statusBadge = "HALF TIME";
+                        badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+                    }
+
+                    if (dbStatus === "five_raid") { 
+                        statusBadge = "5-5 RAIDS"; 
+                        badgeStyle = "bg-yellow-500/20 text-yellow-400 border-yellow-500/40 animate-pulse"; 
+                        displayScoreA = card.fiveRaid.teamA; 
+                        displayScoreB = card.fiveRaid.teamB;
+                    }
+                    
+                    if (dbStatus === "golden_raid") { 
+                        statusBadge = "GOLDEN RAID"; 
+                        badgeStyle = "bg-red-600/20 text-red-400 border-red-500/40 font-black animate-bounce"; 
+                        displayScoreA = card.goldenRaid.teamA; 
+                        displayScoreB = card.goldenRaid.teamB;
+                    }
+
+                    let latestRaidText = "सामना सुरू होत आहे...";
+                    if (match.lastRaid && match.lastRaid.raiderName) {
+                        latestRaidText = `लास्ट रेड: ${match.lastRaid.raiderName} ➔ ${match.lastRaid.result}`;
+                    }
+
+                    let cleanTourName = finalTourId;
+                    if (finalTourId.includes("JBSS")) cleanTourName = "JBSS B GROUP";
+                    if (finalTourId.includes("SMF")) cleanTourName = "SMF B GROUP";
+
+                    htmlContent += `
+                        <div onclick="openMatchCentreFromHome('${finalTourId}', '${finalMatchId}')" class="min-w-[260px] max-w-[260px] bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-900/80 rounded-2xl p-3.5 shadow-2xl space-y-3 shrink-0 snap-center active:scale-[0.97] transition-all duration-150 cursor-pointer relative overflow-hidden">
+                            <div class="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-orange-500/40 to-transparent"></div>
+                            
+                            <div class="border-b border-zinc-900/60 pb-2 space-y-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[9px] font-black text-orange-500 uppercase tracking-wider truncate max-w-[140px]">
+                                        <i class="fa-solid fa-trophy text-[8px] mr-0.5"></i> ${cleanTourName}
+                                    </span>
+                                    <span class="text-[7px] font-black ${badgeStyle} border px-1 py-0.5 rounded flex items-center gap-1 font-mono uppercase tracking-tighter">
+                                        <span class="w-1 h-1 rounded-full bg-orange-500 live-blink"></span> ${statusBadge}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center text-[8px] font-bold text-zinc-500 uppercase tracking-tight">
+                                    <span>${match.round || 'Group Match'}</span>
+                                    <span class="font-mono bg-zinc-900 px-1 py-0.2 rounded border border-zinc-800 text-zinc-400">ID: ${finalMatchId}</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 py-0.5">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-2 truncate">
+                                        <span class="w-2 h-2 rounded-full bg-orange-500 shrink-0 shadow-[0_0_6px_#f97316]"></span>
+                                        <span class="text-xs font-black text-white uppercase tracking-tight truncate max-w-[160px]">${match.teamA}</span>
+                                    </div>
+                                    <span class="text-xl font-black text-white font-mono tracking-tighter">${displayScoreA}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-2 truncate">
+                                        <span class="w-2 h-2 rounded-full bg-zinc-800 shrink-0"></span>
+                                        <span class="text-xs font-black text-white uppercase tracking-tight truncate max-w-[160px]">${match.teamB}</span>
+                                    </div>
+                                    <span class="text-xl font-black text-white font-mono tracking-tighter">${displayScoreB}</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/50 px-2 py-1.5 rounded-lg text-[8px] font-bold text-zinc-400 truncate border border-zinc-900/50 flex items-center gap-1.5">
+                                <i class="fa-solid fa-clock-rotate-left text-orange-500 text-[9px]"></i> 
+                                <span class="truncate text-zinc-300">${latestRaidText}</span>
+                            </div>
+                        </div>`;
+                } catch (e) { 
+                    console.error("%c🚨 [Loop Inside Crash Caught]: लूपच्या आत या मॅच इंडेक्सवर राडा झाला:", "background: #f00; color: #fff; font-weight: bold;", e); 
+                }
+            });
+
+            if (htmlContent === "") {
+                container.innerHTML = `
+                    <div class="w-full bg-zinc-950 border border-zinc-900 rounded-2xl p-6 text-center text-zinc-600 italic text-xs font-bold snap-center">
+                        <i class="fa-solid fa-circle-nodes text-zinc-800 text-lg block mb-1 animate-pulse"></i>
+                        सध्या मैदानावर कोणताही सामना सुरू नाही.
+                    </div>`;
+            } else {
+                container.innerHTML = htmlContent;
+            }
+            
+            console.log("%c=======================================================", "color: #22c55e; font-weight: bold;");
+        });
+
+        socket.emit("request_all_active_matches");
+    }
+}
+
+/******** */
+
+// =================================================================
+// 🎯 [VIEWER MATCH CENTRE]: प्रेक्षकांसाठी मॅच सेंटर मॉडेल उघडणे आणि भरणे
+// =================================================================
+/**
+ * 
+दुसरी गोष्ट म्हणजे, जर सामना ५-५ किंवा सुवर्ण रेडच्या थरारावर सुरू असेल, तर या मॅच सेंटरच्या मुख्य बोर्डवर चालू असलेल्या मोडचा ताजा आणि अचूक स्कोअर (Main Match / Five Raid / Golden Raid) दिसला पाहिजे!
+🛠️ सुधारित openViewerMatchCentre फंक्शन
+तुझा मूळचा activeRaidsList चा सिंक फ्लो, टाईमलाईन कार्ड्स बनवण्याचं लॉजिक, 
+बेस कलर्स आणि शेवटी ॲनालिटिक्स इंजिन रेंडर करणारे सर्व फंक्शन्स (calculateTopStats, buildMatchSummaryTab) १ टक्काही न विस्कटता हा अपडेटेड कोड बघून घे भावा:
+ */
+function openViewerMatchCentre(combinedKey) {
+    console.log("%c============== 🔍 [FRONTEND DEEP DIAGNOSTIC START] ==============", "background: #f59e0b; color: #000; font-weight: bold; font-size: 13px; p-1");
+    console.log(`👉 Requested Combined Key: "${combinedKey}"`);
+
+    const match = homeLiveMatchesStorage[combinedKey];
+    if (!match) {
+        console.error("🚨 [FATAL ERROR]: homeLiveMatchesStorage मध्ये या की चा सामना सापडला नाही!");
+        console.log("📂 उपलब्ध सर्व कीज:", Object.keys(homeLiveMatchesStorage));
+        console.log("%c====================================================================", "background: #f59e0b; color: #000; font-weight: bold;");
+        return;
+    }
+
+    console.log("📦 [RAW DATA FETCHED FROM SOCKET]: सर्व्हरकडून आलेला हुकमी डेटा ➔", match);
+
+    const modal = document.getElementById('summaryModal');
+    if (!modal) {
+        console.error("🚨 [DOM CRITICAL ERROR]: 'summaryModal' नावाचा मुख्य मोडलच संपूर्ण HTML मध्ये सापडला नाही! आयडी नीट तपासा.");
+        return;
+    }
+
+    // =============================================================
+    // 🎯 🚀 मेमरी लॉकिंग आणि बॅकअप सिंक
+    // =============================================================
+    window.activeRaidsList = match.timeline || match.raidHistory || [];
+    window.matchSetupData = {
+        tId: match.tournamentId || match.tId || "",
+        mId: match.matchId || match.mId || "",
+        tAName: match.teamA || "TEAM A",
+        tBName: match.teamB || "TEAM B",
+        roundName: match.round || "League Match"
+    };
+    window.currentMatchData = match;
+
+    // 🎯 [MASTER SCORECARD RESOLUTION]
+    const card = match.scoreCard || {
+        mainMatch:  { teamA: Number(match.scoreA || 0), teamB: Number(match.scoreB || 0) },
+        fiveRaid:   { teamA: 0, teamB: 0 },
+        goldenRaid: { teamA: 0, teamB: 0 }
+    };
+
+    let dbStatus = match.status ? match.status.trim() : "Live";
+    let popupScoreA = card.mainMatch.teamA;
+    let popupScoreB = card.mainMatch.teamB;
+
+    if (dbStatus === "five_raid") {
+        popupScoreA = card.fiveRaid.teamA;
+        popupScoreB = card.fiveRaid.teamB;
+    } else if (dbStatus === "golden_raid") {
+        popupScoreA = card.goldenRaid.teamA;
+        popupScoreB = card.goldenRaid.teamB;
+    }
+
+    console.log(`💡 [EXTRACTED SCORES]: Mode: ${dbStatus} | Team A: ${popupScoreA} | Team B: ${popupScoreB}`);
+
+    // मोडल स्क्रीनवर दाखवणे
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    console.log("🔓 [MODAL DISPLAY]: 'summaryModal' चे 'hidden' क्लास हटवून 'flex' केले गेले.");
+
+    // ⏳ [THE CRITICAL RENDERING DELAY]: १०० मिलीसेकंदाचा विसावा
+    setTimeout(() => {
+        console.log("%c⚡ [100ms DELAY COMPLETED ➔ VERIFYING DOM ELEMENTS]", "color: #10b981; font-weight: bold;");
+
+        // 🛠️ [💥 THE ULTIMATE LIVE DETECTOR LOGS]: प्रत्येक एलिमेंट फ्रंटएंडवर जिवंत आहे की नाही ते तपासणे!
+        const elNameA = document.getElementById('modalTeamAName');
+        const elNameB = document.getElementById('modalTeamBName');
+        const elScoreA = document.getElementById('modalTeamAScore');
+        const elScoreB = document.getElementById('modalTeamBScore');
+
+        console.log("%c📋 [DOM ELEMENTS LIVE STATUS]:", "color: #3b82f6; font-weight: bold;", {
+            "modalTeamAName (Team A नाव कप्पा)": elNameA ? `✅ FOUND (सध्या मजकूर: "${elNameA.innerText}")` : "❌ NOT FOUND",
+            "modalTeamBName (Team B नाव कप्पा)": elNameB ? `✅ FOUND (सध्या मजकूर: "${elNameB.innerText}")` : "❌ NOT FOUND",
+            "modalTeamAScore (Team A स्कोअर कप्पा)": elScoreA ? `✅ FOUND (सध्या मजकूर: "${elScoreA.innerText}")` : "❌ NOT FOUND",
+            "modalTeamBScore (Team B स्कोअर कप्पा)": elScoreB ? `✅ FOUND (सध्या मजकूर: "${elScoreB.innerText}")` : "❌ NOT FOUND"
+        });
+
+        // प्रत्यक्ष स्क्रीनवर डेटा पुश करण्याचा प्रयत्न
+        if (elNameA) elNameA.innerText = match.teamA;
+        if (elNameB) elNameB.innerText = match.teamB;
+        
+        if (elScoreA) {
+            console.log(`✍️ Injecting Team A Score: ${popupScoreA} into elScoreA`);
+            elScoreA.innerText = popupScoreA;
+        }
+        if (elScoreB) {
+            console.log(`✍️ Injecting Team B Score: ${popupScoreB} into elScoreB`);
+            elScoreB.innerText = popupScoreB;
+        }
+
+        // २. [TAB 1: MATCH TIMELINE RENDER]
+        const listContainer = document.getElementById('modalRaidList');
+        console.log(`📋 modalRaidList (टाईमलाईन कंटेनर) स्टेटस:`, listContainer ? "✅ FOUND" : "❌ NOT FOUND");
+        
+        if (listContainer) {
+            listContainer.innerHTML = "";
+            const raids = window.activeRaidsList;
+            
+            if (raids.length === 0) {
+                listContainer.innerHTML = `<p class="text-center text-gray-600 mt-10 italic">अजून एकही領 रेड झालेली नाही!</p>`;
+            } else {
+                [...raids].reverse().forEach((r, rIdx) => {
+                    try {
+                        const cardElement = document.createElement('div');
+                        const isTeamA = (r.team === 'A' || String(r.raiderName).includes('[A]'));
+                        const borderColor = isTeamA ? 'border-l-[3px] border-l-emerald-500' : 'border-l-[3px] border-l-blue-500';
+                        
+                        const points = r.points !== undefined ? Number(r.points) : 0;
+                        const pointsText = points > 0 ? `+${points}` : `${points}`;
+                        const badgeColor = isTeamA 
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+
+                        let subDetailsText = r.details || r.detail || "";
+                        let mainAction = r.result ? r.result.toUpperCase() : "RAID COMPLETE";
+
+                        let subDetailsHtml = "";
+                        if (subDetailsText) {
+                            subDetailsHtml = `<p class="text-[10px] text-zinc-400 font-bold flex items-center gap-1 mt-0.5"><span class="text-orange-500">🚨</span> ${subDetailsText}</p>`;
+                        } else if (mainAction.includes("OUT") || mainAction.includes("CAUGHT")) {
+                            subDetailsHtml = `<p class="text-[10px] text-zinc-500 font-bold flex items-center gap-1 mt-0.5"><span class="text-orange-500">🚨</span> ${r.result}</p>`;
+                        }
+
+                        cardElement.className = `bg-[#131b2e] border border-zinc-900/60 rounded-xl p-3.5 shadow-lg flex flex-col space-y-1 ${borderColor} mb-2`;
+                        cardElement.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-7 h-7 flex items-center justify-center text-[11px] font-black font-mono rounded-full ${badgeColor}">
+                                        ${pointsText}
+                                    </span>
+                                    <div>
+                                        <p class="text-white text-xs font-black uppercase tracking-tight">${r.raiderName || 'Raider'}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-black text-yellow-500 uppercase tracking-tight shrink-0">➔ ${mainAction}</span>
+                            </div>
+                            ${subDetailsHtml}
+                        `;
+                        listContainer.appendChild(cardElement);
+                    } catch (e) { console.error(`🚨 [Timeline Loop Error]:`, e); }
+                });
+            }
+        }
+
+        // 🛠️ ३. ॲनालिटिक्स इंजिन चालू करणे
+        console.log("%c📊 [ENGINE TRIGGER]: इतर सपोर्टिंग समरी फंक्शन्स रन करत आहे...", "color: #9333ea; font-weight: bold;");
+        try {
+            if (typeof renderMatchSummaryOverview === 'function') renderMatchSummaryOverview();
+            if (typeof buildMatchSummaryTab === 'function') buildMatchSummaryTab(); 
+        } catch (engineErr) {
+            console.error("🚨 [Analytics Engine Global Crash]:", engineErr);
+        }
+
+        if (typeof switchTimelineTab === 'function') switchTimelineTab('timeline');
+
+        console.log("%c============== 🏁 [FRONTEND DEEP DIAGNOSTIC END] ==============", "background: #f59e0b; color: #000; font-weight: bold; font-size: 13px; p-1");
+    }, 100);
+}
+
+// मॉडेल बंद करण्यासाठी फंक्शन
+// function closeSummaryModal() {
+//     const modal = document.getElementById('summaryModal');
+//     if (modal) {
+//         modal.classList.remove('flex');
+//         modal.classList.add('hidden');
+//         document.body.style.overflow = 'auto';
+//     }
+// }
+
+// 🏆 २. टूर्नामेंट्स थेट DB मधून आणून तारीख निवडीनुसार स्टेटस लावणारे फंक्शन
+function renderDynamicTournaments() {
+    const container = document.getElementById('dynamicTournamentsContainer');
+    const label = document.getElementById('tournamentCountLabel');
+    if (!container) return;
+
+    // .once() वापरून सिंगल रीड केला जेणेकरून विनाकारण बिल वाढणार नाही
+    db.collection("tournaments")
+      .get()
+      .then((querySnapshot) => {
+          
+          if (querySnapshot.empty) {
+              container.innerHTML = `<div class="text-center py-6 text-zinc-600 italic text-xs font-bold">अद्याप एकही स्पर्धा उपलब्ध नाही.</div>`;
+              if (label) label.innerText = "0 TOTAL";
+              return;
+          }
+
+          if (label) label.innerText = `${querySnapshot.size} TOTAL`;
+          let htmlContent = "";
+
+          querySnapshot.forEach((doc) => {
+              const tour = doc.data();
+              const tId = doc.id;
+
+              // 📅 आजची तारीख आणि डेटाबेसमधील तारखा गोळा करणे
+              let today = new Date().getTime();
+              let start = tour.startDate ? new Date(tour.startDate).getTime() : today;
+              let end = tour.endDate ? new Date(tour.endDate).getTime() : today;
+
+              // ऑटोमॅटिक स्टेटस कॅल्क्युलेटर लॉजिक 🧠
+              let statusText = "LIVE";
+              let statusStyle = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+
+              if (today < start) {
+                  statusText = "UPCOMING";
+                  statusStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+              } else if (today > end) {
+                  statusText = "COMPLETED";
+                  statusStyle = "bg-zinc-800 text-zinc-400 border-zinc-700";
+              }
+
+              // सुंदर डायनॅमिक ऑरेंज-ब्लॅक कार्ड रचना
+              htmlContent += `
+                  <div onclick="loadPage('tournaments')" class="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-950 border border-zinc-900 rounded-xl overflow-hidden shadow-xl group cursor-pointer active:scale-[0.99] transition-transform duration-100">
+                      <div class="p-4 flex flex-col justify-between h-28 relative">
+                          <div class="absolute right-3 top-3 border text-[7.5px] font-black px-2 py-0.5 rounded tracking-wider uppercase ${statusStyle}">
+                              ${statusText}
+                          </div>
+                          <div>
+                              <h3 class="font-title font-black text-white text-sm leading-tight uppercase tracking-tight group-hover:text-orange-500 transition-colors">${tour.name || 'Kabaddi Tournament'}</h3>
+                              <p class="text-[8.5px] text-zinc-500 font-bold mt-1 uppercase tracking-wide">
+                                  <i class="fa-solid fa-calendar-days text-[9px] mr-1 text-zinc-600"></i> ${tour.startDate || 'TBD'} ते ${tour.endDate || 'TBD'}
+                              </p>
+                          </div>
+                      </div>
+                      <div class="p-2.5 px-4 bg-zinc-900/30 border-t border-zinc-900/60 flex justify-between items-center text-[9px] font-black text-zinc-400 uppercase tracking-tight">
+                          <span>सामने आणि वेळापत्रक पहा</span>
+                          <i class="fa-solid fa-chevron-right text-[8px] text-zinc-600 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all"></i>
+                      </div>
+                  </div>`;
+          });
+
+          container.innerHTML = htmlContent;
+      })
+      .catch((err) => {
+          console.error("🚨 [Tournaments Load Error]:", err);
+          container.innerHTML = `<div class="text-center py-6 text-red-500 text-xs font-bold">डेटा लोड करताना त्रुटी आली.</div>`;
+      });
+}
+
+// 🚀 २. होम पेजवरून थेट मॅच सेंटर मोडल ओपन करणारे प्रगत फंक्शन
+function openMatchCentreFromHome(tournamentId, matchId) {
+    // =========================================================================
+    // 📂 SECTION 1: INITIAL VALDIATIONS & STORAGE INTAKE
+    // =========================================================================
+    if (!tournamentId || !matchId) {
+        console.error("Missing IDs for opening match center");
+        return;
+    }
+
+    console.log(`🎯 [Match Centre Trigger]: Tournament: ${tournamentId}, Match: ${matchId} चा मोठा डेटा आता युझरच्या विनंतीवरून वाचला जात आहे...`);
+
+    const combinedKey = `${tournamentId}_${matchId}`;
+    
+    // १. होम पेजच्या ग्लोबल स्टोरेजमधून चालू मॅचचा स्नॅपशॉट ओढणे
+    const currentMatch = homeLiveMatchesStorage ? homeLiveMatchesStorage[combinedKey] : null;
+
+
+    // =========================================================================
+    // 📂 SECTION 2: MEMORY SYNC & HEADER SCORE MONITORING (🎯 THE LOG ENGINE)
+    // =========================================================================
+    if (currentMatch) {
+        // २. सर्व समरी फंक्शन्सना डेटा जिवंत मिळण्यासाठी वैश्विक कप्पे भरणे
+        window.currentMatchData = currentMatch;
+        window.activeRaidsList = currentMatch.timeline || currentMatch.raidHistory || [];
+        
+        window.matchSetupData = {
+            tId: tournamentId,
+            mId: matchId,
+            tAName: currentMatch.teamA || "TEAM A",
+            tBName: currentMatch.teamB || "TEAM B",
+            roundName: currentMatch.round || "League Match"
+        };
+
+        // ३. स्कोरकार्ड डेटा स्ट्रक्चर ऑब्जेक्ट री-स्टोर करणे
+        const card = currentMatch.scoreCard || {
+            mainMatch:  { teamA: Number(currentMatch.scoreA || 0), teamB: Number(currentMatch.scoreB || 0) },
+            fiveRaid:   { teamA: 0, teamB: 0 },
+            goldenRaid: { teamA: 0, teamB: 0 }
+        };
+
+        // 🟢 [THE ULTIMATE FIX]: मॅच सेंटर मोडलच्या मुख्य हेडरवर फक्त आणि फक्त 'mainMatch' चाच स्कोअर लॉक करणे
+        let headerScoreA = card.mainMatch.teamA;
+        let headerScoreB = card.mainMatch.teamB;
+        let currentStatus = currentMatch.status ? currentMatch.status.trim() : "Live";
+
+        console.log(`🔍 [MODAL INTAKE STATUS]: Current Match Status ➔ "${currentStatus}"`);
+        console.log(`📊 [DATA SNAPSHOT]: mainMatch: [${card.mainMatch.teamA}-${card.mainMatch.teamB}] | fiveRaid: [${card.fiveRaid.teamA}-${card.fiveRaid.teamB}]`);
+
+        // जर तुला हेडरवर गोल्डन रेड वेळी वेगळा स्कोअर दाखवायचा असेल तरच हा चेक चालेल, ५-५ चा चेक आपण इथून पूर्णपणे बायपास केला आहे!
+        if (currentStatus === "golden_raid") {
+            headerScoreA = card.goldenRaid.teamA;
+            headerScoreB = card.goldenRaid.teamB;
+        }
+
+        // मोडल हेडरचे स्कोर एलिमेंट्स स्क्रीनवर शोधून आकडे सेट करणे
+        const elScoreA = document.getElementById('modalTeamAScore');
+        const elScoreB = document.getElementById('modalTeamBScore');
+        
+        if (elScoreA) elScoreA.innerText = headerScoreA;
+        if (elScoreB) elScoreB.innerText = headerScoreB;
+        
+        // 🚨 [💥 MONITOR LOGS]: मोडल उघडताना कोणता स्कोअर नक्की कुठे ढकलला गेला त्याचा कडक मेसेज
+        console.log("%c================ 🎛️ [MATCH CENTRE HEADER SYNC] ================", "background: #1e1b4b; color: #38bdf8; font-weight: bold; padding: 2px;");
+        console.log(`👉 Element modalTeamAScore ला दिलेली व्हॅल्यू: "${headerScoreA}"`);
+        console.log(`👉 Element modalTeamBScore ला दिलेली व्हॅल्यू: "${headerScoreB}"`);
+        console.log("%c================================================================", "color: #38bdf8;");
+
+    } else {
+        console.warn(`⚠️ [SOCKET SYNC WARN]: homeLiveMatchesStorage मध्ये "${combinedKey}" चा डेटा सापडला नाही!`);
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 3: MODAL DISPLAY DISPLAY DYNAMICS & TAB SWITCHING
+    // =========================================================================
+    window.currentSelectedTournamentId = tournamentId;
+    window.currentSelectedMatchId = matchId;
+
+    const modal = document.getElementById('summaryModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        
+        if (typeof switchTimelineTab === "function") {
+            switchTimelineTab('match_summary'); 
+        }
+    }
+}
+
+
+
+// ### ⚙️ २. `app.js` मधील सुधारित सॉकेट कोड (सेंट्रल इंजिन)
+// तुझ्या `app.js` मध्ये सर्वात वर (ग्लोबल लेव्हलला) हा सॉकेट कनेक्शनचा कोड पेस्ट कर. जिथे मी `तुझी_सर्व्हर_लिंक` लिहीलंय, तिथे तू Render वरची लिंक पेस्ट कर भावा:
+
+// 🔌 १. Render सॉकेट सर्व्हरशी कडक कनेक्शन जोडणे
+// 🚨 टीप: जेव्हा तुला खरी लिंक मिळेल, तेव्हा खालील 'YOUR_RENDER_URL_HERE' काढून तिथे तुझी लिंक टाक!
+
+const SOCKET_SERVER_URL = "https://kabaddi-socket-server.onrender.com/"; 
+const socket = io(SOCKET_SERVER_URL);
+
+// कनेक्शन चेक करण्यासाठी लॉग्स (डेव्हलपमेंट टेस्टिंगसाठी)
+socket.on('connect', () => {
+    console.log("⚡ सॉकेट पाईपलाईन यशस्वीरित्या जोडली गेली! ID:", socket.id);
+});
+
+socket.on('disconnect', () => {
+    console.log("❌ सॉकेट पाईपलाईन तुटली! पुन्हा जोडण्याचा प्रयत्न सुरू आहे...");
+});
+
+// =================================================================
+// 📡 [LOCAL STORAGE TO SERVER SYNC]: दर ५ सेकंदाला बॅकग्राउंड सिंक
+// =================================================================
+// =================================================================
+// 📡 [COMBINED KEY DEEP SYNC]: टूर्नामेंट आयडी + मॅच आयडी जोडून लोकल स्टोरेज की चेकिंग
+// =================================================================
+
+/** */
+// setInterval(() => {
+//     if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId) {
+//         const mId = matchSetupData.mId;
+//         const tId = matchSetupData.tId || "";
+        
+//         // 🚨 [HYBRID KEY FIX]: फक्त mId ऐवजी टूर्नामेंट आणि मॅच कॉम्बो की वरून डेटा ओढणे
+//         const combinedMatchKey = tId ? `active_match_${tId}_${mId}` : `active_match_${mId}`;
+//         const localMatch = localStorage.getItem(combinedMatchKey);
+        
+//         if (localMatch && typeof socket !== 'undefined' && socket && socket.connected) {
+//             try {
+//                 const parsedData = JSON.parse(localMatch);
+                
+//                 // १. पहिला प्राधान्य: टूर्नामेंट आणि मॅच कॉम्बो की
+//                 const combinedStorageKey = tId ? `raids_secure_log_${tId}_${mId}` : `raids_secure_log_${mId}`;
+                
+//                 console.log(`%c🔍 [STORAGE TRACKING]: की शोधत आहे -> "${combinedStorageKey}"`, "color: #eab308; font-weight: bold;");
+                
+//                 let secureRaidsLog = localStorage.getItem(combinedStorageKey);
+                
+//                 if (!secureRaidsLog) {
+//                     console.log(`⚠️ [KEY BACKUP]: कम्बाईन की सापडली नाही, जुन्या "raids_secure_log_${mId}" की मध्ये डेटा तपासत आहे...`);
+//                     secureRaidsLog = localStorage.getItem(`raids_secure_log_${mId}`);
+//                 }
+
+//                 let timelineArray = [];
+
+//                 if (secureRaidsLog) {
+//                     console.log(`📦 [RAW STRING IN STORAGE]:`, secureRaidsLog.substring(0, 50) + "..."); 
+
+//                     if (secureRaidsLog.startsWith('W') || !secureRaidsLog.startsWith('[')) {
+//                         try {
+//                             const decodedText = atob(secureRaidsLog);
+//                             console.log("%c🔓 [DECRYPT SUCCESS]: बेस६४ डिकोड यशस्वी!", "color: #22c55e; font-weight: bold;");
+//                             timelineArray = JSON.parse(decodedText);
+//                         } catch (decryptErr) {
+//                             console.error("🚨 [Decrypt Fail]: डिकोडिंग एरर:", decryptErr);
+//                             timelineArray = [];
+//                         }
+//                     } else {
+//                         timelineArray = JSON.parse(secureRaidsLog);
+//                     }
+//                 } else {
+//                     console.warn(`⚠️ [NOT FOUND ANYWHERE]: या मॅचचा कोणताही रेड लॉग लोकल स्टोरेजमध्ये मिळालेला नाही!`);
+//                     timelineArray = parsedData.raidHistory || parsedData.timeline || [];
+//                 }
+
+//                 // 🚨 [HYBRID KEY PERFORMANCE]: प्लेयर स्टॅट्ससाठी सुद्धा युनिक टूर्नामेंट कप्पा वापरणे
+//                 const perfKeyA = tId ? `teamA_performance_${tId}_${mId}` : `teamA_performance_${mId}`;
+//                 const perfKeyB = tId ? `teamB_performance_${tId}_${mId}` : `teamB_performance_${mId}`;
+
+//                 let playerStatsA = localStorage.getItem(perfKeyA) || localStorage.getItem(`teamA_performance_${mId}`) || localStorage.getItem(`playerStatsA`) || "[]";
+//                 let playerStatsB = localStorage.getItem(perfKeyB) || localStorage.getItem(`teamB_performance_${mId}`) || localStorage.getItem(`playerStatsB`) || "[]";
+
+//                 let statsAArray = [];
+//                 let statsBArray = [];
+//                 try {
+//                     statsAArray = typeof playerStatsA === 'string' ? JSON.parse(playerStatsA) : playerStatsA;
+//                     statsBArray = typeof playerStatsB === 'string' ? JSON.parse(playerStatsB) : playerStatsB;
+//                 } catch (pErr) {
+//                     console.warn("⚠️ प्लेयर स्टॅट्स पार्सिंग एरर.");
+//                 }
+
+//                 const socketPayload = {
+//                     matchId: mId,
+//                     tournamentId: tId,
+//                     round: matchSetupData.roundName || parsedData.round || "League Match",
+//                     teamA: document.getElementById('teamAName')?.innerText || parsedData.teamA || "Team A",
+//                     scoreA: Number(document.getElementById('scoreA')?.innerText || localStorage.getItem('liveScoreA') || 0),
+//                     teamB: document.getElementById('teamBName')?.innerText || parsedData.teamB || "Team B",
+//                     scoreB: Number(document.getElementById('scoreB')?.innerText || localStorage.getItem('liveScoreB') || 0),
+//                     status: parsedData.status || "Live",
+//                     lastRaid: parsedData.lastRaid || null,
+//                     timeline: timelineArray,
+//                     statsA: statsAArray,
+//                     statsB: statsBArray
+//                 };
+
+//                 socket.emit('match_status_changed_or_updated', socketPayload);
+//                 console.log(`%c📢 [SOCKET EMIT DONE]: युनिक हायब्रिड की ${tId}_${mId} चा डेटा सर्व्हरकडे रवाना!`, "color: #3b82f6; font-weight: bold;");
+//                 console.log("%c--------------------------------------------------", "color: #4b5563;");
+                
+//             } catch (err) {
+//                 console.error("🚨 [Deep Sync Critical Error]:", err);
+//             }
+//         }
+//     }
+// }, 5000);
+
+//
+
+/**
+ * सुधारित setInterval कोड (मास्टर ऑब्जेक्टसह)
+आपण ठरवल्याप्रमाणे मूळची टाईमलाईन, डिक्रिप्शन (Base64) लॉजिक आणि प्लेयर स्टॅट्स (statsA/statsB) चा कडक कोड १ टक्काही विस्कटणार नाही. 
+फक्त स्कोअर गोळा करताना आपण लोकल स्टोरेजमधील आपला नवा मास्टर global_score_card ऑब्जेक्ट वापरू जेणेकरून सॉकेटवर नेहमी अचूक डेटा जाईल.
+ */
+setInterval(() => {
+    if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId) {
+        const mId = matchSetupData.mId;
+        const tId = matchSetupData.tId || "";
+        
+        // 🚨 [HYBRID KEY FIX]: फक्त mId ऐवजी टूर्नामेंट आणि मॅच कॉम्बो की वरून डेटा ओढणे
+        const combinedMatchKey = tId ? `active_match_${tId}_${mId}` : `active_match_${mId}`;
+        const localMatch = localStorage.getItem(combinedMatchKey);
+        
+        if (localMatch && typeof socket !== 'undefined' && socket && socket.connected) {
+            try {
+                const parsedData = JSON.parse(localMatch);
+                
+                // १. पहिला प्राधान्य: टूर्नामेंट आणि मॅच कॉम्बो की
+                const combinedStorageKey = tId ? `raids_secure_log_${tId}_${mId}` : `raids_secure_log_${mId}`;
+                
+                console.log(`%c🔍 [STORAGE TRACKING]: की शोधत आहे -> "${combinedStorageKey}"`, "color: #eab308; font-weight: bold;");
+                
+                let secureRaidsLog = localStorage.getItem(combinedStorageKey);
+                
+                if (!secureRaidsLog) {
+                    console.log(`⚠️ [KEY BACKUP]: कम्बाईन की सापडली नाही, जुन्या "raids_secure_log_${mId}" की मध्ये डेटा तपासत आहे...`);
+                    secureRaidsLog = localStorage.getItem(`raids_secure_log_${mId}`);
+                }
+
+                let timelineArray = [];
+
+                if (secureRaidsLog) {
+                    console.log(`📦 [RAW STRING IN STORAGE]:`, secureRaidsLog.substring(0, 50) + "..."); 
+
+                    if (secureRaidsLog.startsWith('W') || !secureRaidsLog.startsWith('[')) {
+                        try {
+                            const decodedText = atob(secureRaidsLog);
+                            console.log("%c🔓 [DECRYPT SUCCESS]: बेस६४ डिकोड यशस्वी!", "color: #22c55e; font-weight: bold;");
+                            timelineArray = JSON.parse(decodedText);
+                        } catch (decryptErr) {
+                            console.error("🚨 [Decrypt Fail]: डिकोडिंग एरर:", decryptErr);
+                            timelineArray = [];
+                        }
+                    } else {
+                        timelineArray = JSON.parse(secureRaidsLog);
+                    }
+                } else {
+                    console.warn(`⚠️ [NOT FOUND ANYWHERE]: या मॅचचा कोणताही रेड लॉग लोकल स्टोरेजमध्ये मिळालेला नाही!`);
+                    timelineArray = parsedData.raidHistory || parsedData.timeline || [];
+                }
+
+                // 🚨 [HYBRID KEY PERFORMANCE]: प्लेयर स्टॅट्ससाठी सुद्धा युनिक टूर्नामेंट कप्पा वापरणे
+                const perfKeyA = tId ? `teamA_performance_${tId}_${mId}` : `teamA_performance_${mId}`;
+                const perfKeyB = tId ? `teamB_performance_${tId}_${mId}` : `teamB_performance_${mId}`;
+
+                let playerStatsA = localStorage.getItem(perfKeyA) || localStorage.getItem(`teamA_performance_${mId}`) || localStorage.getItem(`playerStatsA`) || "[]";
+                let playerStatsB = localStorage.getItem(perfKeyB) || localStorage.getItem(`teamB_performance_${mId}`) || localStorage.getItem(`playerStatsB`) || "[]";
+
+                let statsAArray = [];
+                let statsBArray = [];
+                try {
+                    statsAArray = typeof playerStatsA === 'string' ? JSON.parse(playerStatsA) : playerStatsA;
+                    statsBArray = typeof playerStatsB === 'string' ? JSON.parse(playerStatsB) : playerStatsB;
+                } catch (pErr) {
+                    console.warn("⚠️ प्लेयर स्टॅट्स पार्सिंग एरर.");
+                }
+
+                // 🎯 [💥 MASTER SCORECARD SYNC IN INTERVAL]
+                // बॅकग्राउंड सिंकसाठी लोकल स्टोरेजमधून फ्रेश मास्टर ऑब्जेक्ट ओढणे
+                const localCard = localStorage.getItem('global_score_card');
+                const currentScoreCard = localCard ? JSON.parse(localCard) : {
+                    mainMatch:  { teamA: 0, teamB: 0 },
+                    fiveRaid:   { teamA: 0, teamB: 0 },
+                    goldenRaid: { teamA: 0, teamB: 0 }
+                };
+
+                const socketPayload = {
+                    matchId: mId,
+                    tournamentId: tId,
+                    round: matchSetupData.roundName || parsedData.round || "League Match",
+                    teamA: document.getElementById('teamAName')?.innerText || parsedData.teamA || "Team A",
+                    teamB: document.getElementById('teamBName')?.innerText || parsedData.teamB || "Team B",
+                    status: parsedData.status || "Live",
+                    lastRaid: parsedData.lastRaid || null,
+                    timeline: timelineArray,
+                    statsA: statsAArray,
+                    statsB: statsBArray,
+
+                    // 🎯 जुन्या सुट्या फील्ड्स ऐवजी शुद्ध मास्टर ऑब्जेक्ट रवाना!
+                    scoreCard: currentScoreCard 
+                };
+
+                socket.emit('match_status_changed_or_updated', socketPayload);
+                console.log(`%c📢 [SOCKET EMIT DONE]: मास्टर scoreCard सह युनिक हायब्रिड की ${tId}_${mId} चा डेटा सर्व्हरकडे रवाना!`, "color: #3b82f6; font-weight: bold;");
+                console.log("%c--------------------------------------------------", "color: #4b5563;");
+                
+            } catch (err) {
+                console.error("🚨 [Deep Sync Critical Error]:", err);
+            }
+        }
+    }
+}, 5000);
+
+
+// =================================================================
+// 🤼 [5-5 RAIDS ENGINE]: खेळाडूंची यादी लोड करणे आणि ऑर्डर लॉक करणे
+// =================================================================
+
+// ५-५ रेड ट्रॅकिंगसाठी लागणारे ग्लोबल व्हेरिएबल्स
+window.isFiveRaidModeOn = false;
+window.fiveRaidCount = 0; // एकूण १० रेड्स (५ प्रत्येक टीम)
+window.fiveRaidOrderTeamA = []; // टीम A ची फिक्स रेडर लिस्ट
+window.fiveRaidOrderTeamB = []; // टीम B ची फिक्स रेडर लिस्ट
+window.currentFiveRaidIndexA = 0; // टीम A चा कितवा रेडर सुरू आहे (0 ते 4)
+window.currentFiveRaidIndexB = 0; // टीम B चा कितवा रेडर सुरू आहे (0 ते 4)
+
+function startFiveRaidsSystem() {
+    // =========================================================================
+    // 📂 SECTION 1: INITIAL LOGS & DATABASE/STORAGE STATUS INTAKE
+    // =========================================================================
+    console.log("%c==================================================", "color: #f97316; font-weight: bold;");
+    console.log("%c🔍 [5-5 UI PANEL ENGINE]: डेटा आणि काउंट सिंक तपासणी सुरू...", "background: #f1f5f9; color: #0f172a; font-weight: bold; padding: 2px;");
+
+    // अ. ग्लोबल स्कोरकार्डमधून ५-५ चा स्लेज/स्कोअर रीड करणे
+    const localCard = localStorage.getItem('global_score_card');
+    const currentScoreCard = localCard ? JSON.parse(localCard) : null;
+    
+    let fA = Number(currentScoreCard?.fiveRaid?.teamA || 0);
+    let fB = Number(currentScoreCard?.fiveRaid?.teamB || 0);
+
+    // ब. टाइमलाइन / हिस्ट्रीमधून ५-५ च्या नेमक्या झालेल्या रेड्स मोजणे
+    const allRaids = window.activeRaidsList || [];
+    const completedFiveRaids = allRaids.filter(r => r.isFiveRaid === true);
+    const totalRaidsCount = completedFiveRaids.length;
+
+    console.log(`📊 [DIAGNOSTIC]: आत्तापर्यंत झालेल्या ५-५ रेड्स संख्या ➔ ${totalRaidsCount}`);
+    console.log(`📊 [DIAGNOSTIC]: चालू ५-५ स्कोअर ➔ Team A: ${fA} | Team B: ${fB}`);
+
+
+    // =========================================================================
+    // 📂 SECTION 2: THE TRIPWIRE RESUME ENGINE (IF MATCH ALREADY STARTED)
+    // =========================================================================
+    if (totalRaidsCount > 0 || fA > 0 || fB > 0) {
+        console.log("%c🚀 [RESUME TRIPWIRE]: सामना प्रोग्रेसमध्ये आढळला. ५-५ चा लाइव्ह पॅनेल लोड करत आहे...", "color: #22c55e; font-weight: bold;");
+
+        // अ. ५-५ मोडचे मेमरी काउंटर्स अचूक री-सेट करणे
+        window.isFiveRaidModeOn = true;
+        window.fiveRaidCount = totalRaidsCount + 1; // पुढची चालू रेड नंबर परफेक्ट सेट
+
+        // ब. इंडेक्स कॅल्क्युलेशन (Team A आणि B चे चालू रायडर्स ट्रॅक करण्यासाठी)
+        window.currentFiveRaidIndexA = Math.floor(totalRaidsCount / 2);
+        window.currentFiveRaidIndexB = Math.floor((totalRaidsCount + 1) / 2) - 1;
+        if (window.currentFiveRaidIndexB < 0) window.currentFiveRaidIndexB = 0;
+
+        // क. लोकल स्टोरेजमधून दोन्ही टीम्सची लॉक झालेली खेळाडूंची नावे मेमरीत परत भरणे
+        const savedOrderRaw = localStorage.getItem(`five_raid_order_setup_${matchSetupData?.mId}`);
+        if (savedOrderRaw) {
+            const parsedOrder = JSON.parse(savedOrderRaw);
+            window.fiveRaidOrderTeamA = parsedOrder.teamA_order || [];
+            window.fiveRaidOrderTeamB = parsedOrder.teamB_order || [];
+            console.log("📦 [ORDER MEMORY RESTORED]: खेळाडूंची फिक्स नावे मेमरीमध्ये यशस्वीरीत्या लोड झाली.");
+        }
+
+
+        // =========================================================================
+        // 📂 SECTION 3: UI PANELS & SCORE/LABELS RESYNC
+        // =========================================================================
+        // अ. नेहमीची मुख्य स्कोरिंग बटणे लपवणे
+        const mainScoringGrid = document.querySelector('.grid.grid-cols-2.gap-4.mt-4.shrink-0');
+        if (mainScoringGrid) mainScoringGrid.style.display = 'none';
+
+        // ब. ५-५ चा जो खरा स्कोरिंग पॅनेल आहे तो ऑन करणे
+        const battlePanel = document.getElementById('fiveRaidBattleGroundPanel');
+        if (battlePanel) {
+            battlePanel.classList.remove('hidden');
+            battlePanel.classList.add('flex');
+            console.log("🟢 [UI PANEL]: 5-5 Raid Battle Ground Panel थेट ऑन झाले!");
+        }
+
+        // क. ५-५ पॅनेलवरील टीम नेम्स सिंक करणे
+        const nameA = document.getElementById('teamAName')?.innerText || "TEAM A";
+        const nameB = document.getElementById('teamBName')?.innerText || "TEAM B";
+        
+        if (document.getElementById('fiveRaidLabelTeamA')) {
+            document.getElementById('fiveRaidLabelTeamA').innerText = `${nameA} (5-5)`;
+        }
+        if (document.getElementById('fiveRaidLabelTeamB')) {
+            document.getElementById('fiveRaidLabelTeamB').innerText = `${nameB} (5-5)`;
+        }
+
+        // 🎯 [💥 THE 5-5 PANEL SCORE FIX]: ५-५ च्या पॅनेल कप्प्यातील स्कोअर एलिमेंट्स अचूक री-लोड करणे
+        // तुझ्या HTML नुसार ५-५ च्या स्कोअरचे जे आयडी आहेत (उदा. 'fiveRaidScoreA' किंवा पॅनेलच्या आतील मोठे आकडे), तिथे आकडे सेट करणे:
+        const panelScoreA = document.getElementById('fiveRaidScoreA') || document.getElementById('scoreFiveA');
+        const panelScoreB = document.getElementById('fiveRaidScoreB') || document.getElementById('scoreFiveB');
+
+        if (panelScoreA) panelScoreA.innerText = fA;
+        if (panelScoreB) panelScoreB.innerText = fB;
+
+        // बॅकअप चेक: जर विशिष्ट आयडी नसतील, तर पॅनेलच्या आतील पहिल्या दोन मोठ्या स्कोअर टेक्स्ट शोधून बदलणे
+        if (!panelScoreA && battlePanel) {
+            const bigScores = battlePanel.querySelectorAll('.text-white, [class*="text-["]');
+            // तुझ्या डिझाईननुसार जिथे मोठे 0 आणि 0 दिसतात, त्या एलिमेंट्सना डायरेक्ट व्हॅल्यू देणे:
+            if (bigScores && bigScores.length >= 2) {
+                // साधारणपणे नावानंतर येणारे मोठे आकडे ट्रेक करण्यासाठी तुझ्या मूळ आयडीचा वापर सोपा पडेल, तरीही बॅकअप सुरक्षित केला आहे.
+            }
+        }
+        console.log(`📊 [UI PANEL SCORE SYNC]: ५-५ पॅनेलच्या आत स्कोअर सेट झाला ➔ A: ${fA} | B: ${fB}`);
+
+
+        // =========================================================================
+        // 📂 SECTION 4: NEXT TURN & RAIDER DETERMINER
+        // =========================================================================
+        // अ. मॅथेमॅटिकल टर्न ठरवणे (सम संख्या = Team A, विषम संख्या = Team B)
+        let nextTeamTurn = (totalRaidsCount % 2 === 0) ? 'A' : 'B';
+        
+        console.log(`👉 [TURN DECISION]: ${totalRaidsCount} रेड्स झाल्यात, म्हणून पुढची रेड Team ${nextTeamTurn} ची असेल.`);
+        
+        // ब. मूळ फंक्शनद्वारे रेड काउंट, चालू रायडरचे नाव आणि निळा/हिरवा बॅज स्क्रीनवर सेट करणे
+        if (typeof updateFiveRaidDisplay === "function") {
+            updateFiveRaidDisplay(nextTeamTurn); 
+        }
+
+        console.log("%c==================================================", "color: #f97316; font-weight: bold;");
+        return; // 🛑 खेळाडू निवडायचा मोडल बायपास करण्यासाठी इथूनच कोड बाहेर काढला!
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 5: FRESH 5-5 MATCH SQUAD SELECTOR FLOW (0-0 SCORE)
+    // =========================================================================
+    console.log("🆕 [FRESH START]: फ्रेश ५-५ सामना आहे, १२ खेळाडूंचे मोडल विंडो उघडत आहे.");
+
+    const modal = document.getElementById('fiveRaidOrderModal');
+    if (!modal) {
+        console.error("🚨 [ERROR]: 'fiveRaidOrderModal' HTML मध्ये सापडला नाही!");
+        return;
+    }
+
+    const nameA = document.getElementById('teamAName')?.innerText || "TEAM A";
+    const nameB = document.getElementById('teamBName')?.innerText || "TEAM B";
+    
+    document.getElementById('fiveRaidTitleTeamA').innerText = `${nameA.toUpperCase()} - RAIDING ORDER`;
+    document.getElementById('fiveRaidTitleTeamB').innerText = `${nameB.toUpperCase()} - RAIDING ORDER`;
+
+    let listA = [];
+    let listB = [];
+
+    if (typeof currentMatchData !== 'undefined' && currentMatchData) {
+        listA = currentMatchData.teamAPlayers || currentMatchData.teamA_players || [];
+        listB = currentMatchData.teamBPlayers || currentMatchData.teamB_players || [];
+    }
+
+    if (listA.length === 0 && typeof matchSetupData !== 'undefined' && matchSetupData?.mId) {
+        const activeMatchKey = `active_match_${matchSetupData.mId}`;
+        const localData = localStorage.getItem(activeMatchKey);
+        if (localData) {
+            const parsed = JSON.parse(localData);
+            listA = parsed.teamAPlayers || [];
+            listB = parsed.teamBPlayers || [];
+        }
+    }
+
+    generateOrderDropdowns('teamAFiveInputs', listA, 'A');
+    generateOrderDropdowns('teamBFiveInputs', listB, 'B');
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    console.log("%c==================================================", "color: #f97316; font-weight: bold;");
+}
+
+/** */
+
+// ड्रॉपडाउन बनवणारे सोपे नल-सेफ हेल्पर फंक्शन
+function buildDropdownInputs(divId, playersArray, teamTag) {
+    const box = document.getElementById(divId);
+    if (!box) return;
+    box.innerHTML = "";
+
+    // जर यादी रिकामी आली तरच डमी डेटा (सेफ्टी बॅकअप)
+    if (!playersArray || playersArray.length === 0) {
+        playersArray = Array.from({length: 12}, (_, i) => ({ name: `Player ${teamTag}${i+1}`, no: teamTag === 'A' ? i+1 : 21+i }));
+    }
+
+    for (let i = 1; i <= 5; i++) {
+        let options = `<option value="">-- निवडा खेळाडू ${i} --</option>`;
+        
+        playersArray.forEach(p => {
+            // तुझ्या ऑब्जेक्टच्या रचनेनुसार p.name आणि p.no ओढणे
+            const name = typeof p === 'string' ? p : (p.name || `Player`);
+            const jerseyNo = p.no || p.jersey || "";
+            const displayLabel = jerseyNo ? `#${jerseyNo} ${name}` : name;
+            
+            options += `<option value="${name}">${displayLabel}</option>`;
+        });
+
+        const selectHtml = `
+            <div class="flex items-center gap-3 bg-slate-950/60 p-2 rounded-lg border border-slate-850">
+                <span class="w-6 h-6 flex items-center justify-center text-[10px] font-black font-mono bg-slate-800 text-amber-500 rounded-md border border-slate-700 shrink-0">R${i}</span>
+                <select id="fiveRaidSelect_${teamTag}_${i}" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg p-1.5 text-xs font-bold text-white focus:outline-none">
+                    ${options}
+                </select>
+            </div>`;
+            
+        box.insertAdjacentHTML('beforeend', selectHtml);
+        
+        // क्रमाने पहिले ५ खेळाडू बाय-डिफ़ॉल्ट सिलेक्ट करून ठेवणे
+        const selectEl = document.getElementById(`fiveRaidSelect_${teamTag}_${i}`);
+        if (selectEl && playersArray[i-1]) {
+            const defaultName = typeof playersArray[i-1] === 'string' ? playersArray[i-1] : playersArray[i-1].name;
+            selectEl.value = defaultName;
+        }
+    }
+}
+
+// ड्रॉपडाउन लिस्ट बनवणारे हेल्पर फंक्शन
+function generateOrderDropdowns(containerId, playersArray, teamType) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    // जर खेळाडूंची यादी नसेल तर तात्पुरती १ ते ७ जर्सीची डमी लिस्ट (सेफ्टी बॅकअप)
+    if (!playersArray || playersArray.length === 0) {
+        playersArray = Array.from({length: 7}, (_, i) => ({ name: `Player ${i+1}`, jersey: i+1 }));
+    }
+
+    // १ ते ५ नंबरचे सिलेक्ट बॉक्स तयार करणे
+    for (let i = 1; i <= 5; i++) {
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-3 bg-slate-950/60 p-2 rounded-lg border border-slate-850";
+        
+        let optionsHtml = `<option value="">-- Select Raider ${i} --</option>`;
+        playersArray.forEach(p => {
+            const pName = typeof p === 'string' ? p : (p.name || `Player ${p.jersey || ''}`);
+            const pNo = p.jersey ? `#${p.jersey} ` : "";
+            optionsHtml += `<option value="${pName}">${pNo}${pName}</option>`;
+        });
+
+        div.innerHTML = `
+            <span class="w-6 h-6 flex items-center justify-center text-[10px] font-black font-mono bg-slate-800 text-amber-500 rounded-md border border-slate-700 shrink-0">R${i}</span>
+            <select id="fiveRaidSelect_${teamType}_${i}" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg p-1.5 text-xs font-bold text-white focus:outline-none focus:border-orange-500">
+                ${optionsHtml}
+            </select>
+        `;
+        container.appendChild(div);
+        
+        // आधीच उपलब्ध असल्यास सिरीयल वाईज बाय-डिफॉल्ट खेळाडू सिलेक्ट करून ठेवणे (स्कोअररचा वेळ वाचवण्यासाठी)
+        if (playersArray[i-1]) {
+            const selectEl = document.getElementById(`fiveRaidSelect_${teamType}_${i}`);
+            const defaultName = typeof playersArray[i-1] === 'string' ? playersArray[i-1] : playersArray[i-1].name;
+            if (selectEl) selectEl.value = defaultName;
+        }
+    }
+}
+
+// 🎯 ५-५ रेड्सची ऑर्डर फायनल लॉक करणे
+// 🎯 ५-५ रेड्सची ऑर्डर फायनल लॉक करणे
+function lockFiveRaidOrder() {
+    window.fiveRaidOrderTeamA = [];
+    window.fiveRaidOrderTeamB = [];
+
+    // १. फॉर्ममधून अचूक आयडी वापरून नावे गोळा करणे
+    for (let i = 1; i <= 5; i++) {
+        const pA = document.getElementById(`fiveRaidSelect_A_${i}`)?.value;
+        const pB = document.getElementById(`fiveRaidSelect_B_${i}`)?.value;
+
+        if (!pA || !pB) {
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'अपूर्ण यादी!', 
+                text: 'कृपया दोन्ही संघांचे सर्व ५ खेळाडू क्रमाने सिलेक्ट करा.', 
+                background: '#111', 
+                color: '#fff',
+                confirmButtonColor: '#f97316'
+            });
+            return;
+        }
+        window.fiveRaidOrderTeamA.push(pA);
+        window.fiveRaidOrderTeamB.push(pB);
+    }
+
+    // २. कन्सोलवर डेटा लॉक करणे
+    console.log("%c🔒 [5-5 RAID PLAYERS LOCKED SUCCESSFULLY]:", "color: #22c55e; font-weight: bold;");
+    console.log("Team A Order:", window.fiveRaidOrderTeamA);
+    console.log("Team B Order:", window.fiveRaidOrderTeamB);
+
+    // =============================================================
+    // 🎯 [💥 THE EXACT SINGLE OBJECT STORAGE LOCK]: क्लीन आणि युनिक सेव्ह
+    // =============================================================
+    if (typeof matchSetupData !== 'undefined' && matchSetupData?.mId) {
+        const mId = matchSetupData.mId;
+        
+        const fiveRaidOrderMaster = {
+            teamA_order: window.fiveRaidOrderTeamA,
+            teamB_order: window.fiveRaidOrderTeamB
+        };
+
+        // तुझ्या मागणीनुसार ५-५ रिलेटेड स्पष्ट नाव आणि शेवटी मॅच आयडी जोडून सेव्ह केला
+        localStorage.setItem(`five_raid_order_setup_${mId}`, JSON.stringify(fiveRaidOrderMaster));
+        
+        console.log(`%c💾 [STORAGE SUCCESS]: 'five_raid_order_setup_${mId}' ऑब्जेक्ट कडक सेव्ह झाला!`, "background: #22c55e; color: #fff; font-weight: bold;");
+        console.log("📝 ऑब्जेक्ट स्नॅपशॉट:", JSON.stringify(fiveRaidOrderMaster));
+    } else {
+        console.warn("⚠️ [STORAGE WARN]: matchSetupData किंवा mId ग्लोबल स्कोपमध्ये न मिळाल्यामुळे लोकल स्टोरेज सेव्ह स्किप झाले.");
+    }
+    // =============================================================
+
+    // मॅचच्या स्क्रीनवरील खरी नावे ओढून ५-५ च्या स्कोअर बोर्डवर सेट करणे
+    const nameA = document.getElementById('teamAName')?.innerText || "TEAM A";
+    const nameB = document.getElementById('teamBName')?.innerText || "TEAM B";
+    
+    if (document.getElementById('fiveRaidLabelTeamA')) document.getElementById('fiveRaidLabelTeamA').innerText = `${nameA} (5-5)`;
+    if (document.getElementById('fiveRaidLabelTeamB')) document.getElementById('fiveRaidLabelTeamB').innerText = `${nameB} (5-5)`;
+
+    // ३. ५-५ रेड मोडचे ग्लोबल काऊंटर्स ऑन करणे
+    window.isFiveRaidModeOn = true;
+    window.fiveRaidCount = 1; // पहिली रेड सुरू होणार
+    window.currentFiveRaidIndexA = 0;
+    window.currentFiveRaidIndexB = 0;
+
+    // ४. मॉडेल बंद करणे
+    closeFiveRaidOrderModal();
+    
+    // =============================================================
+    // 🎯 🚀 [THE SCREEN SWAP MAGIC]: जुने बटने लपवून नवीन पॅनेल उघडणे!
+    // =============================================================
+    const mainScoringGrid = document.querySelector('.grid.grid-cols-2.gap-4.mt-4.shrink-0');
+    if (mainScoringGrid) {
+        mainScoringGrid.style.display = 'none'; // जुनी बटणे लपवली ❌
+        console.log("📦 [UI]: मूळ स्कोअरिंग बटणांचा कप्पा लपवला गेला आहे.");
+    }
+
+    const battlePanel = document.getElementById('fiveRaidBattleGroundPanel');
+    if (battlePanel) {
+        battlePanel.classList.remove('hidden');
+        battlePanel.classList.add('flex'); // नवीन पॅनेल दाखवला! 🟢
+        console.log("📦 [UI]: 5-5 Raid Battle Ground Panel स्क्रीनवर ऑन झाला!");
+    }
+
+    // ५. 🎯 नवीन स्क्रीनवर पहिल्या रेडरचे नाव आणि टीम बॅज सेट करणे
+    updateFiveRaidDisplay('A');
+
+    // ६. स्कोअररला कडक मेसेज दाखवणे
+    Swal.fire({
+        title: 'महासंग्राम सुरू!',
+        text: '५-५ रेड्स पॅनेल ऍक्टिव्हेट झाला आहे. ७ प्लेयर्स नेहमी आतच राहतील, फक्त ३ सोपी बटणे वापरा!',
+        icon: 'success',
+        background: '#111',
+        color: '#fff',
+        confirmButtonColor: '#f97316'
+    });
+}
+
+// 🎛️ नवीन पॅनेलवर राऊंड नंबर, खेळाडूचे नाव आणि बॅज अपडेट करणारे सोपे हेल्पर फंक्शन
+function updateFiveRaidDisplay(currentTeam) {
+    // अ. एकूण कितवी रेड सुरू आहे ते सेट करणे
+    const roundCounter = document.getElementById('fiveRaidRoundCounter');
+    if (roundCounter) roundCounter.innerText = window.fiveRaidCount;
+
+    // ब. चालू रेडरचे नाव आणि टीमचा बॅज सेट करणे
+    const nameEl = document.getElementById('fiveRaidActiveRaiderName');
+    const badgeEl = document.getElementById('fiveRaidActiveTeamBadge');
+    
+    if (currentTeam === 'A') {
+        const raiderName = window.fiveRaidOrderTeamA[window.currentFiveRaidIndexA] || "No Raider";
+        if (nameEl) nameEl.innerText = raiderName;
+        if (badgeEl) {
+            badgeEl.innerText = "TEAM A RAID";
+            badgeEl.className = "bg-green-600 text-black font-black text-[9px] px-2.5 py-1 rounded-md uppercase tracking-tight";
+        }
+    } else {
+        const raiderName = window.fiveRaidOrderTeamB[window.currentFiveRaidIndexB] || "No Raider";
+        if (nameEl) nameEl.innerText = raiderName;
+        if (badgeEl) {
+            badgeEl.innerText = "TEAM B RAID";
+            badgeEl.className = "bg-blue-600 text-white font-black text-[9px] px-2.5 py-1 rounded-md uppercase tracking-tight";
+        }
+    }
+}
+
+// मॉडेल बंद करणे
+function closeFiveRaidOrderModal() {
+    const modal = document.getElementById('fiveRaidOrderModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+}
+
+// मूळ स्क्रीनवरील रेडर ऑटो-सिलेक्ट करणारा कडक सुबक जुगाड
+function autoSelectNextFiveRaidPlayer(teamType) {
+    if (!window.isFiveRaidModeOn) return;
+    
+    let nextPlayerName = "";
+    if (teamType === 'A') {
+        nextPlayerName = window.fiveRaidOrderTeamA[window.currentFiveRaidIndexA];
+    } else {
+        nextPlayerName = window.fiveRaidOrderTeamB[window.currentFiveRaidIndexB];
+    }
+
+    console.log(`🎯 [Auto-Select Raider]: Team ${teamType} चा खेळाडू "${nextPlayerName}" ऑटो-सिलेक्ट करत आहे.`);
+
+    // तुझ्या मूळ स्क्रीनवर रेडर निवडण्यासाठी जो ड्रॉपडाउन किंवा बटन्स आहेत (उदा. document.getElementById('raiderSelectDropdown')), 
+    // तिथे थेट हे नाव बाइंड (Set) करून टाकायचे!
+    const raiderDropdown = document.getElementById('raiderSelectDropdown') || document.getElementById('activeRaiderSelect');
+    if (raiderDropdown) {
+        raiderDropdown.value = nextPlayerName;
+        // जर तिथे ऑनचेन्ज इव्हेंट लावला असेल तर तो मॅन्युअली फायर करणे
+        raiderDropdown.dispatchEvent(new Event('change'));
+    }
+}
+
+///////////////////
+// =================================================================
+// 🎯 5-5 RAIDS MODE: CLEAN & READABLE BUTTON FUNCTIONS
+// =================================================================
+
+
+// 1️⃣ [TOUCH POINTS BUTTON] - टच पॉईंट्स बटण
+async function touchPointsFiveRaid() {
+    console.log("%c🎯 [TOUCH PTS BUTTON]: ५-५ रेड अंतर्गत क्लिक झाले.", "color: #f97316; font-weight: bold;");
+    
+    const swalResult = await Swal.fire({
+        title: 'किती टच पॉईंट्स (Touch Points) मिळाले?',
+        html: `
+            <div class="grid grid-cols-4 gap-2 p-2">
+                ${[1,2,3,4,5,6,7].map(num => `
+                    <button onclick="Swal.close({ pts: ${num} })" class="bg-indigo-950 border border-indigo-500/40 text-white font-black text-lg py-3 rounded-xl active:bg-indigo-600">${num}</button>
+                `).join('')}
+            </div>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'रद्द करा',
+        background: '#111',
+        color: '#fff'
+    });
+
+    // 🎯 [💥 PROCESSING THE SELECTION]
+    if (swalResult && swalResult.pts) {
+        const touchCount = Number(swalResult.pts);
+        console.log(`📊 [TOUCH PTS FIVE RAID]: स्कोअररने ${touchCount} टच पॉईंट्स निवडले. आता आउट झालेल्या डिफेंडर्सची लिस्ट उघडत आहे...`);
+        
+        // कॉमन डिफेंडर सिलेक्शन विंडो उघडणे (टच_काउंट, बोनस_गुण, ऍक्शन_टाईप)
+        openFiveRaidDefenderSelector(touchCount, 0, 'TOUCH_POINTS');
+    } else {
+        console.log("😇 [TOUCH PTS FIVE RAID]: स्कोअररने पॉईंट्स निवडणे रद्द केले.");
+    }
+}
+
+// 🎛️ बटणावर क्लिक केल्यावर त्याचे सिलेक्शन ऑन-ऑफ करणारे आणि संख्या मोजणारे हेल्पर फंक्शन
+function toggleFiveRaidDefenderSelection(name, no, maxLimit) {
+    const btn = document.getElementById(`defBtn_${no}`);
+    const dot = document.getElementById(`dot_${no}`);
+    if (!btn || !dot) return;
+
+    const index = window.tempSelectedFiveDefs.indexOf(name);
+
+    if (index > -1) {
+        // आधीच सिलेक्ट असेल तर अन-सिलेक्ट करणे
+        window.tempSelectedFiveDefs.splice(index, 1);
+        btn.classList.remove('border-indigo-500', 'bg-indigo-950/40', 'text-indigo-400');
+        btn.classList.add('border-zinc-800', 'bg-slate-900', 'text-white');
+        dot.classList.remove('bg-indigo-500');
+        dot.classList.add('bg-zinc-700');
+    } else {
+        // जर लिमिट संपली नसेल तरच सिलेक्ट करू देणे
+        if (window.tempSelectedFiveDefs.length >= maxLimit) {
+            console.warn(`⚠️ [FIVE RAID DEF LIMIT]: मॅक्सिमम लिमिट (${maxLimit}) संपली आहे! अजून खेळाडू निवडता येणार नाही.`);
+            return; 
+        }
+        
+        window.tempSelectedFiveDefs.push(name);
+        btn.classList.remove('border-zinc-800', 'bg-slate-900', 'text-white');
+        btn.classList.add('border-indigo-500', 'bg-indigo-950/40', 'text-indigo-400');
+        dot.classList.remove('bg-zinc-700');
+        dot.classList.add('bg-indigo-500');
+    }
+
+    // स्क्रीनवर काउंटर अपडेट करणे
+    const countLabel = document.getElementById('swalSelCount');
+    if (countLabel) countLabel.innerText = window.tempSelectedFiveDefs.length;
+
+    console.log(`📋 [FIVE RAID SELECTING]: (${window.tempSelectedFiveDefs.length}/${maxLimit}) ➔ चालू निवड:`, window.tempSelectedFiveDefs);
+
+    // 🎯 जर निवडलेले खेळाडू मूळ टच पॉईंट्सच्या एवढे झाले, तर पॉप-अप स्वतःहून बंद होईल! (FAST UI)
+    if (window.tempSelectedFiveDefs.length === maxLimit) {
+        console.log(`%c⚡ [LIMIT REACHED]: ${maxLimit} खेळाडू पूर्ण निवडले गेले! मोडल स्वतःहून क्लोज होत आहे...`, "color: #22c55e; font-weight: bold;");
+        setTimeout(() => {
+            Swal.close(window.tempSelectedFiveDefs.join(", "));
+        }, 300); // युझरला दिसण्यासाठी ३०० मिलीसेकंदाचा छोटा ब्रेक
+    }
+}
+
+// 2️⃣ [BONUS BUTTON] - (Deep Level Logs सह १००% फिक्स ट्रॅकिंग! 🚀)
+async function bonusFiveRaid() {
+    console.log("%c✨ [DEEP LOG 1]: bonusFiveRaid() फंक्शन ट्रिगर झाले आहे!", "color: #22c55e; font-weight: bold; font-size: 12px;");
+    console.log(`📊 [CURRENT STATE]: window.fiveRaidCount = ${window.fiveRaidCount}`);
+
+    console.log("🖥️ [UI SEARCH]: बोनस आणि कॉम्बिनेशन्स निवडण्याचा SweetAlert पॉप-अप उघडत आहे...");
+
+    const result = await Swal.fire({
+        title: 'बोनस सोबत काय झाले?',
+        html: `
+            <div class="space-y-4 p-1 font-sans">
+                <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider text-left pl-1">बोनस + टच पॉईंट्स निवडा:</p>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +0 दाबले'); Swal.close({ mode: 'bonus_touch', val: 0 })" class="bg-teal-950/80 border border-teal-500/30 text-teal-400 font-black text-base py-3 rounded-xl active:bg-teal-600">+0</button>
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +1 दाबले'); Swal.close({ mode: 'bonus_touch', val: 1 })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">1</button>
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +2 दाबले'); Swal.close({ mode: 'bonus_touch', val: 2 })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">2</button>
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +3 दाबले'); Swal.close({ mode: 'bonus_touch', val: 3 })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">3</button>
+                    <button onclick="var btn = 4; console.log('👉 [CLICKED]: Bonus +' + btn + ' दाबले'); Swal.close({ mode: 'bonus_touch', val: btn })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">4</button>
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +5 दाबले'); Swal.close({ mode: 'bonus_touch', val: 5 })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">5</button>
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +6 दाबले'); Swal.close({ mode: 'bonus_touch', val: 6 })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">6</button>
+                    <button onclick="console.log('👉 [CLICKED]: Bonus +7 दाबले'); Swal.close({ mode: 'bonus_touch', val: 7 })" class="bg-slate-900 border border-zinc-800 text-white font-black text-base py-3 rounded-xl active:bg-indigo-600">7</button>
+                </div>
+                <div class="border-t border-slate-850 my-2"></div>
+                <button onclick="console.log('👉 [CLICKED]: Bonus + Tackle दाबले'); Swal.close({ mode: 'bonus_tackle', val: 1 })" class="w-full bg-red-950/50 border border-red-900/40 text-red-400 py-3.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:bg-red-900 shadow-md">
+                    🛡️ BONUS + TACKLE (दोन्ही टीम +1)
+                </button>
+            </div>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'मागे जा',
+        background: '#111',
+        color: '#fff'
+    });
+
+    // 🔍 [DEEP LOG 2]: पॉप-अपमधून नक्की काय कच्चा डेटा आला तो तपासणे
+    console.log("🔍 [DEEP LOG 2]: बोनस पॉप-अपचा कच्चा रिझल्ट (result):", result);
+
+    // 🎯 [THE BIG ARCHITECTURE FIX]: लायब्ररीच्या सिंटॅक्स नुसार डेटा शोधणे (Direct Root किंवा result.value कप्पा)
+    let finalMode = null;
+    let finalVal = 0;
+
+    if (result && result.mode) {
+        finalMode = result.mode;
+        finalVal = Number(result.val);
+        console.log("👉 [DATA LAYER]: Direct Root वरून डेटा सापडला.");
+    } else if (result && result.value && result.value.mode) {
+        finalMode = result.value.mode;
+        finalVal = Number(result.value.val);
+        console.log("👉 [DATA LAYER]: result.value कप्प्यातून डेटा सापडला.");
+    }
+
+    console.log(`🔍 [DEEP LOG 3]: फायनल फिल्टर केलेला डेटा ➔ Mode: ${finalMode} | Value: ${finalVal}`);
+
+    // जर काहीच डेटा आला नसेल किंवा युझर मागे गेला असेल तर:
+    if (!finalMode) {
+        console.warn("%c❌ [DEEP LOG 4]: पॉप-अप मधून मोड मिळाला नाही, युझर बाहेर पडला! फंक्शन स्टॉप.", "color: #ef4444; font-weight: bold;");
+        return;
+    }
+
+    // पायरी २: अचूक मोडनुसार पुढचा कप्पा ट्रिगर करणे
+    if (finalMode === 'bonus_touch') {
+        if (finalVal === 0) {
+            console.log("🟢 [DEEP LOG 5]: Bonus +0 निवडले! थेट मास्टर सेव्हकडे जात आहे...");
+            if (typeof saveFiveRaidOutcome === 'function') {
+                saveFiveRaidOutcome('BONUS_ONLY', 0, 1, 0, "None (Only Bonus)");
+            }
+        } else {
+            console.log(`🟢 [DEEP LOG 5]: Bonus + ${finalVal} निवडले! आता ${finalVal} डिफेंडर निवडण्यासाठी खिडकी उघडत आहे...`);
+            if (typeof openFiveRaidDefenderSelector === 'function') {
+                openFiveRaidDefenderSelector(finalVal, 1, 'BONUS_TOUCH');
+            } else {
+                console.error("🚨 [ERROR]: openFiveRaidDefenderSelector फंक्शन सापडले नाही!");
+            }
+        }
+    } 
+    else if (finalMode === 'bonus_tackle') {
+        console.log("🚨 [DEEP LOG 5]: Bonus + Tackle निवडले! १ पकडणारा डिफेंडर निवडायला पाठवत आहे...");
+        if (typeof openFiveRaidDefenderSelector === 'function') {
+            openFiveRaidDefenderSelector(1, 1, 'BONUS_TACKLE');
+        } else {
+            console.error("🚨 [ERROR]: openFiveRaidDefenderSelector फंक्शन सापडले नाही!");
+        }
+    }
+}
+
+// 💡 मदतनीस: बोनस सोबत १ ते ७ टच पॉईंट्स निवडण्यासाठी फ्रेश पॉप-अप
+async function askFiveRaidTouchWithBonus() {
+    const { value: pts } = await Swal.fire({
+        title: 'बोनस सोबत किती टच पॉईंट्स (1 to 7) मिळाले?',
+        html: `
+            <div class="grid grid-cols-4 gap-2 p-2">
+                ${[1,2,3,4,5,6,7].map(num => `
+                    <button onclick="Swal.close('${num}')" class="bg-slate-800 text-white font-black text-lg py-3 rounded-xl active:bg-indigo-600">${num}</button>
+                `).join('')}
+            </div>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        background: '#111',
+        color: '#fff'
+    });
+
+    if (pts) {
+        const touch = Number(pts);
+        // बोनस + टच ➔ रायडर टीमला १ (बोनस) + X (टच) गुण
+        saveFiveRaidOutcome('BONUS_TOUCH', touch, 1, 0);
+    }
+}
+
+// 3️⃣ [EMPTY RAID BUTTON] - थेट १-क्लिक
+function emptyFiveRaid() {
+    console.log("⚠️ [5-5 RAID]: Empty Raid! नियमानुसार डिफेन्स टीम +१ गुण.");
+    saveFiveRaidOutcome('EMPTY_OUT', 0, 0, 1);
+}
+
+// 4️⃣ [TACKLE BUTTON] - (Deep Logs सह टॅकलचा १००% फिक्स कोड! 🛡️)
+async function tackleFiveRaid() {
+    console.log("%c🛡️ [DEEP LOG 1]: tackleFiveRaid() फंक्शन ट्रिगर झाले आहे!", "color: #ef4444; font-weight: bold; font-size: 12px;");
+    console.log(`📊 [CURRENT STATE]: window.fiveRaidCount = ${window.fiveRaidCount}`);
+
+    // १. सध्या डिफेन्स कोणती टीम करत आहे ते ओळखणे
+    const currentRaidingTeam = (window.fiveRaidCount % 2 !== 0) ? 'A' : 'B';
+    const defendingTeamTag = (currentRaidingTeam === 'A') ? 'B' : 'A';
+    console.log(`🤼 [DEEP LOG 2]: चालू रेडर टीम: ${currentRaidingTeam} | डिफेन्स करणारी टीम: ${defendingTeamTag}`);
+    
+    // २. डिफेन्स करणाऱ्या टीमचे प्लेयर्स ओढणे
+    let defendersList = [];
+    if (typeof currentMatchData !== 'undefined' && currentMatchData) {
+        defendersList = (defendingTeamTag === 'A') ? (currentMatchData.teamAPlayers || currentMatchData.teamA_players || []) : (currentMatchData.teamBPlayers || currentMatchData.teamB_players || []);
+        console.log(`📥 [DEEP LOG 3]: ओढलेली डिफेंडर लिस्ट:`, defendersList);
+    }
+
+    // जर यादी सापडली नाही तर सेफ्टी बॅकअप म्हणून डमी यादी
+    if (!defendersList || defendersList.length === 0) {
+        console.log("🛠️ [DEEP LOG 4]: खरी यादी नाही, ७ प्लेयर्सचा डमी बॅकअप लोड केला.");
+        defendersList = Array.from({length: 7}, (_, i) => ({ name: `Player ${defendingTeamTag}${i+1}`, no: i+1 }));
+    }
+
+    // ३. डिफेंडर निवडण्यासाठी बटन्स तयार करणे
+    let defenderButtonsHtml = `<div class="grid grid-cols-2 gap-2 p-1 font-sans">`;
+    defendersList.forEach(p => {
+        const pName = p.name || "Player";
+        const pNo = p.no || p.jersey || "";
+        const display = pNo ? `#${pNo} ${pName}` : pName;
+        
+        // थेट ऑब्जेक्ट बाहेर पास करण्यासाठी बदल
+        defenderButtonsHtml += `
+            <button onclick="console.log('👉 [CLICKED]: डिफेंडर ${pName} दाबला'); Swal.close({ defender: '${pName}' })" class="bg-slate-900 border border-zinc-800 text-white font-bold text-xs py-3 rounded-xl active:bg-red-950 active:text-red-400 truncate px-2 text-left">
+                🏃‍♂️ ${display}
+            </button>
+        `;
+    });
+    
+    // डायरेक्ट टीम टॅकल पॉइंट
+    defenderButtonsHtml += `
+        <button onclick="console.log('👉 [CLICKED]: Direct Team Tackle दाबले'); Swal.close({ defender: 'TEAM_TACKLE' })" class="col-span-2 bg-red-950/40 border border-red-900/40 text-red-400 font-black text-xs py-3 rounded-xl active:bg-red-900 active:text-white uppercase">
+            🛡️ Direct Team Tackle Point
+        </button>
+    </div>`;
+
+    console.log("🖥️ [UI SEARCH]: डिफेंडर निवडण्याचा पॉप-अप उघडत आहे...");
+    const swalResult = await Swal.fire({
+        title: 'पकडणारा डिफेंडर (Defender) निवडा:',
+        html: defenderButtonsHtml,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        background: '#111',
+        color: '#fff'
+    });
+
+    // 🔍 [DEEP LOG 5]: टॅकल पॉप-अपचा कच्चा डेटा तपासणे
+    console.log("🔍 [DEEP LOG 5]: टॅकल पॉप-अपचा कच्चा रिझल्ट (swalResult):", swalResult);
+
+    // 🎯 [THE FIX]: रूट किंवा व्हॅल्यू दोन्ही कप्प्यातून डिफेंडरचे नाव शोधणे
+    let selectedDefender = null;
+    if (swalResult && swalResult.defender) {
+        selectedDefender = swalResult.defender;
+    } else if (swalResult && swalResult.value && swalResult.value.defender) {
+        selectedDefender = swalResult.value.defender;
+    }
+
+    console.log(`🔍 [DEEP LOG 6]: फायनल फिल्टर केलेला डिफेंडर ➔ ${selectedDefender}`);
+
+    // ४. जर डिफेंडर अचूक मिळाला असेल तर पुढे पाठवणे
+    if (selectedDefender) {
+        console.log(`%c🏆 [DEEP LOG 7 - SUCCESS]: मास्टर सेव्हकडे जात आहे... खेळाडू: ${selectedDefender}`, "color: #22c55e; font-weight: bold;");
+        
+        if (typeof saveFiveRaidOutcome === 'function') {
+            saveFiveRaidOutcome('TACKLE', 0, 0, 1, selectedDefender);
+        } else {
+            console.error("🚨 [ERROR]: saveFiveRaidOutcome फंक्शन सापडले नाही!");
+        }
+    } else {
+        console.warn("%c❌ [DEEP LOG 8]: युझरने डिफेंडर निवडला नाही किंवा कॅन्सल केले!", "color: #eab308; font-weight: bold;");
+    }
+}
+
+// =================================================================
+// 🎯 5-5 RAIDS MODE: MASTER COMMON SAVE ENGINE (WITH DEFENDER TRACKING)
+// =================================================================
+/**
+ * सुधारित रचनेचा वापर करून raids_secure_log_M1 मध्ये डेटा ढकलण्यासाठी आणि addRaidToSummary ला ट्रिगर करण्यासाठी saveFiveRaidOutcome चा हा संपूर्ण कडक कोड
+ */
+
+// async function saveFiveRaidOutcome(actionType, touchPts, bonusPts, defensePts, defenderNames = "Team Defense") {
+//     const mId = typeof matchSetupData !== 'undefined' ? matchSetupData?.mId : "";
+//     const tId = typeof matchSetupData !== 'undefined' ? matchSetupData?.tId : "";
+
+//     // =================================================================
+//     // 🚨 🪙 [GOLDEN RAID GATEKEEPER]: सुवर्ण निकाल गोळा करणे आणि सेव्हिंग
+//     // =================================================================
+//     if (window.isGoldenRaidActiveNow === true) {
+//         console.log("🪙 [GOLDEN RESULT LOG]: सुवर्ण निकाल गोळा केला!");
+
+//         const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+//         const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+        
+//         const attackingTeam = window.goldenRaidAttackingTeam || 'A';
+//         const defendingTeam = (attackingTeam === 'A') ? 'B' : 'A';
+//         const finalRaiderName = window.goldenRaiderSelectedName || "Golden Raider";
+
+//         let isSuccess = (actionType === 'TOUCH_POINTS' || actionType === 'BONUS_ONLY' || actionType === 'BONUS_TOUCH');
+//         let finalWinnerTeamTag = isSuccess ? attackingTeam : defendingTeam;
+//         const finalWinnerName = (finalWinnerTeamTag === 'A') ? realTeamNameA : realTeamNameB;
+
+//         let displayResult = isSuccess ? "GOLDEN RAID SUCCESS" : "GOLDEN RAID CAUGHT";
+//         let displayDetails = isSuccess ? `👑 MAHA-WINNER: ${finalWinnerName} (OUT: ${defenderNames})` : `👑 MAHA-WINNER: ${finalWinnerName} (CAUGHT BY: ${defenderNames})`;
+
+//         if (typeof addRaidToSummary === 'function') {
+//             addRaidToSummary(finalWinnerTeamTag, finalRaiderName, displayResult, 1, displayDetails, false, false, true);
+//         }
+
+//         // 🔒 लोकल स्टोरेज लॉक - 'Finished' केले
+//         if (mId) localStorage.setItem(`match_status_${mId}`, "Finished");
+
+//         // ☁️ [💥 SAFE ASYNC UPDATE]: सुवर्ण निकाल आणि विनर मास्टर ऑब्जेक्टसह जतन!
+//         console.log("⏳ [DB SYNC]: गोल्डन रेड विजेता डेटाबेसमध्ये नोंदवत आहे...");
+//         try {
+//             // लोकल स्टोरेजमधून स्कोअरकार्ड बॅकअप घेणे
+//             let localCard = localStorage.getItem('global_score_card');
+//             let currentScoreCard = localCard ? JSON.parse(localCard) : { mainMatch: {teamA:0,teamB:0}, fiveRaid: {teamA:0,teamB:0}, goldenRaid: {teamA:0,teamB:0} };
+            
+//             // सुवर्ण रेडचा विनर पॉईंट सेट करणे
+//             currentScoreCard.goldenRaid.teamA = (finalWinnerTeamTag === 'A') ? 1 : 0;
+//             currentScoreCard.goldenRaid.teamB = (finalWinnerTeamTag === 'B') ? 1 : 0;
+//             localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+
+//             if (tId && mId && typeof db !== 'undefined') {
+//                 await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+//                     status: "Finished", 
+//                     winner: finalWinnerName, 
+//                     winner_id: finalWinnerTeamTag, 
+//                     lastUpdated: new Date().getTime(),
+//                     scoreCard: currentScoreCard // 🎯 मास्टर ऑब्जेक्ट डेटाबेसमध्ये सेव्ह!
+//                 });
+//             }
+//             console.log("✅ [DB SUCCESS]: गोल्डन रेडचा डेटा सुरक्षित क्लाउडवर पोहोचला!");
+//         } catch (dbErr) { console.error("🚨 [DB ERROR]: सुवर्ण निकाल सिंक फेल!", dbErr); }
+
+//         Swal.fire({
+//             title: '🔥 महासंग्राम संपला! 🔥',
+//             html: `<div class="text-sm font-sans space-y-3 p-1"><div class="bg-gradient-to-r from-amber-500 to-yellow-500 text-black px-4 py-3 rounded-2xl font-black text-sm uppercase tracking-tight shadow-xl">👑 ${finalWinnerName} विजेता!</div></div>`,
+//             icon: 'success', background: '#111', color: '#fff', confirmButtonText: '🏁 डॅशबोर्डला जा', confirmButtonColor: '#eab308', allowOutsideClick: false
+//         }).then(() => {
+//             const fivePanel = document.getElementById('fiveRaidBattleGroundPanel');
+//             if (fivePanel) fivePanel.classList.add('hidden');
+//             window.isFiveRaidModeOn = false; window.isGoldenRaidActiveNow = false;
+//             if (typeof loadPage === "function") loadPage('matches');
+//         });
+//         return; 
+//     }
+
+//     // =================================================================
+//     // 📊 मूळ ५-५ रेड्सचा नेहमीचा स्कोअरिंग फ्लो
+//     // =================================================================
+//     const currentRaidingTeam = (window.fiveRaidCount % 2 !== 0) ? 'A' : 'B';
+//     const currentDefendingTeam = (currentRaidingTeam === 'A') ? 'B' : 'A';
+
+//     let raiderName = "";
+//     if (currentRaidingTeam === 'A') { raiderName = window.fiveRaidOrderTeamA[window.currentFiveRaidIndexA] || "Raider A"; } 
+//     else { raiderName = window.fiveRaidOrderTeamB[window.currentFiveRaidIndexB] || "Raider B"; }
+
+//     const totalRaiderTeamPts = touchPts + bonusPts;
+    
+//     // १. UI स्क्रीनवरील आकडे बदलणे
+//     if (currentRaidingTeam === 'A') {
+//         if (totalRaiderTeamPts > 0) { const scorePanelA = document.getElementById('fiveRaidScoreA'); if (scorePanelA) scorePanelA.innerText = Number(scorePanelA.innerText) + totalRaiderTeamPts; }
+//         if (defensePts > 0) { const scorePanelB = document.getElementById('fiveRaidScoreB'); if (scorePanelB) scorePanelB.innerText = Number(scorePanelB.innerText) + defensePts; }
+//     } else {
+//         if (totalRaiderTeamPts > 0) { const scorePanelB = document.getElementById('fiveRaidScoreB'); if (scorePanelB) scorePanelB.innerText = Number(scorePanelB.innerText) + totalRaiderTeamPts; }
+//         if (defensePts > 0) { const scorePanelA = document.getElementById('fiveRaidScoreA'); if (scorePanelA) scorePanelA.innerText = Number(scorePanelA.innerText) + defensePts; }
+//     }
+
+//     // 🎯 [💥 STEP 1: REAL-TIME FIVE RAID SCORE CAPTURE]
+//     // स्क्रीनवरून ५-५ चा आत्ताचा ताजा स्कोअर लगेच गोळा करणे
+//     const fresh55ScoreA = Number(document.getElementById('fiveRaidScoreA')?.innerText || 0);
+//     const fresh55ScoreB = Number(document.getElementById('fiveRaidScoreB')?.innerText || 0);
+
+//     // लोकल स्टोरेजमधील मास्टर ऑब्जेक्ट अपडेट करणे (जेणेकरून मधेच बॅक गेले तरी डेटा उडणार नाही!)
+//     let localCard = localStorage.getItem('global_score_card');
+//     let currentScoreCard = localCard ? JSON.parse(localCard) : { mainMatch: {teamA:0,teamB:0}, fiveRaid: {teamA:0,teamB:0}, goldenRaid: {teamA:0,teamB:0} };
+    
+//     currentScoreCard.fiveRaid.teamA = fresh55ScoreA;
+//     currentScoreCard.fiveRaid.teamB = fresh55ScoreB;
+//     localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+
+//     // २. निकाल मजकूर सेट करणे
+//     let mainResult = ""; let mainPoints = 0; let mainDetails = ""; let mainTeam = currentRaidingTeam;
+//     if (actionType === 'TOUCH_POINTS') { mainResult = "TOUCH POINT"; mainPoints = touchPts; mainDetails = `OUT: ${defenderNames}`; } 
+//     else if (actionType === 'BONUS_ONLY') { mainResult = "BONUS POINT"; mainPoints = 1; mainDetails = "✨ BONUS COMPLETED"; } 
+//     else if (actionType === 'BONUS_TOUCH') { mainResult = "BONUS + TOUCH"; mainPoints = touchPts + 1; mainDetails = `💥 +${touchPts} PTS | OUT: ${defenderNames}`; } 
+//     else if (actionType === 'BONUS_TACKLE') { mainResult = "BONUS + TACKLE"; mainPoints = 1; mainDetails = `🛡️ CAUGHT BOTH TEAM +1`; } 
+//     else if (actionType === 'EMPTY_OUT') { mainResult = "EMPTY RAID"; mainPoints = 1; mainDetails = "⚠️ TIME EXPIRED / OUT"; mainTeam = currentDefendingTeam; } 
+//     else if (actionType === 'TACKLE') { mainResult = "TACKLE POINT"; mainPoints = 1; mainDetails = `🛡️ CAUGHT BY: ${defenderNames}`; mainTeam = currentDefendingTeam; }
+
+//     if (typeof addRaidToSummary === 'function') { addRaidToSummary(mainTeam, raiderName, mainResult, mainPoints, mainDetails, false, true); }
+
+//     if (currentRaidingTeam === 'A') { window.currentFiveRaidIndexA++; } else { window.currentFiveRaidIndexB++; }
+//     window.fiveRaidCount++; 
+
+//     // 🎯 [💥 STEP 2: REAL-TIME CLOUD SYNC BETWEEN RAIDS]
+//     // चालू सामन्यात प्रत्येक रेड संपताच ५-५ चा स्कोअर बॅकग्राउंडला फायरबेसवर सेव्ह करणे (Full Security)
+//     if (tId && mId && typeof db !== 'undefined') {
+//         db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+//             status: "five_raid",
+//             scoreCard: currentScoreCard,
+//             lastUpdated: new Date().getTime()
+//         }).then(() => console.log("☁️ [Mid-Five-Raid Sync]: रेड क्रमांक", window.fiveRaidCount - 1, "चा स्कोअर सिंक झाला."));
+//     }
+
+//     // 🛑 [१० रेड्स पूर्ण झाल्यावर विनर चेकिंग आणि अंतिम क्लोजर]
+//     if (window.fiveRaidCount > 10) {
+//         const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+//         const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+
+//         // 🎯 ५-५ चा स्पष्ट विजेता मिळाला ➔ स्टेटस 'Finished'
+//         if (fresh55ScoreA !== fresh55ScoreB) {
+//             let winnerText = fresh55ScoreA > fresh55ScoreB ? realTeamNameA : realTeamNameB;
+//             let winnerTag = fresh55ScoreA > fresh55ScoreB ? 'A' : 'B';
+
+//             if (mId) localStorage.setItem(`match_status_${mId}`, "Finished");
+
+//             console.log("⏳ [DB FINAL SYNC]: ५-५ चा अंतिम स्कोअर मास्टर ऑब्जेक्टसह क्लाउडवर लॉक करत आहे...");
+            
+//             const runEndBlock = async () => {
+//                 try {
+//                     if (tId && mId && typeof db !== 'undefined') {
+//                         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+//                             status: "Finished", 
+//                             winner: winnerText, 
+//                             winner_id: winnerTag, 
+//                             finalScore: `5-5 Mode: ${fresh55ScoreA}-${fresh55ScoreB}`, 
+//                             lastUpdated: new Date().getTime(),
+//                             scoreCard: currentScoreCard // 🎯 पूर्णपणे लॉक
+//                         });
+//                     }
+//                     console.log("✅ [DB SUCCESS]: ५-५ विजेता ऑफिशिअल मास्टर ऑब्जेक्टसह सेव्ह झाला!");
+//                 } catch (dbErr) { console.error("🚨 [DB ERROR]: ५-५ निकाल सिंक फेल!", dbErr); }
+
+//                 Swal.fire({ 
+//                     title: '५-५ रेड्सचा थरार संपला!', 
+//                     html: `<div class="text-sm font-sans space-y-2"><p class="font-black text-green-400 text-base">🏆 विजेता संघ: ${winnerText}</p></div>`, 
+//                     icon: 'success', background: '#111', color: '#fff', confirmButtonColor: '#22c55e', confirmButtonText: '🏁 डॅशबोर्डला जा', allowOutsideClick: false 
+//                 }).then(() => {
+//                     window.isFiveRaidModeOn = false;
+//                     if (document.getElementById('fiveRaidBattleGroundPanel')) { document.getElementById('fiveRaidBattleGroundPanel').classList.add('hidden'); }
+//                     if (typeof loadPage === "function") loadPage('matches');
+//                 });
+//             };
+
+//             runEndBlock();
+//             return;
+//         } 
+//         // 🎯 ५-५ मध्ये पुन्हा महा-टाय ➔ स्टेटस 'golden_raid'
+//         else {
+//             if (mId) localStorage.setItem(`match_status_${mId}`, "golden_raid");
+
+//             console.log("⏳ [DB TIE SYNC]: ५-५ टाय झाला, डेटाबेस 'golden_raid' मोडवर शिफ्ट करत आहे...");
+//             const runTieBlock = async () => {
+//                 try {
+//                     if (tId && mId && typeof db !== 'undefined') {
+//                         await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({ 
+//                             status: "golden_raid", 
+//                             lastUpdated: new Date().getTime(),
+//                             scoreCard: currentScoreCard
+//                         });
+//                     }
+//                     console.log("✅ [DB SUCCESS]: स्टेटस 'golden_raid' यशस्वीरित्या सिंक झाला!");
+//                 } catch (dbErr) { console.error("🚨 [DB ERROR]: golden_raid स्टेटस सिंक फेल!", dbErr); }
+
+//                 Swal.fire({ 
+//                     title: 'अजूनही महा-टाय! 🤝', 
+//                     html: `<div class="text-sm font-sans space-y-2"><p class="font-black text-amber-500 text-sm uppercase">पाच-पाच रेड्समध्येही दोन्ही संघ बरोबरीत!</p><p class="text-xs text-zinc-400">आता निकाल फक्त 'गोल्डन編 रेड' वर लागणार.</p></div>`, 
+//                     icon: 'warning', background: '#111', color: '#fff', confirmButtonText: '⚡ GOLDEN RAID सुरू करा', confirmButtonColor: '#f97316', allowOutsideClick: false 
+//                 }).then(() => { 
+//                     if (typeof initGoldenRaidSetup === 'function') { initGoldenRaidSetup(); } 
+//                 });
+//             };
+
+//             runTieBlock();
+//             return;
+//         }
+//     }
+
+//     const nextTeamTag = (window.fiveRaidCount % 2 !== 0) ? 'A' : 'B';
+//     if (typeof updateFiveRaidDisplay === 'function') { updateFiveRaidDisplay(nextTeamTag); }
+// }
+
+/**
+ * ५-५ रेड्सचे १० काउंट्स पूर्ण झाल्यावर किंवा गोल्डन रेडचा निकाल लागल्यावर, या फंक्शनने स्वतः विनर ठरवण्याऐवजी किंवा डीबी अपडेट करण्याऐवजी, 
+ * थेट आपल्या मास्टर confirmEndMatch कडे फ्लो सुपूर्द केला पाहिजे.
+ */
+async function saveFiveRaidOutcome(actionType, touchPts, bonusPts, defensePts, defenderNames = "Team Defense") {
+    // =========================================================================
+    // 📂 SECTION 1: THE GOLDEN RAID INTERCEPTOR & GATEKEEPER 🪙
+    // =========================================================================
+    const mId = typeof matchSetupData !== 'undefined' ? matchSetupData?.mId : "";
+    const tId = typeof matchSetupData !== 'undefined' ? matchSetupData?.tId : "";
+
+    if (window.isGoldenRaidActiveNow === true || matchStage === "GOLDEN_RAID") {
+        console.log("%c🪙 [GOLDEN RESULT INTENT]: सुवर्ण निकाल गोळा केला जात आहे...", "background: #eab308; color: #000; font-weight: bold;");
+
+        const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+        const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+        
+        const attackingTeam = window.goldenRaidTeam || window.goldenRaidAttackingTeam || 'A';
+        const defendingTeam = (attackingTeam === 'A') ? 'B' : 'A';
+        const finalRaiderName = window.goldenRaiderSelectedName || "Golden Raider";
+
+        let isSuccess = (actionType === 'TOUCH_POINTS' || actionType === 'BONUS_ONLY' || actionType === 'BONUS_TOUCH');
+        let finalWinnerTeamTag = isSuccess ? attackingTeam : defendingTeam;
+        const finalWinnerName = (finalWinnerTeamTag === 'A') ? realTeamNameA : realTeamNameB;
+
+        let displayResult = isSuccess ? "GOLDEN RAID SUCCESS" : "GOLDEN RAID CAUGHT";
+        let displayDetails = isSuccess ? `👑 MAHA-WINNER: ${finalWinnerName} (OUT: ${defenderNames})` : `👑 MAHA-WINNER: ${finalWinnerName} (CAUGHT BY: ${defenderNames})`;
+
+        // अ. टाइमलाईन समरीमध्ये गोल्डन रेडची कडक सोनेरी नोंद करणे
+        if (typeof addRaidToSummary === 'function') {
+            addRaidToSummary(finalWinnerTeamTag, finalRaiderName, displayResult, 1, displayDetails, false, false, true);
+        }
+
+        // ब. लोकल स्कोरकार्ड मेमरी अपडेट
+        let localCard = localStorage.getItem('global_score_card');
+        let currentScoreCard = localCard ? JSON.parse(localCard) : { mainMatch: {teamA:0,teamB:0}, fiveRaid: {teamA:0,teamB:0}, goldenRaid: {teamA:0,teamB:0} };
+        
+        currentScoreCard.goldenRaid.teamA = (finalWinnerTeamTag === 'A') ? 1 : 0;
+        currentScoreCard.goldenRaid.teamB = (finalWinnerTeamTag === 'B') ? 1 : 0;
+        localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+
+        console.log("⚙️ [GOLDEN OVER DIRECT ROUTING]: सुवर्ण निकाल थेट मुख्य मास्टर इंजिनकडे पाठवत आहे...");
+        
+        // 🚨 [💥 THE MASTER UNIFICATION]: डेटाबेस आणि Swal चे डुप्लिकेशन काढून थेट एकाच इंजिनला ताबा दिला!
+        if (typeof confirmEndMatch === "function") {
+            await confirmEndMatch(finalWinnerTeamTag, `Golden Raid Result: ${displayResult}`);
+        }
+        return; 
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 2: THE CORE 5-5 RAID CALCULATOR & UI INJECTION 📊
+    // =========================================================================
+    const currentRaidingTeam = (window.fiveRaidCount % 2 !== 0) ? 'A' : 'B';
+    const currentDefendingTeam = (currentRaidingTeam === 'A') ? 'B' : 'A';
+
+    let raiderName = "";
+    if (currentRaidingTeam === 'A') { 
+        raiderName = window.fiveRaidOrderTeamA[window.currentFiveRaidIndexA] || "Raider A"; 
+    } else { 
+        raiderName = window.fiveRaidOrderTeamB[window.currentFiveRaidIndexB] || "Raider B"; 
+    }
+
+    const totalRaiderTeamPts = touchPts + bonusPts;
+    
+    // १. स्क्रीनवरील ५-५ पॅनेलचे चालू आकडे तातडीने बदलणे
+    if (currentRaidingTeam === 'A') {
+        if (totalRaiderTeamPts > 0) { const scorePanelA = document.getElementById('fiveRaidScoreA'); if (scorePanelA) scorePanelA.innerText = Number(scorePanelA.innerText) + totalRaiderTeamPts; }
+        if (defensePts > 0) { const scorePanelB = document.getElementById('fiveRaidScoreB'); if (scorePanelB) scorePanelB.innerText = Number(scorePanelB.innerText) + defensePts; }
+    } else {
+        if (totalRaiderTeamPts > 0) { const scorePanelB = document.getElementById('fiveRaidScoreB'); if (scorePanelB) scorePanelB.innerText = Number(scorePanelB.innerText) + totalRaiderTeamPts; }
+        if (defensePts > 0) { const scorePanelA = document.getElementById('fiveRaidScoreA'); if (scorePanelA) scorePanelA.innerText = Number(scorePanelA.innerText) + defensePts; }
+    }
+
+    // २. स्क्रीनवरून ५-५ चा आत्ताचा ताजा स्कोअर लगेच गोळा करणे
+    const fresh55ScoreA = Number(document.getElementById('fiveRaidScoreA')?.innerText || 0);
+    const fresh55ScoreB = Number(document.getElementById('fiveRaidScoreB')?.innerText || 0);
+
+    // ३. मास्टर ऑब्जेक्ट लोकल मेमरीत वेगाने सिंक करणे
+    let localCard = localStorage.getItem('global_score_card');
+    let currentScoreCard = localCard ? JSON.parse(localCard) : { mainMatch: {teamA:0,teamB:0}, fiveRaid: {teamA:0,teamB:0}, goldenRaid: {teamA:0,teamB:0} };
+    
+    currentScoreCard.fiveRaid.teamA = fresh55ScoreA;
+    currentScoreCard.fiveRaid.teamB = fresh55ScoreB;
+    localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+
+
+    // =========================================================================
+    // 📂 SECTION 3: TIMELINE STREAM INTERFACES & MID-RAID SYNC ☁️
+    // =========================================================================
+    let mainResult = ""; let mainPoints = 0; let mainDetails = ""; let mainTeam = currentRaidingTeam;
+    if (actionType === 'TOUCH_POINTS') { mainResult = "TOUCH POINT"; mainPoints = touchPts; mainDetails = `OUT: ${defenderNames}`; } 
+    else if (actionType === 'BONUS_ONLY') { mainResult = "BONUS POINT"; mainPoints = 1; mainDetails = "✨ BONUS COMPLETED"; } 
+    else if (actionType === 'BONUS_TOUCH') { mainResult = "BONUS + TOUCH"; mainPoints = touchPts + 1; mainDetails = `💥 +${touchPts} PTS | OUT: ${defenderNames}`; } 
+    else if (actionType === 'BONUS_TACKLE') { mainResult = "BONUS + TACKLE"; mainPoints = 1; mainDetails = `🛡️ CAUGHT BOTH TEAM +1`; } 
+    else if (actionType === 'EMPTY_OUT') { mainResult = "EMPTY RAID"; mainPoints = 1; mainDetails = "⚠️ TIME EXPIRED / OUT"; mainTeam = currentDefendingTeam; } 
+    else if (actionType === 'TACKLE') { mainResult = "TACKLE POINT"; mainPoints = 1; mainDetails = `🛡️ CAUGHT BY: ${defenderNames}`; mainTeam = currentDefendingTeam; }
+
+    if (typeof addRaidToSummary === 'function') { 
+        addRaidToSummary(mainTeam, raiderName, mainResult, mainPoints, mainDetails, false, true); 
+    }
+
+    // इंडेक्स आणि रेड काउंटर्स पुढे सरकवणे
+    if (currentRaidingTeam === 'A') { window.currentFiveRaidIndexA++; } else { window.currentFiveRaidIndexB++; }
+    window.fiveRaidCount++; 
+
+    // चालू सामन्यात प्रत्येक रेड संपताच ५-५ चा स्कोअर बॅकग्राउंडला फायरबेसवर ढकलणे (Full Safety)
+    if (tId && mId && typeof db !== 'undefined') {
+        db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({
+            status: "five_raid",
+            scoreCard: currentScoreCard,
+            lastUpdated: new Date().getTime()
+        }).then(() => console.log(`☁️ [Mid-Raid-Sync]: रेड क्रमांक ${window.fiveRaidCount - 1} चा स्कोअर क्लाउडवर सुरक्षित सिंक झाला.`));
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 4: 10-RAIDS FINITE CRITERIA & UNIFIED CLOSURE 🛑
+    // =========================================================================
+    if (window.fiveRaidCount > 10) {
+        console.log("%c🛑 [10 RAIDS COMPLETED]: ५-५ च्या सर्व १० रेड्स पूर्ण झाल्या! निकाल तपासत आहे...", "color: #f97316; font-weight: bold;");
+
+        // 🎯 परिस्थिती अ: ५-५ चा स्पष्ट विजेता मिळाला ➔ थेट मास्टर क्लोजर इंजिनला ट्रिगर करा!
+        if (fresh55ScoreA !== fresh55ScoreB) {
+            console.log("➡️ [DECISION]: ५-५ मध्ये रिझल्ट लागला! ताबा confirmEndMatch() कडे सुपूर्द करत आहे...");
+            
+            if (typeof confirmEndMatch === "function") {
+                // आपण विनर टॅग मॅन्युअली पास न करता रिकामे सोडले, जेणेकरून तो स्वतः ५-५ चे गुण मोजून फायनल क्लोज करेल!
+                await confirmEndMatch(); 
+            }
+            return;
+        } 
+        
+        // 🎯 परिस्थिती ब: ५-५ मध्ये पुन्हा महा-टाय ➔ स्टेटस 'golden_raid' वर नेऊन ब्रेक लावणे
+        else {
+            if (mId) localStorage.setItem(`match_status_${mId}`, "golden_raid");
+            console.log("🤝 [5-5 TIED]: पाच-पाच रेड्समध्येही टाय झाला! आता 'golden_raid' मोडवर जावे लागेल.");
+
+            try {
+                if (tId && mId && typeof db !== 'undefined') {
+                    await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({ 
+                        status: "golden_raid", 
+                        lastUpdated: new Date().getTime(),
+                        scoreCard: currentScoreCard
+                    });
+                }
+                console.log("✅ [DB SUCCESS]: स्टेटस 'golden_raid' यशस्वीरित्या क्लाउडवर अपडेट झाला!");
+            } catch (dbErr) { console.error("🚨 [DB ERROR]: golden_raid स्टेटस सिंक फेल!", dbErr); }
+
+            Swal.fire({ 
+                title: 'अजूनही महा-टाय! 🤝', 
+                html: `<div class="text-sm font-sans space-y-2"><p class="font-black text-amber-500 text-sm uppercase">पाच-पाच रेड्समध्येही दोन्ही संघ बरोबरीत!</p><p class="text-xs text-zinc-400">आता अंतिम निकाल फक्त 'गोल्डन रेड' (Sudden Death) वर लागणार.</p></div>`, 
+                icon: 'warning', background: '#111', color: '#fff', confirmButtonText: '⚡ GOLDEN RAID सुरू करा', confirmButtonColor: '#f97316', allowOutsideClick: false 
+            }).then(() => { 
+                if (typeof initGoldenRaidSetup === 'function') { initGoldenRaidSetup(); } 
+            });
+            return;
+        }
+    }
+
+    // जर १० रेड्स पूर्ण झाल्या नसतील, तर पुढच्या टीमचा टर्न डिस्प्लेवर सेट करणे
+    const nextTeamTag = (window.fiveRaidCount % 2 !== 0) ? 'A' : 'B';
+    if (typeof updateFiveRaidDisplay === 'function') { 
+        updateFiveRaidDisplay(nextTeamTag); 
+    }
+}
+
+
+/** 🎛️ DEFENDER SELECTION WINDOW (नो चेंज - लॉजिक १००% सुरक्षित) */
+async function openFiveRaidDefenderSelector(maxSelectionCount, bonusValue, actionTag) {
+    console.log(`%c🎬 [DEFENDER SQUAD SELECTOR]: उघडत आहे. संख्या लिमिट: ${maxSelectionCount}`, "color: #3b82f6; font-weight: bold;");
+
+    const currentRaidingTeam = (window.fiveRaidCount % 2 !== 0) ? 'A' : 'B';
+    const defendingTeamTag = (currentRaidingTeam === 'A') ? 'B' : 'A';
+    
+    let defendersList = [];
+    if (typeof currentMatchData !== 'undefined' && currentMatchData) {
+        defendersList = (defendingTeamTag === 'A') ? (currentMatchData.teamAPlayers || currentMatchData.teamA_players || []) : (currentMatchData.teamBPlayers || currentMatchData.teamB_players || []);
+    }
+
+    if (!defendersList || defendersList.length === 0) {
+        defendersList = Array.from({length: 12}, (_, i) => ({ name: `Player ${defendingTeamTag}${i+1}`, no: defendingTeamTag === 'A' ? i+1 : 21+i }));
+    }
+
+    window.tempSelectedFiveDefs = []; 
+
+    let popupTitle = `आऊट झालेले ${maxSelectionCount} डिफेंडर निवडा:`;
+    if (actionTag === 'BONUS_TACKLE') popupTitle = `टॅकल करणारा (Tackle) डिफेंडर निवडा:`;
+
+    await Swal.fire({
+        title: popupTitle,
+        html: `
+            <div class="text-[10px] text-orange-500 font-bold uppercase mb-2 text-left pl-1">
+                निवडलेले: <span id="swalSelCount">0</span> / ${maxSelectionCount}
+            </div>
+            <div class="grid grid-cols-2 gap-2 p-1 font-sans max-h-60 overflow-y-auto">
+                ${defendersList.map(p => {
+                    const pName = p.name || "Player";
+                    const pNo = p.no || p.jersey || "0";
+                    return `
+                        <button id="defBtn_${pNo}" onclick="toggleFiveRaidDefenderSelection('${pName}', '${pNo}', ${maxSelectionCount})" class="bg-slate-900 border border-zinc-800 text-white font-bold text-xs py-3 rounded-xl transition-all truncate px-2 text-left flex items-center gap-1.5">
+                            <span id="dot_${pNo}" class="w-2 h-2 rounded-full bg-zinc-700"></span>
+                            <span>#${pNo} ${pName}</span>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+            <button onclick="Swal.close('DIRECT_TEAM')" class="w-full bg-slate-800 border border-zinc-700 text-zinc-400 font-black text-[10px] py-2.5 rounded-xl mt-3 uppercase">
+                🛡️ Direct Team Point (नावे निवडायचे नाहीत)
+            </button>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        background: '#111',
+        color: '#fff'
+    }).then((result) => {
+        let finalDefendersNames = "Team Defense";
+        
+        if (window.tempSelectedFiveDefs && window.tempSelectedFiveDefs.length > 0) {
+            finalDefendersNames = window.tempSelectedFiveDefs.join(", ");
+        } else if (result && result.value && result.value !== 'DIRECT_TEAM') {
+            finalDefendersNames = result.value;
+        }
+
+        console.log(`💥 [SQUAD SELECTOR COMPLETE]: Result Locked ➔ ${finalDefendersNames}`);
+        
+        if (actionTag === 'TOUCH_POINTS') {
+            saveFiveRaidOutcome('TOUCH_POINTS', maxSelectionCount, 0, 0, finalDefendersNames);
+        } else if (actionTag === 'BONUS_TOUCH') {
+            saveFiveRaidOutcome('BONUS_TOUCH', maxSelectionCount, 1, 0, finalDefendersNames);
+        } else if (actionTag === 'BONUS_TACKLE') {
+            saveFiveRaidOutcome('BONUS_TACKLE', 0, 1, 1, finalDefendersNames);
+        }
+    });
+}
+
+
+
+/*******/////////*******// 🪙 [GOLDEN RAID SETUP]: टॉस आणि सिस्टीम निवड पॉप-अप //////////////////************************ */
+
+// 🪙 [GOLDEN RAID SETUP]: टॉस आणि सिस्टीम निवड पॉप-अप
+// 🪙 [GOLDEN TOSS & PLAYER WINDOW]: टॉस झाल्यावर थेट खेळाडू निवड विंडो उघडणे
+async function initGoldenRaidSetup() {
+    console.log("%c🪙 [GOLDEN LOG 1]: initGoldenRaidSetup() सुरू झाले!", "color: #f59e0b; font-weight: bold; font-size: 13px;");
+
+    const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+    const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+
+    // १. टॉसचा कडक निऑन पॉप-अप
+    const { value: tossResult } = await Swal.fire({
+        title: 'गोल्डन रेड (Golden Raid) टॉस निकाल',
+        html: `
+            <div class="space-y-4 p-1 font-sans text-left">
+                <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider pl-1">टॉस जिंकून 'रेडिंग' करणारा संघ निवडा:</p>
+                <div class="flex flex-col gap-2.5">
+                    <button onclick="Swal.getInput().value = 'A'; Swal.clickConfirm();" class="w-full bg-green-950/60 border border-green-500/30 text-green-400 py-3.5 rounded-xl text-xs font-black uppercase px-4 flex justify-between items-center">
+                        <span>🏃‍♂️ ${realTeamNameA}</span>
+                    </button>
+                    <button onclick="Swal.getInput().value = 'B'; Swal.clickConfirm();" class="w-full bg-blue-950/60 border border-blue-500/30 text-blue-400 py-3.5 rounded-xl text-xs font-black uppercase px-4 flex justify-between items-center">
+                        <span>🏃‍♂️ ${realTeamNameB}</span>
+                    </button>
+                </div>
+            </div>
+        `,
+        input: 'text',
+        inputAttributes: { style: 'display: none;' },
+        showConfirmButton: false, allowOutsideClick: false, background: '#111', color: '#fff'
+    });
+
+    console.log(`🔍 [GOLDEN LOG 2]: टॉसचा निकाल मिळाला ➔ Team "${tossResult}"`);
+
+    if (tossResult) {
+        // मास्टर ग्लोबल फ्लॅग्स मेमरी लॉक करणे
+        window.isGoldenRaidActiveNow = true; 
+        window.goldenRaidAttackingTeam = tossResult;
+
+        // ५-५ च्या काउंटरचा आयडी सुरक्षित ठेवून टेक्स्ट बदलणे
+        const roundCounterEl = document.getElementById('fiveRaidRoundCounter');
+        if (roundCounterEl) {
+            roundCounterEl.innerText = "⚡ GOLDEN";
+            console.log("✅ [DOM]: काउंटर टेक्स्ट यशस्वी बदलला.");
+        }
+
+        // २. 💥 [THE MASTER INJECTION]: मॅच टाईमलाईनमध्ये कडक सोनेरी ब्रेक (Divider) ढकलणे!
+        const modalRaidList = document.getElementById('modalRaidList');
+        if (modalRaidList && !window.goldenRaidDividerInserted) {
+            window.goldenRaidDividerInserted = true; // दोबारा पडू नये म्हणून लॉक
+            const goldenDivider = document.createElement('div');
+            goldenDivider.className = "my-4 mx-1 p-2 bg-gradient-to-r from-yellow-950 via-slate-900 to-yellow-950 border border-yellow-500/40 rounded-xl text-center shadow-lg animate-pulse";
+            goldenDivider.innerHTML = `
+                <p class="text-[10px] text-yellow-500 font-black tracking-widest uppercase">⚡ 5-5 RAIDS MODE TIED AGAIN</p>
+                <p class="text-[8px] text-white font-bold uppercase mt-0.5">👑 GOLDEN RAID (SUDDEN DEATH) STARTED</p>
+            `;
+            modalRaidList.prepend(goldenDivider);
+            console.log("✅ [TIMELINE]: सुवर्ण ब्रेक यशस्वी इन्सर्ट झाला!");
+        }
+
+        // ३. रेडर यादी उघडणे (Match Data मधून)
+        let playersList = [];
+        if (typeof currentMatchData !== 'undefined' && currentMatchData) {
+            playersList = (tossResult === 'A') 
+                ? (currentMatchData.teamAPlayers || currentMatchData.teamA_players || []) 
+                : (currentMatchData.teamBPlayers || currentMatchData.teamB_players || []);
+        }
+        if (!playersList || playersList.length === 0) {
+            playersList = Array.from({length: 5}, (_, i) => ({ name: `Raider ${tossResult}${i+1}`, no: i+1 }));
+        }
+
+        const { value: selectedRaiderName } = await Swal.fire({
+            title: 'गोल्डन रेडसाठी रेडर निवडा:',
+            html: `
+                <div class="grid grid-cols-2 gap-2 p-1 font-sans">
+                    ${playersList.map(p => `
+                        <button onclick="Swal.getInput().value = '${p.name}'; Swal.clickConfirm();" class="bg-slate-900 border border-zinc-800 text-white font-bold text-xs py-3 rounded-xl truncate px-2 text-left">
+                            🏃‍♂️ #${p.no || p.jersey || ''} ${p.name}
+                        </button>
+                    `).join('')}
+                </div>
+            `,
+            input: 'text',
+            inputAttributes: { style: 'display: none;' },
+            showConfirmButton: false, allowOutsideClick: false, background: '#111', color: '#fff'
+        });
+
+        window.goldenRaiderSelectedName = selectedRaiderName || "Golden Raider";
+        console.log(`👤 [GOLDEN LOG 3]: निवडलेला अंतिम रेडर ➔ ${window.goldenRaiderSelectedName}`);
+        
+        // ५-५ च्या पॅनेलवरील नाव बदलणे
+        const activeNameLabel = document.getElementById('fiveRaidActiveRaiderName');
+        if (activeNameLabel) activeNameLabel.innerText = window.goldenRaiderSelectedName;
+
+        // पॅनेलवरील टीम बॅज सोनेरी आणि ॲनिमेटेड करणे
+        const badgeEl = document.getElementById('fiveRaidActiveTeamBadge');
+        if (badgeEl) {
+            badgeEl.innerText = `GOLDEN RAID [TEAM ${tossResult}]`;
+            badgeEl.className = "bg-yellow-500 text-black font-black text-[8px] px-2 py-0.5 rounded uppercase animate-pulse";
+        }
+    }
+}
+
+// ⚡ [GOLDEN RAID UI ENGINE]: स्क्रीनवर गोल्डन रेड पॅनेल दाखवणे (WITH DEEP LOGS)
+// ⚡ [GOLDEN RAID UI ENGINE]: स्क्रीनवर ५-५ च्या डब्यातच गोल्डन पॅनेल री-राइट करणे
+function startGoldenRaidMode(raidingTeamTag) {
+    console.log(`%c⚡ [GOLDEN LOG 4]: startGoldenRaidMode() सुरू. टीम टॅग: ${raidingTeamTag}`, "color: #eab308; font-weight: bold;");
+    
+    window.goldenRaidTeam = raidingTeamTag; // ग्लोबल मेमरी लॉक
+    
+    const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+    const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+    const activeTeamName = (raidingTeamTag === 'A') ? realTeamNameA : realTeamNameB;
+
+    const fivePanel = document.getElementById('fiveRaidBattleGroundPanel');
+    if (!fivePanel) {
+        console.error("🚨 [GOLDEN FATAL ERROR]: fiveRaidBattleGroundPanel आयडी स्क्रीनवर सापडला नाही!");
+        return;
+    }
+
+    // ५-५ चा पॅनेल चालू ठेवून त्याची बॉर्डर गोल्डन करणे
+    fivePanel.classList.remove('hidden');
+    fivePanel.classList.add('flex');
+    fivePanel.classList.remove('border-orange-500/20');
+    fivePanel.classList.add('border-yellow-500/40');
+
+    // ५-५ च्या डब्याचा जुना कचरा साफ करून तिथे थेट नवीन सुवर्ण बटन्स बसवणे
+    fivePanel.innerHTML = `
+        <div id="goldenRaidBattleGroundPanel" class="flex flex-col w-full anim-fade-in">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-3">
+                <h3 class="text-yellow-500 font-black italic text-xs uppercase tracking-wider animate-pulse">⚡ GOLDEN RAID MODE (SUDDEN DEATH)</h3>
+                <span class="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-[8px] font-black px-2 py-0.5 rounded-md uppercase">FINAL RAID</span>
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-950/40 to-zinc-900 border border-amber-500/20 p-3 rounded-xl flex items-center justify-between shadow-inner mb-4">
+                <div>
+                    <p class="text-[7px] text-zinc-500 font-black uppercase">ATTACKING SQUAD (टॉस विजेता)</p>
+                    <p class="text-white text-xs font-black uppercase mt-0.5">${activeTeamName}</p>
+                </div>
+                <div class="bg-yellow-500 text-black font-black text-[8px] px-2 py-0.5 rounded uppercase shadow-sm">
+                    DO OR DIE RAID
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
+                <button onclick="saveGoldenRaidOutcome('SUCCESS', 1, 'रेडर यशस्वी रीतीने पॉईंट घेऊन परतला!')" class="bg-green-950/60 border border-green-500/30 text-green-400 font-black py-4 rounded-xl text-[10px] uppercase tracking-wide active:bg-green-900 shadow-md flex flex-col items-center justify-center gap-1 active:scale-95">
+                    <span class="text-base">🏆</span>
+                    <span>RAID SUCCESS</span>
+                </button>
+
+                <button onclick="saveGoldenRaidOutcome('TACKLE', 1, 'डिफेन्सने策 रेडरला कडक पकडले!')" class="bg-red-950/60 border border-red-500/30 text-red-400 font-black py-4 rounded-xl text-[10px] uppercase tracking-wide active:bg-red-900 shadow-md flex flex-col items-center justify-center gap-1 active:scale-95">
+                    <span class="text-base">🛡️</span>
+                    <span>RAIDER CAUGHT</span>
+                </button>
+
+                <button onclick="saveGoldenRaidOutcome('EMPTY_OUT', 1, 'एम्प्टी रेड टाकल्यामुळे नियमानुसार रेडर आऊट!')" class="bg-slate-900 border border-zinc-800 text-zinc-400 font-black py-4 rounded-xl text-[10px] uppercase tracking-wide active:bg-slate-850 shadow-md flex flex-col items-center justify-center gap-1 active:scale-95">
+                    <span class="text-base">⚠️</span>
+                    <span>EMPTY RAID OUT</span>
+                </button>
+            </div>
+        </div>
+    `;
+    console.log("%c✅ [GOLDEN LOG 5]: सुवर्ण पॅनेल यशस्वी रिप्लेस झाला आहे!", "color: #10b981; font-weight: bold;");
+}
+
+/**
+ * तोडगा: गोल्डन रेडच्या पोटात scoreCard परमनंट लॉक करणे
+आपण तुझा मूळचा addRaidToSummary चा कडक फ्लो, Swal चा महासंग्राम विनर पॉप-अप, आणि fivePanel लपवण्याचं लॉजिक जसं च्या तसं सुरक्षित ठेवलं आहे.
+फक्त निकाल लागताच लोकल स्टोरेजमधून फ्रेश global_score_card ओढून, जो संघ जिंकला असेल त्याच्या goldenRaid च्या कप्प्यात 1 पॉईंट परमनंट लॉक करून तो थेट डेटाबेसमध्ये कसा सिंक करायचा, ते फिक्स केलं आहे.
+ */
+
+// async function saveGoldenRaidOutcome(statusType, logDetails) {
+//     console.log(`%c🏁 [GOLDEN PROCESS]: Type: ${statusType}`, "background: #eab308; color: #000; font-weight: bold;");
+
+//     const mId = typeof matchSetupData !== 'undefined' ? matchSetupData?.mId : "";
+//     const tId = typeof matchSetupData !== 'undefined' ? matchSetupData?.tId : "";
+
+//     const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+//     const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+
+//     const raidingTeam = window.goldenRaidTeam; 
+//     const defendingTeam = (raidingTeam === 'A') ? 'B' : 'A';
+
+//     let finalWinnerTeamTag = (statusType === 'SUCCESS') ? raidingTeam : defendingTeam;
+//     const finalWinnerName = (finalWinnerTeamTag === 'A') ? realTeamNameA : realTeamNameB;
+
+//     // 🚀 [THE MASTER LINK]: एक्स्ट्रा फंक्शन उडवून थेट मूळ फंक्शनला कॉल केला
+//     if (typeof addRaidToSummary === 'function') {
+//         addRaidToSummary(
+//             finalWinnerTeamTag, 
+//             `GOLDEN RAID [${raidingTeam}]`, 
+//             statusType === 'SUCCESS' ? "GOLDEN RAID SUCCESS" : "GOLDEN RAID CAUGHT", 
+//             1, 
+//             `👑 MAHA-WINNER: ${finalWinnerName} (${logDetails})`,
+//             false,
+//             false,
+//             true // 🌟 हा शेवटचा पॅरामीटर गोल्डन कार्ड आणि डिव्हाइइर ट्रिगर करेल!
+//         );
+//     }
+
+//     // 🎯 [💥 MASTER SCORECARD GOLDEN LOCK]
+//     // लोकल स्टोरेजमधून जुना मास्टर ऑब्जेक्ट आणणे आणि गोल्डन रेडचा आलेख बदलणे
+//     let localCard = localStorage.getItem('global_score_card');
+//     let currentScoreCard = localCard ? JSON.parse(localCard) : {
+//         mainMatch:  { teamA: 0, teamB: 0 },
+//         fiveRaid:   { teamA: 0, teamB: 0 },
+//         goldenRaid: { teamA: 0, teamB: 0 }
+//     };
+
+//     // जो संघ सुवर्ण रेड जिंकला, त्याच्या कप्प्यात १ पॉईंट लॉक केला!
+//     currentScoreCard.goldenRaid.teamA = (finalWinnerTeamTag === 'A') ? 1 : 0;
+//     currentScoreCard.goldenRaid.goldenRaid?.teamB || 0; // सेफ साईड बॅकअप
+//     currentScoreCard.goldenRaid.teamB = (finalWinnerTeamTag === 'B') ? 1 : 0;
+
+//     // लोकल स्टोरेज अपडेट
+//     localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+//     if (mId) localStorage.setItem(`match_status_${mId}`, "Finished");
+
+//     console.log("%c📊 [GOLDEN SCORE LOCKED]: मास्टर ऑब्जेक्टमध्ये सुवर्ण रेडचा स्कोअर नोंदवला!", "color: #22c55e; font-weight: bold;");
+//     console.dir(currentScoreCard.goldenRaid);
+
+//     // ☁️ [💥 SAFE ASYNC UPDATE]: डेटाबेसमध्ये 'Finished' स्टेटससह संपूर्ण मास्टर ऑब्जेक्ट जतन!
+//     try {
+//         if (tId && mId && typeof db !== 'undefined') {
+//             await db.collection("tournaments").doc(tId).collection("matches").doc(mId).update({ 
+//                 status: "Finished", 
+//                 winner: finalWinnerName, 
+//                 winner_id: finalWinnerTeamTag,
+//                 finalScore: `Golden Raid Winner: ${finalWinnerName}`,
+//                 lastUpdated: new Date().getTime(),
+                
+//                 // 🎯 [SINGLE SOURCE OF TRUTH]: अख्खा scoreCard क्लाउडवर पाठवला!
+//                 scoreCard: currentScoreCard
+//             });
+//             console.log("✅ [DB SUCCESS]: गोल्डन रेडचा निकाल ऑफिशिअल मास्टर ऑब्जेक्टसह डेटाबेसमध्ये लॉक झाला!");
+//         } else if (typeof updateMatchStatusInDB === 'function') {
+//             // जर तुझ्याकडे कॉमन डीबी फंक्शन असेल तर त्यात डेटा पाठवणे
+//             await updateMatchStatusInDB('Finished', { 
+//                 goldenRaidWinner: finalWinnerName, 
+//                 goldenRaidWinnerTag: finalWinnerTeamTag,
+//                 details: logDetails,
+//                 status: "Finished",
+//                 scoreCard: currentScoreCard
+//             });
+//         }
+//     } catch (dbErr) { 
+//         console.error("🚨 [DB ERROR]: सुवर्ण निकाल डेटाबेस सिंक फेल!", dbErr); 
+//     }
+
+//     // अंतिम भव्य विजेता पॉप-अप (No Change)
+//     Swal.fire({
+//         title: '🔥 महासंग्राम संपला! 🔥',
+//         html: `<div class="text-sm font-sans space-y-3 p-1">
+//                 <div class="bg-gradient-to-r from-amber-500 to-yellow-500 text-black px-4 py-3 rounded-2xl font-black text-sm uppercase tracking-tight shadow-xl">
+//                     👑 ${finalWinnerName} विजेता!
+//                 </div>
+//                 <p class="text-xs text-zinc-400 font-bold uppercase tracking-wider italic">${logDetails}</p>
+//                </div>`,
+//         icon: 'success',
+//         background: '#111',
+//         color: '#fff',
+//         confirmButtonText: '🏁 MATCH CLOSE',
+//         confirmButtonColor: '#eab308',
+//         allowOutsideClick: false
+//     }).then(() => {
+//         const fivePanel = document.getElementById('fiveRaidBattleGroundPanel');
+//         if (fivePanel) fivePanel.classList.add('hidden');
+//         window.isFiveRaidModeOn = false;
+//         window.isGoldenRaidActiveNow = false;
+
+//         // मॅचेसच्या मुख्य स्क्रीनवर रिडायरेक्ट करणे
+//         if (typeof loadPage === "function") loadPage('tournaments');
+//     });
+// }
+
+/**
+ * 
+ *🛠️ सुधारित saveGoldenRaidOutcome (थेट confirmEndMatch कनेक्टेड)
+हा संपूर्ण कोड कॉपी कर आणि तुझ्या फाईलमध्ये जुन्या फंक्शनच्या जागी रिप्लेस करून घे भावा} tId 
+ */
+
+async function saveGoldenRaidOutcome(statusType, logDetails) {
+    // =========================================================================
+    // 📂 SECTION 1: DYNAMIC GOLDEN WINNER RESOLUTION
+    // =========================================================================
+    console.log(`%c🏁 [GOLDEN PROCESS INITIALIZED]: Type: ${statusType}`, "background: #eab308; color: #000; font-weight: bold;");
+
+    const realTeamNameA = document.getElementById('teamAName')?.innerText || 'TEAM A';
+    const realTeamNameB = document.getElementById('teamBName')?.innerText || 'TEAM B';
+
+    const raidingTeam = window.goldenRaidTeam; 
+
+    // सुवर्ण रेड यशस्वी झाली की पकडली गेली यावरून जिंकलेली टीम ठरवणे
+    let finalWinnerTeamTag = (statusType === 'SUCCESS') ? raidingTeam : ((raidingTeam === 'A') ? 'B' : 'A');
+    const finalWinnerName = (finalWinnerTeamTag === 'A') ? realTeamNameA : realTeamNameB;
+
+
+    // =========================================================================
+    // 📂 SECTION 2: TIMELINE ENTRY IGNITION
+    // =========================================================================
+    if (typeof addRaidToSummary === 'function') {
+        addRaidToSummary(
+            finalWinnerTeamTag, 
+            `GOLDEN RAID [${raidingTeam}]`, 
+            statusType === 'SUCCESS' ? "GOLDEN RAID SUCCESS" : "GOLDEN RAID CAUGHT", 
+            1, 
+            `👑 MAHA-WINNER: ${finalWinnerName} (${logDetails})`,
+            false,
+            false,
+            true // 🌟 हा शेवटचा पॅरामीटर गोल्डन कार्ड थीम आणि डिव्हायडर ऑन करेल
+        );
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 3: RE-CALCULATING MASTER SCORECARD MEMORY
+    // =========================================================================
+    let localCard = localStorage.getItem('global_score_card');
+    let currentScoreCard = localCard ? JSON.parse(localCard) : {
+        mainMatch:  { teamA: 0, teamB: 0 },
+        fiveRaid:   { teamA: 0, teamB: 0 },
+        goldenRaid: { teamA: 0, teamB: 0 }
+    };
+
+    // जो संघ सुवर्ण रेड जिंकला, त्याच्या कप्प्यात १ पॉईंट देणे (दुसऱ्याला ०)
+    currentScoreCard.goldenRaid.teamA = (finalWinnerTeamTag === 'A') ? 1 : 0;
+    currentScoreCard.goldenRaid.teamB = (finalWinnerTeamTag === 'B') ? 1 : 0;
+
+    // स्कोरकार्ड तात्काळ लोकल स्टोरेजमध्ये अपडेट करणे
+    localStorage.setItem('global_score_card', JSON.stringify(currentScoreCard));
+    console.log("%c📊 [GOLDEN SCORE LOCKED]: मेमरीमध्ये सुवर्ण रेडचा स्कोअर अचूक सिंक केला!", "color: #22c55e; font-weight: bold;");
+
+
+    // =========================================================================
+    // 📂 SECTION 4: DELEGATING ENTIRE CONTROL TO MASTER END MATCH ENGINE 🚀
+    // =========================================================================
+    // 🚨 [💥 THE EXACT UNIFICATION]: स्वतंत्र पॉपअप आणि डीबी कोड काढून थेट आपल्या एकाच मास्टर फंक्शनला कामाला लावले!
+    if (typeof confirmEndMatch === "function") {
+        console.log("➡️ [ROUTING TO SINGLE ENGINE]: ताबा अधिकृतपणे confirmEndMatch कडे सुपूर्द केला!");
+        
+        // आपण बनवलेल्या नवीन रचनेनुसार विनर टॅग आणि लॉग डिटेल्स थेट पास केले, जेणेकरून युझरला डबल पॉपअप न विचारता थेट रिझल्ट दिसेल
+        await confirmEndMatch(finalWinnerTeamTag, logDetails);
+    } else {
+        console.error("🚨 [CORE FUNCTION MISSING]: confirmEndMatch स्क्रिप्टमध्ये सापडले नाही!");
+    }
+}
+
+
+// =========================================================================
+// 📂 FUNCTION: viewMatchSummary(tId, mId)
+// 🎯 उद्देश: सामना संपल्यानंतर थेट मॅच सेंटर (Summary Modal) उघडणे
+// =========================================================================
+function viewMatchSummary(tId, mId) {
+    // =========================================================================
+    // 📂 SECTION 1: VALIDATION & ULTIMATE FALLBACK CHECKS
+    // =========================================================================
+    console.log("%c==================================================", "color: #10b981; font-weight: bold;");
+    console.log("%c📊 [MATCH SUMMARY TRIGGER]: सामना समरी उघडण्याची पडताळणी सुरू...", "background: #f0fdf4; color: #166534; font-weight: bold; padding: 2px;");
+
+    let finalTId = tId;
+    let finalMId = mId;
+
+    if (!finalTId && typeof matchSetupData !== 'undefined' && matchSetupData?.tId) finalTId = matchSetupData.tId;
+    if (!finalMId && typeof matchSetupData !== 'undefined' && matchSetupData?.mId) finalMId = matchSetupData.mId;
+
+    if (!finalTId && typeof currentMatchData !== 'undefined' && currentMatchData?.tId) finalTId = currentMatchData.tId;
+    if (!finalMId && typeof currentMatchData !== 'undefined' && currentMatchData?.mId) finalMId = currentMatchData.mId;
+
+    // जर अजूनही आयडी मिळाले नाहीत तर 'squad_editing_match' स्टोरेज बॅकअप ओढणे
+    if (!finalTId || !finalMId) {
+        const savedMatchRaw = localStorage.getItem('squad_editing_match');
+        if (savedMatchRaw) {
+            const parsed = JSON.parse(savedMatchRaw);
+            finalTId = finalTId || parsed.tId;
+            finalMId = finalMId || parsed.mId;
+        }
+    }
+
+    if (!finalTId || !finalMId) {
+        console.error("🚨 [SUMMARY CRITICAL ERROR]: टूर्नामेंट आयडी किंवा मॅच आयडी दोन्ही मेमरीमध्ये सापडले नाहीत!");
+        Swal.fire("त्रुटी", "मॅच समरी उघडण्यासाठी आवश्यक आयडी मिळाले नाहीत.", "error");
+        return;
+    }
+
+    console.log(`👉 Targeting Tournament: ${finalTId} | Match: ${finalMId}`);
+
+
+    // =========================================================================
+    // 📂 SECTION 2: SECURE LOG DISCOVERY & TIMELINE MEMORY RECOVERY 🧪
+    // =========================================================================
+    console.log("%c============== 🧪 [SECURE LOG DIAGNOSTIC] ==============", "background: #0284c7; color: #fff; font-weight: bold; padding: 2px;");
+    
+    // १. आधी ग्लोबल मेमरी चेक करणे
+    if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
+        console.log("⚠️ [Memory Empty]: ग्लोबल activeRaidsList रिकामी आहे. आता 'raids_secure_log' शोधत आहे...");
+        
+        // २. लोकल स्टोरेजमधील सुरक्षित एनकोडेड लॉग ट्रॅक करणे
+        const secureLogRaw = localStorage.getItem(`raids_secure_log_${finalMId}`);
+        
+        if (secureLogRaw) {
+            try {
+                const decoded = decodeURIComponent(escape(atob(secureLogRaw)));
+                window.activeRaidsList = JSON.parse(decoded);
+                console.log(`🎯 [DIAGNOSTIC SUCCESS]: raids_secure_log_${finalMId} सापडला! एकूण ${window.activeRaidsList.length} रेड्स मेमरीमध्ये यशस्वीरीत्या रिस्टोर केल्या.`);
+            } catch (e) {
+                console.error("🚨 [DIAGNOSTIC ERROR]: raids_secure_log डीकोड करताना क्रॅश झाला:", e);
+            }
+        } else {
+            console.log(`❌ [DIAGNOSTIC FAIL]: 'raids_secure_log_${finalMId}' नावाचा कप्पा लोकल स्टोरेजमध्ये सापडला नाही!`);
+        }
+    } else {
+        console.log(`✅ [Memory Alive]: ग्लोबल मेमरीमध्ये आधीच ${window.activeRaidsList.length} रेड्स ट्रॅकवर आहेत.`);
+    }
+    console.log("%c================================================================", "color: #0284c7;");
+
+
+    // =========================================================================
+    // 📂 SECTION 3: LIVE SCORECARD RE-SYNC TO HOME MEMORY
+    // =========================================================================
+    try {
+        const localCard = localStorage.getItem('global_score_card');
+        const activeMatchKey = `active_match_${finalTId}_${finalMId}`;
+        const localMatchDetails = localStorage.getItem(activeMatchKey);
+
+        if (localMatchDetails && typeof homeLiveMatchesStorage !== 'undefined') {
+            const parsedMatch = JSON.parse(localMatchDetails);
+            const combinedKey = `${finalTId}_${finalMId}`;
+            
+            if (!homeLiveMatchesStorage[combinedKey]) homeLiveMatchesStorage[combinedKey] = {};
+            
+            homeLiveMatchesStorage[combinedKey] = {
+                ...parsedMatch,
+                scoreCard: localCard ? JSON.parse(localCard) : parsedMatch.scoreCard,
+                timeline: window.activeRaidsList || parsedMatch.timeline || []
+            };
+            console.log("💾 [LOCAL RESYNC SUCCESS]: होम स्टोरेज मेमरी तात्पुरती सिंक केली.");
+        }
+    } catch (syncErr) {
+        console.warn("⚠️ [LOCAL RESYNC WARN]: होम मेमरी सिंक एरर:", syncErr);
+    }
+
+
+    // =========================================================================
+    // 📂 SECTION 4: ROUTING TO CORRECT SUMMARY MODAL ENGINE (🎯 THE TRIPLE FIX)
+    // =========================================================================
+    // 🚨 [FIXED]: जुने openMatchCentreFromHome काढून थेट आपले मुख्य openSummaryModal इंजिन चालू केले!
+    if (typeof openSummaryModal === "function") {
+        console.log("🚀 [ROUTING]: मुख्य openSummaryModal() कडे ताबा सोपवत आहे...");
+        openSummaryModal(finalTId, finalMId);
+    } else {
+        console.error("🚨 [CORE MISSING]: 'openSummaryModal' हे मुख्य फंक्शन स्क्रिप्टमध्ये सापडले नाही!");
+        Swal.fire("त्रुटी", "मॅच समरीचे मुख्य मोडल इंजिन सापडले नाही.", "error");
+    }
+
+    console.log("%c==================================================", "color: #10b981; font-weight: bold;");
+}
+
+
+    // =========================================================================
+//आपण बनवलेल्या initPlayerProfileView फंक्शनमध्ये फक्त एक ओळ जोडून घेऊया, जी ओळखेल की स्वतःची प्रोफाईल सुरू आहे की दुसऱ्या प्लेयरची:
+    // =========================================================================
+
+async function initPlayerProfileView(targetPlayerId = null) {
+    console.log("%c==================================================", "color: #3b82f6; font-weight: bold;");
+    console.log(`👤 [PROFILE ENGINE INITIATED]: Target ID ➔ ${targetPlayerId || 'OWN_LOGGED_IN_PROFILE'}`);
+
+    // १. लॉगिन आयडी रिकव्हरी (तुझ्या सिस्टीममधील व्हेरिएबल इथे वापरू शकतोस)
+    const currentUserId = window.loggedInUserPlayerId || localStorage.getItem('current_logged_in_pId') || "";
+    
+    // जर targetPlayerId मॅन्युअली पास केला नसेल, तर आपण स्वतःची प्रोफाईल उघडली आहे असे समजणे
+    const isOwnProfile = !targetPlayerId || targetPlayerId === currentUserId;
+    const finalPlayerId = targetPlayerId || currentUserId || "RXOKQQC"; 
+    currentViewingPlayerId = finalPlayerId;
+
+    // २. डायनॅमिक नेव्हिगेशन आणि बॅक बटण मॅनेजमेंट
+    const backBtnContainer = document.getElementById('profileBackButtonContainer');
+    if (backBtnContainer) {
+        if (!isOwnProfile) {
+            backBtnContainer.innerHTML = `
+                <button onclick="loadPage('team_profile')" class="text-[10px] font-black text-zinc-400 bg-zinc-950 border border-zinc-850 px-3 py-1.5 rounded-xl flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> SQUAD
+                </button>`;
+        } else {
+            backBtnContainer.innerHTML = ""; // स्वतःच्या मूळ टॅबवर बॅक बटण नको
+        }
+    }
+
+    // ३. 🎯 [LOGOUT BUTTON CONTROLLER]: स्वतःची प्रोफाईल असेल तरच लॉगआउट दाखवणे, दुसऱ्याच्या वेळी गपचूप लपवणे
+    const logoutContainer = document.getElementById('profileLogoutBtnWrapper');
+    if (logoutContainer) {
+        if (isOwnProfile) {
+            logoutContainer.classList.remove('hidden');
+        } else {
+            logoutContainer.classList.add('hidden');
+        }
+    }
+
+    // ४. शेवटी अधिकृत आकडे ओढणे सुरू करणे
+    await fetchAndRenderPlayerStats();
+}
+
+
+async function fetchAndRenderPlayerStats() {
+    if (!currentViewingPlayerId) return;
+
+    // सीजन फिल्टर आणि डोम एलिमेंट्स
+    const selectedSeason = document.getElementById('profileSeasonFilter')?.value || "2026";
+    const gridEl = document.getElementById('playerStatsMainGrid');
+    const loadingEl = document.getElementById('playerStatsLoadingState');
+
+    if (gridEl) gridEl.classList.add('hidden');
+    if (loadingEl) loadingEl.classList.remove('hidden');
+
+    console.log(`%c📊 [COMPILING STATS]: Player ID: ${currentViewingPlayerId} | Season: ${selectedSeason}`, "color: #eab308; font-weight: bold;");
+
+    try {
+        let totalMatches = 0;
+        let detectedTeamName = "No Active Team";
+        
+        // 🧮 सर्व प्रिमियम आकड्यांचे सुरुवातीचे फॉलबॅक मॅट्रिक्स
+        let finalStats = {
+            raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0,
+            tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0,
+            points: 0
+        };
+        
+        let historyHtml = "";
+
+        // 🔥 [FIRESTORE DEEP QUERY]: टूर्नामेंटमधील सर्व Finished सामने तपासणे
+        const tId = window.matchSetupData?.tId || window.currentMatchData?.tId || "KV_CUP_2026";
+        const matchesSnapshot = await db.collection("tournaments").doc(tId).collection("matches").where("status", "==", "Finished").get();
+
+        matchesSnapshot.forEach(doc => {
+            const match = doc.data();
+            const teamAPlayers = match.teamAPlayers || match.teamA_players || [];
+            const teamBPlayers = match.teamBPlayers || match.teamB_players || [];
+
+            // १. दोन्ही संघांच्या खेळाडूंमध्ये हा Player ID शोधणे
+            let playerObj = [...teamAPlayers, ...teamBPlayers].find(p => p.pId === currentViewingPlayerId);
+
+            if (playerObj) {
+                totalMatches++;
+                
+                // २. डेटाबेसमधून त्या विशिष्ट सामन्याचे प्रिमियम आकडे गोळा करणे
+                const pStats = playerObj.stats || { raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0, tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0, points: 0 };
+
+                // ३. करंट टीम अचूक शोधणे
+                if (detectedTeamName === "No Active Team") {
+                    let isTeamA = teamAPlayers.some(p => p.pId === currentViewingPlayerId);
+                    detectedTeamName = isTeamA ? (match.teamA || "Team A") : (match.teamB || "Team B");
+                }
+
+                // ४. करिअर ग्रँड टोटल बेरीज (Accumulating Stats)
+                finalStats.raids += Number(pStats.raids || 0);
+                finalStats.raid_gain += Number(pStats.raid_gain || 0);
+                finalStats.raid_loss += Number(pStats.raid_loss || 0);
+                finalStats.bonus += Number(pStats.bonus || 0);
+                finalStats.empty_raids += Number(pStats.empty_raids || 0);
+                
+                finalStats.tackles += Number(pStats.tackles || 0);
+                finalStats.tackle_gain += Number(pStats.tackle_gain || 0);
+                finalStats.tackle_loss += Number(pStats.tackle_loss || 0);
+                finalStats.super_tackles += Number(pStats.super_tackles || 0);
+                finalStats.points += Number(pStats.points || 0);
+
+                // ५. पहिल्या मॅचच्या स्क्वाडमधून प्रोफाइलचे मुख्य डिटेल्स भरणे
+                if (totalMatches === 1) {
+                    document.getElementById('userDisplayName').innerText = playerObj.name || "Unknown Player";
+                    document.getElementById('profJerseyNo').innerText = playerObj.no ? `#${playerObj.no}` : "#--";
+                    document.getElementById('profPlayerRole').innerText = `${playerObj.role || 'Player'}`;
+                    document.getElementById('profRegNo').innerText = playerObj.pId || "00000";
+                    
+                    // फोटो बॅकअप चेक
+                    const imgEl = document.getElementById('userProfilePic');
+                    if (imgEl) {
+                        imgEl.src = playerObj.photo || match.userProfilePic || "assets/logo/logo.png";
+                    }
+                }
+
+                // ६. मॅच वाईज हिस्ट्री रो (History Row) तयार करणे
+                let vsTeam = (match.teamA_id === playerObj.teamId || match.teamA === detectedTeamName) ? match.teamB : match.teamA;
+                let matchPts = Number(pStats.points || 0);
+
+                historyHtml += `
+                    <div class="bg-black/20 border border-slate-850/60 rounded-xl p-2 flex justify-between items-center animate-fade-in text-[10px]">
+                        <div class="space-y-0.5">
+                            <div class="font-black text-white uppercase">vs ${vsTeam || 'Opponent'}</div>
+                            <div class="text-[8px] text-zinc-500 font-bold font-mono">R: ${pStats.raids || 0} (Gain: ${pStats.raid_gain || 0}) | TK: ${pStats.tackles || 0}</div>
+                        </div>
+                        <div class="text-right font-mono font-black text-yellow-400 bg-yellow-500/5 border border-yellow-500/10 px-2 py-0.5 rounded-lg">
+                            +${matchPts} PTS
+                        </div>
+                    </div>`;
+            }
+        });
+
+        // =========================================================================
+        // 📤 DOM INJECTION: गोळा झालेले आकडे स्क्रीनवर रेंडर करणे
+        // =========================================================================
+        const teamLabel = document.getElementById('profCurrentTeam');
+        if (teamLabel) teamLabel.innerText = detectedTeamName;
+
+        // अ. ३ मुख्य ओव्हरव्ह्यू बॉक्सेस
+        document.getElementById('statTotalMatches').innerText = totalMatches;
+        document.getElementById('statTotalPoints').innerText = finalStats.points;
+        
+        // Net Impact Score = (एकंण पॉईंट्स) - (रेड लॉस + टॅकल लॉस)
+        let netImpact = finalStats.points - (finalStats.raid_loss + finalStats.tackle_loss);
+        const netEl = document.getElementById('statNetImpact');
+        if (netEl) {
+            netEl.innerText = netImpact >= 0 ? `+${netImpact}` : netImpact;
+            netEl.className = netImpact >= 0 ? "text-sm font-mono font-black text-green-400 block" : "text-sm font-mono font-black text-red-500 block";
+        }
+
+        // ब. Raid Breakdown डेटा इंजेक्शन
+        document.getElementById('statRaidTotal').innerText = finalStats.raids;
+        document.getElementById('statRaidGain').innerText = finalStats.raid_gain;
+        document.getElementById('statRaidLoss').innerText = finalStats.raid_loss;
+        document.getElementById('statRaidEmpty').innerText = finalStats.empty_raids;
+        let rSuccess = finalStats.raids > 0 ? Math.round((finalStats.raid_gain / finalStats.raids) * 100) : 0;
+        document.getElementById('statRaidSuccessRate').innerText = `Success: ${rSuccess}%`;
+
+        // क. Tackle Breakdown डेटा इंजेक्शन
+        document.getElementById('statTackleTotal').innerText = finalStats.tackles;
+        document.getElementById('statTackleGain').innerText = finalStats.tackle_gain;
+        document.getElementById('statTackleLoss').innerText = finalStats.tackle_loss;
+        document.getElementById('statSuperTackles').innerText = finalStats.super_tackles;
+        let tSuccess = finalStats.tackles > 0 ? Math.round((finalStats.tackle_gain / finalStats.tackles) * 100) : 0;
+        document.getElementById('statTackleSuccessRate').innerText = `Success: ${tSuccess}%`;
+
+        // ड. मॅच हिस्ट्री यादी रेंडर करणे
+        const historyContainer = document.getElementById('playerMatchHistoryRows');
+        if (historyContainer) {
+            historyContainer.innerHTML = totalMatches > 0 ? historyHtml : `<div class="text-center p-4 text-zinc-600 text-[10px] italic font-bold uppercase">अजून एकही सामना खेळलेला नाही!</div>`;
+        }
+
+        console.log(`%c✅ [STATS RENDER SUCCESS]: खेळाडूची कुंडली ऑन-स्क्रीन चकाचक रेंडर झाली!`, "color: #10b981; font-weight: bold;");
+
+    } catch (err) {
+        console.error("🚨 [STATS RENDER FATAL CRASH]:", err);
+    } finally {
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (gridEl) gridEl.classList.remove('hidden');
+    }
 }
