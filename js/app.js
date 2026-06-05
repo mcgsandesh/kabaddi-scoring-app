@@ -50,113 +50,12 @@ function setActiveNav(pageId) {
 }
 
 
-/** 
-function loadPage(page) {
-  const app = document.getElementById('app');
-
-  if (page === 'home') {
-    app.innerHTML = "<h2 class='text-xl'>🏠 Home</h2>";
-  }
-
-  if (page === 'matches') {
-    app.innerHTML = "<h2 class='text-xl'>🎯 Matches</h2>";
-  }
-
-  if (page === 'teams') {
-    app.innerHTML = "<h2 class='text-xl'>👥 Teams</h2>";
-  }
-
-  if (page === 'tournaments') {
-    app.innerHTML = "<h2 class='text-xl'>🏆 Tournaments</h2>";
-  }
-
-  if (page === 'profile') {
-    app.innerHTML = "<h2 class='text-xl'>👤 Profile</h2>";
-  }
-    // 🔥 NEW: auto close menu
-  closeMenu();
-}
-*/
-/** loadPage async */
-
-// async function loadPage(page) {
-//   // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
-//   if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId && page !== 'scoring') {
-      
-//       console.log(`%c🛑 [Navigation Block]: युझर स्कोअरिंग सोडून "${page}" वर जाण्याचा प्रयत्न करत आहे. वॉर्निंग दाखवत आहे...`, "color: #ef4444; font-weight: bold;");
-
-//       const result = await Swal.fire({
-//           title: 'स्कोअरिंग सोडून बाहेर जायचे का?',
-//           text: "चालू मॅचचा टायमर पॉज केला जाईल आणि संपूर्ण रेड इतिहास सुरक्षित सेव्ह केला जाईल.",
-//           icon: 'warning',
-//           showCancelButton: true,
-//           confirmButtonText: 'हो, बाहेर पडा',
-//           cancelButtonText: 'नाही, इथेच राहा',
-//           background: '#111',
-//           color: '#fff',
-//           confirmButtonColor: '#ef4444',
-//           cancelButtonColor: '#4b5563'
-//       });
-
-//       // ❌ जर युझरने 'नाही' (Cancel) क्लिक केले, तर पेज बदलू नका, इथल्या इथेच फ्लो थांबवा!
-//       if (!result.isConfirmed) {
-//           console.log("😇 [Navigation Cancelled]: युझर स्कोअरिंग स्क्रीनवरच थांबला.");
-//           return; 
-//       }
-
-//       // ✅ जर युझरने 'हो' (Confirm) केले, तर डेटा सुरक्षित क्लाउडवर पाठवा!
-//       console.log("☁️ [Exit Sync]: शिल्लक वेळ आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
-      
-//       if (window.matchInterval) clearInterval(window.matchInterval);
-//       window.isMatchPaused = true;
-
-//       // 🔒 लोकल मेमरी किंवा लोकल स्टोरेजमधून ताजी रेड समरी गोळा करा
-//       let finalRaidsArray = window.activeRaidsList || [];
-//       if (finalRaidsArray.length === 0) {
-//           const storedData = localStorage.getItem(`raids_secure_log_${matchSetupData.mId}`);
-//           if (storedData) {
-//               try {
-//                   finalRaidsArray = JSON.parse(decodeURIComponent(escape(atob(storedData))));
-//               } catch (e) { console.error("Error decoding storage on exit:", e); }
-//           }
-//       }
-
-//       try {
-//           // ☁️ [ONE-TIME SYNC CALL]: सर्व डेटा एकाच वेळी 'raidsHistory' मध्ये जतन!
-//           await db.collection("tournaments").doc(matchSetupData.tId)
-//             .collection("matches").doc(matchSetupData.mId).update({
-//                 savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
-//                 isMatchPaused: true,
-//                 raidsHistory: finalRaidsArray,    // 🎯 तुझा संपूर्ण रेड इतिहास एकाच फील्डमध्ये साठवला!
-//                 lastUpdated: new Date().getTime()
-//             });
-//           console.log(`✅ [Exit Sync Success]: शिल्लक वेळ आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर जतन केल्या!`);
-          
-//           // 🧹 बाहेर पडताना चालू मेमरी साफ करा
-//           matchSetupData = null; 
-//           currentMatchData = null;
-//           window.activeRaidsList = [];
-          
-//       } catch (err) {
-//           console.error("🚨 [Exit Sync Error]: डेटाबेस अपडेट फेल झाले!", err);
-//           Swal.fire("त्रुटी", "डेटा सेव्ह करताना अडचण आली, तरीही पेज बदलत आहे.", "error");
-//       }
-//   }
-
-//   // -------------------------------------------------------------
-//   // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
-//   // -------------------------------------------------------------
-//   const app = document.getElementById('app');
-//   setActiveNav(page);   
-
-//   const res = await fetch(`pages/${page}.html`);
-//   const html = await res.text();
-
-//   app.innerHTML = html;
-//   initPage(page);
-//   closeMenu();
-// }
-
+/**
+ * सुधारित loadPage फंक्शन (नव्या मास्टर ऑब्जेक्टसह)
+आपण ठरवल्याप्रमाणे तुझा मूळचा स्वीटअलर्ट (Swal), बेस६४ डिकोडिंग लॉजिक, पेज फेचिंग (fetch) आणि 
+मेमरी क्लीनअपचा कडक फ्लो जसाच्या तसा सुरक्षित ठेवला आहे. 
+फक्त स्कोअर गोळा करताना आणि फायरबेस अपडेट करताना आपण आपला मास्टर scoreCard ऑब्जेक्ट तिथे बसवला आहे.
+ */
 
 // async function loadPage(page) {
 //   // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
@@ -200,23 +99,30 @@ function loadPage(page) {
 //           }
 //       }
 
-//       // 🎯 [LIVE SCORE CAPTURE]: स्क्रीनवरून आत्ताचा ताजा स्कोअर ओढून घेणे
-//       const currentScoreA = parseInt(document.getElementById('scoreA')?.innerText) || 0;
-//       const currentScoreB = parseInt(document.getElementById('scoreB')?.innerText) || 0;
+//       // 🎯 [💥 MASTER SCORECARD EXIT CAPTURE]
+//       // बाहेर पडताना लोकल स्टोरेजमधून ताजी आणि अधिकृत स्कोअरकार्डची प्रत ओढणे
+//       let localCard = localStorage.getItem('global_score_card');
+//       let currentScoreCard = localCard ? JSON.parse(localCard) : {
+//           mainMatch:  { teamA: 0, teamB: 0 },
+//           fiveRaid:   { teamA: 0, teamB: 0 },
+//           goldenRaid: { teamA: 0, teamB: 0 }
+//       };
 
 //       try {
-//           // ☁️ [ONE-TIME SYNC CALL]: स्कोअरसह सर्व डेटा एकाच वेळी जतन!
+//           // ☁️ [ONE-TIME SYNC CALL]: जुन्या फील्ड्स काढून थेट मास्टर scoreCard एकाच वेळी जतन!
 //           await db.collection("tournaments").doc(matchSetupData.tId)
 //             .collection("matches").doc(matchSetupData.mId).update({
 //                 savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
 //                 isMatchPaused: true,
-//                 scoreA: currentScoreA,             // 🟢 फिक्स: टीम A चा ताजा स्कोअर सेव्ह केला!
-//                 scoreB: currentScoreB,             // 🟢 फिक्स: टीम B चा ताजा स्कोअर सेव्ह केला!
 //                 raidsHistory: finalRaidsArray,     // संपूर्ण रेड इतिहास
-//                 lastUpdated: new Date().getTime()
+//                 lastUpdated: new Date().getTime(),
+                
+//                 // 🎯 [SINGLE SOURCE OF TRUTH]: डेटाबेसमध्ये मास्टर ऑब्जेक्ट ढकलला!
+//                 scoreCard: currentScoreCard
 //             });
           
-//           console.log(`✅ [Exit Sync Success]: स्कोअर (A:${currentScoreA} vs B:${currentScoreB}) आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर जतन केल्या!`);
+//           console.log(`✅ [Exit Sync Success]: मास्टर scoreCard आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर यशस्वीरित्या जतन केल्या!`);
+//           console.dir(currentScoreCard);
           
 //           // 🧹 बाहेर पडताना चालू मेमरी साफ करा
 //           matchSetupData = null; 
@@ -233,23 +139,16 @@ function loadPage(page) {
 //   // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
 //   // -------------------------------------------------------------
 //   const app = document.getElementById('app');
-//   setActiveNav(page);   
+//   if (typeof setActiveNav === "function") setActiveNav(page);   
 
 //   const res = await fetch(`pages/${page}.html`);
 //   const html = await res.text();
 
 //   app.innerHTML = html;
-//   initPage(page);
-//   closeMenu();
+//   if (typeof initPage === "function") initPage(page);
+//   if (typeof closeMenu === "function") closeMenu();
 // }
-
-/**
- * सुधारित loadPage फंक्शन (नव्या मास्टर ऑब्जेक्टसह)
-आपण ठरवल्याप्रमाणे तुझा मूळचा स्वीटअलर्ट (Swal), बेस६४ डिकोडिंग लॉजिक, पेज फेचिंग (fetch) आणि 
-मेमरी क्लीनअपचा कडक फ्लो जसाच्या तसा सुरक्षित ठेवला आहे. 
-फक्त स्कोअर गोळा करताना आणि फायरबेस अपडेट करताना आपण आपला मास्टर scoreCard ऑब्जेक्ट तिथे बसवला आहे.
- */
-
+/** */
 async function loadPage(page) {
   // 🚨 [YOUR SMART TRACKER]: जर युझर स्कोअरिंगवर आहे आणि दुसऱ्या पेजवर क्लिक करतोय
   if (typeof matchSetupData !== 'undefined' && matchSetupData && matchSetupData.mId && page !== 'scoring') {
@@ -269,19 +168,16 @@ async function loadPage(page) {
           cancelButtonColor: '#4b5563'
       });
 
-      // ❌ जर युझरने 'नाही' (Cancel) क्लिक केले, तर पेज बदलू नका, इथल्या इथेच फ्लो थांबवा!
       if (!result.isConfirmed) {
           console.log("😇 [Navigation Cancelled]: युझर स्कोअरिंग स्क्रीनवरच थांबला.");
           return; 
       }
 
-      // ✅ जर युझरने 'हो' (Confirm) केले, तर डेटा सुरक्षित क्लाउडवर पाठवा!
       console.log("☁️ [Exit Sync]: शिल्लक वेळ, चालू स्कोअर आणि रेड इतिहास क्लाउडवर सेव्ह करत आहे...");
       
       if (window.matchInterval) clearInterval(window.matchInterval);
       window.isMatchPaused = true;
 
-      // 🔒 लोकल मेमरी किंवा लोकल स्टोरेजमधून ताजी रेड समरी गोळा करा
       let finalRaidsArray = window.activeRaidsList || [];
       if (finalRaidsArray.length === 0) {
           const storedData = localStorage.getItem(`raids_secure_log_${matchSetupData.mId}`);
@@ -292,8 +188,6 @@ async function loadPage(page) {
           }
       }
 
-      // 🎯 [💥 MASTER SCORECARD EXIT CAPTURE]
-      // बाहेर पडताना लोकल स्टोरेजमधून ताजी आणि अधिकृत स्कोअरकार्डची प्रत ओढणे
       let localCard = localStorage.getItem('global_score_card');
       let currentScoreCard = localCard ? JSON.parse(localCard) : {
           mainMatch:  { teamA: 0, teamB: 0 },
@@ -302,22 +196,17 @@ async function loadPage(page) {
       };
 
       try {
-          // ☁️ [ONE-TIME SYNC CALL]: जुन्या फील्ड्स काढून थेट मास्टर scoreCard एकाच वेळी जतन!
           await db.collection("tournaments").doc(matchSetupData.tId)
             .collection("matches").doc(matchSetupData.mId).update({
-                savedMatchTime: matchTotalSeconds, // अचूक शिल्लक सेकंद
+                savedMatchTime: matchTotalSeconds, 
                 isMatchPaused: true,
-                raidsHistory: finalRaidsArray,     // संपूर्ण रेड इतिहास
+                raidsHistory: finalRaidsArray,     
                 lastUpdated: new Date().getTime(),
-                
-                // 🎯 [SINGLE SOURCE OF TRUTH]: डेटाबेसमध्ये मास्टर ऑब्जेक्ट ढकलला!
                 scoreCard: currentScoreCard
             });
           
           console.log(`✅ [Exit Sync Success]: मास्टर scoreCard आणि एकूण ${finalRaidsArray.length} रेड्स क्लाउडवर यशस्वीरित्या जतन केल्या!`);
-          console.dir(currentScoreCard);
           
-          // 🧹 बाहेर पडताना चालू मेमरी साफ करा
           matchSetupData = null; 
           currentMatchData = null;
           window.activeRaidsList = [];
@@ -329,8 +218,9 @@ async function loadPage(page) {
   }
 
   // -------------------------------------------------------------
-  // 🔥 इथून पुढे तुझा मूळ नेहमीचा पान लोड करण्याचा क्लीन कोड सुरू होतो
+  // 🔥 मूळ पान लोड करण्याचा क्लीन आणि सुरक्षित कोड
   // -------------------------------------------------------------
+  console.log(`%c📂 [ROUTE CHANGE]: Fetching page ➔ pages/${page}.html`, "color: #a855f7; font-weight: bold;");
   const app = document.getElementById('app');
   if (typeof setActiveNav === "function") setActiveNav(page);   
 
@@ -338,58 +228,127 @@ async function loadPage(page) {
   const html = await res.text();
 
   app.innerHTML = html;
+  
+  // 🎯 इथं पान लोड झाल्यावर तुमची सिस्टीम initPage कॉल करते, आपण याचाच वापर करू!
   if (typeof initPage === "function") initPage(page);
   if (typeof closeMenu === "function") closeMenu();
 }
 
 /** Pages */
+// async function initPage(page) {
+//     const user = firebase.auth().currentUser;
+//     let userRole = 'viewer';
+
+//     if (user) {
+//         userRole = await checkUserPermissions(user.email);
+//     }
+
+//     // 1. Navigation update kara
+//     handleNavigationUI(userRole);
+
+//     // 2. Viewer sathi Restricted Pages check
+//     // Viewer la fakta 'home' ani 'profile' chi parvaangi aahe
+//     const allowedPages = ['home', 'profile'];
+    
+//     if (userRole === 'viewer' && !allowedPages.includes(page)) {
+//         console.warn("Unauthorized access! Redirecting to home...");
+//         loadPage('home'); 
+//         return;
+//     }
+
+//     // 3. Home Page Logic
+//     if (page === 'home') {
+//         if (userRole === 'viewer') {
+//             renderLiveMatchesForViewers(); 
+//         } else {
+//            // renderAdminDashboard();
+
+//             renderLiveMatchesForViewers(); 
+//         }
+//     }
+
+//     // Bakiche logic (Profile, Teams, etc.)
+//     if (page === 'profile' && user) updateProfileUI(user);
+
+//    // 'teams' पेजसाठी नवीन फंक्शन कॉल करा
+// if (page === 'teams' && userRole !== 'viewer') {
+//     console.log("[Navigation]: Loading Teams Page...");
+//     loadMasterTeamsList(); // हे नवीन प्रगत फंक्शन कॉल करा
+// }
+
+//     if (page === 'tournaments' && userRole !== 'viewer') renderTournaments();
+
+// }
+
+/**
+ * 
+ */
+// =========================================================================
+// 🚀 STEP 1: GLOBAL NAVIGATION VARIABLE
+// =========================================================================
+window.currentViewingTargetPlayerId = null; // स्क्वाडमधून येणाऱ्या खेळाडूचा आयडी साठवण्यासाठी
+
 async function initPage(page) {
     const user = firebase.auth().currentUser;
     let userRole = 'viewer';
 
+    console.log(`%c[STEP 1][initPage Entry]: page ➔ ${page} | User Active ➔ ${!!user}`, "color: #10b981; font-weight: bold;");
+
     if (user) {
         userRole = await checkUserPermissions(user.email);
+        console.log(`   ➔ Permission Check: User Role is '${userRole}'`);
     }
 
     // 1. Navigation update kara
     handleNavigationUI(userRole);
 
     // 2. Viewer sathi Restricted Pages check
-    // Viewer la fakta 'home' ani 'profile' chi parvaangi aahe
     const allowedPages = ['home', 'profile'];
-    
     if (userRole === 'viewer' && !allowedPages.includes(page)) {
-        console.warn("Unauthorized access! Redirecting to home...");
+        console.warn("🚫 Unauthorized access! Redirecting to home...");
         loadPage('home'); 
         return;
     }
 
     // 3. Home Page Logic
     if (page === 'home') {
-        if (userRole === 'viewer') {
-            renderLiveMatchesForViewers(); 
-        } else {
-           // renderAdminDashboard();
-
-            renderLiveMatchesForViewers(); 
-        }
+        renderLiveMatchesForViewers(); 
     }
 
-    // Bakiche logic (Profile, Teams, etc.)
-    if (page === 'profile' && user) updateProfileUI(user);
+    // 🎯 4. Profile Page Logic (जुना फ्लो आणि व्हेरिएबल्स १००% सुरक्षित ठेवून लॉग्स जोडले)
+    if (page === 'profile' && user) {
+        console.log("%c[STEP 2][PROFILE BRANCH]: प्रोफाइल पेजचे डोम लोड झाले आहे.", "color: #3b82f6; font-weight: bold;");
+        
+        // जुना मूळ UI फ्लो जसा आहे तसाच धावेल
+        if (typeof updateProfileUI === "function") {
+            updateProfileUI(user);
+            console.log("   ➔ updateProfileUI(user) यशस्वीरित्या एक्झिक्युट झाले.");
+        }
 
-   // 'teams' पेजसाठी नवीन फंक्शन कॉल करा
-if (page === 'teams' && userRole !== 'viewer') {
-    console.log("[Navigation]: Loading Teams Page...");
-    loadMasterTeamsList(); // हे नवीन प्रगत फंक्शन कॉल करा
-}
+        // कन्सोल ट्रॅकर: युझर मेन्यूवरून आला की स्क्वाडवरून हे तपासणे
+        if (!window.currentViewingTargetPlayerId) {
+            console.log("%c[FLOW DETECTION]: युझर मुख्य PROFILE MENU वरून आला आहे. स्वतःचा डेटा लोड होत आहे...", "color: #3b82f6; font-style: italic;");
+        } else {
+            console.log(`%c[FLOW DETECTION]: युझर प्लेयर演出 लिस्टवरून (Squad) आला आहे. Target ID ➔ ${window.currentViewingTargetPlayerId}`, "color: #a855f7; font-weight: bold;");
+        }
+
+        // मुख्य आकडेवारी फंक्शनला कॉल
+        console.log("   🚀 fetchAndRenderPlayerStats() ला ट्रिगर करत आहे...");
+        fetchAndRenderPlayerStats();
+    }
+
+    // 'teams' पेजसाठी
+    if (page === 'teams' && userRole !== 'viewer') {
+        loadMasterTeamsList(); 
+    }
 
     if (page === 'tournaments' && userRole !== 'viewer') renderTournaments();
-
 }
 
 
-/**२. व्हिटलिस्ट चेक करण्यासाठी फंक्शन (Helper Function) */
+/**
+ * २. व्हिटलिस्ट चेक करण्यासाठी फंक्शन (Helper Function)
+ *  */
 async function checkUserPermissions(email) {
   console.log("Fetching permissions from Firestore for:", email);
   try {
@@ -9355,8 +9314,150 @@ let currentViewingTournamentId = null;
 
 // १. मुख्य एंट्री फंक्शन जे बटण क्लिकवर कॉल होईल
 
+// async function viewTeamPlayers(teamId, tId) {
+//     // 🔥 [FRONTEND LIVE LOG]: प्रोफाइल कार्डवर क्लिक करताच आयडीची कुंडली फ्रंटएंडला उघडेल
+//     console.log("%c========================================", "color: #f97316; font-weight: bold;");
+//     if (!tId || tId === "") {
+//         console.log(`%c📂 [प्रोफाइल राउटिंग]: संघ मास्टर यादीमधून (OUTSIDE) प्रोफाइल उघडली.`, "color: #3b82f6; font-weight: bold; font-size: 11px;");
+//     } else {
+//         console.log(`%c🏆 [प्रोफाइल राउटिंग]: टूर्नामेंटच्या आतून (INSIDE) प्रोफाइल उघडली. टूर्नामेंट ID: ${tId}`, "color: #a855f7; font-weight: bold; font-size: 11px;");
+//     }
+//     console.log(`👉 लक्ष्य संघ आयडी (teamId/regId) : %c"${teamId}"`, "color: #eab308; font-weight: bold; font-size: 12px;");
+//     console.log("%c========================================", "color: #f97316; font-weight: bold;");
+
+//     currentViewingTeamId = teamId;
+//     currentViewingTournamentId = tId;
+
+//     const content = document.getElementById('mainContent') || document.getElementById('app') || document.body; 
+//     if (!content) return;
+
+//     const oldOverlay = document.getElementById('fullTeamProfileOverlay');
+//     if (oldOverlay) oldOverlay.remove();
+
+//     const profileOverlay = document.createElement('div');
+//     profileOverlay.id = 'fullTeamProfileOverlay';
+//     profileOverlay.className = "fixed inset-0 z-[150] p-4 bg-black text-white overflow-y-auto space-y-4 pb-12 animate-fadeIn";
+
+//     profileOverlay.innerHTML = `
+//         <div class="flex items-center justify-between p-2.5 bg-[#111] border border-gray-800/80 shadow-lg rounded-2xl mt-2 gap-2">
+//             <div class="flex items-center gap-3 min-w-0 flex-1">
+//                 <button onclick="closeTeamProfileOverlay('${tId}')" class="text-orange-500 hover:bg-orange-500/10 p-1.5 rounded-full transition-all active:scale-75 shrink-0">
+//                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+//                     </svg>
+//                 </button>
+                
+//                 <div id="profHeaderLogo" class="w-9 h-9 bg-gray-950 rounded-full border border-orange-500/30 flex items-center justify-center p-0.5 shrink-0 shadow-inner">
+//                     <div class="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+//                 </div>
+                
+//                 <div class="min-w-0 flex-1 leading-tight">
+//                     <h2 id="profTeamNameHeader" class="text-sm font-black text-white uppercase tracking-tighter italic truncate">Loading...</h2>
+//                     <p id="profTeamAreaHeader" class="text-[8px] text-gray-500 uppercase font-bold tracking-wider truncate mt-0.5">📍 Loading...</p>
+//                 </div>
+//             </div>
+
+//             <div id="profTeamFormHeader" class="flex gap-0.5 shrink-0 bg-gray-950/80 p-1 rounded-lg border border-gray-900"></div>
+//         </div>
+
+//         <div class="px-1 sticky top-0 z-20 bg-black/80 backdrop-blur-md py-1">
+//             <div class="flex bg-[#111] p-1 rounded-2xl border border-gray-800 shadow-inner overflow-x-auto gap-1">
+//                 <button id="btnTeamTabOverview" onclick="switchTeamProfileTab('overview')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+//                     Overview
+//                 </button>
+//                 <button id="btnTeamTabPlayers" onclick="switchTeamProfileTab('players')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+//                     Players
+//                 </button> 
+//                 <button id="btnTeamTabMatches" onclick="switchTeamProfileTab('matches')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+//                     Matches
+//                 </button>
+//                 <button id="btnTeamTabStats" onclick="switchTeamProfileTab('stats')" class="flex-1 py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all duration-200 text-gray-500 whitespace-nowrap">
+//                     Statistics
+//                 </button>
+//             </div>
+//         </div>
+
+//         <div id="teamProfileTabContent" class="min-h-[450px] py-1">
+//             <div class="flex justify-center py-20 text-orange-500 text-[10px] font-black uppercase tracking-widest animate-pulse">डेटा लोड होत आहे...</div>
+//         </div>
+//     `;
+
+//     content.appendChild(profileOverlay);
+
+// try {
+//         // १. आधी नेहमीप्रमाणे थेट दस्तऐवज आयडी (Document ID) ने शोधण्याचा प्रयत्न करा
+//         console.log(`[डेटाबेस शोध]: थेट डॉक्युमेंट आयडीने तपासत आहे: "${teamId}"...`);
+//         let teamDoc = await db.collection("master_teams").doc(teamId).get();
+//         let teamData = null;
+
+//         if (teamDoc.exists) {
+//             teamData = teamDoc.data();
+//             console.log(`%c✅ [थेट सापडला]: दस्तऐवज आयडी थेट मॅच झाला!`, "color: #22c55e; font-weight: bold;");
+//         } else {
+//             // 🟢 [अल्टीमेट बॅकअप]: जर थेट सापडला नाही, तर 'regId' फील्डमध्ये तो नंबर शोधून काढा!
+//             console.log(`%c⚠️ [बॅकअप सक्रिय]: थेट आयडी सापडला नाही. "regId == ${teamId}" साठी क्वेरी मारत आहे...`, "color: #eab308;");
+            
+//             const backupSnapshot = await db.collection("master_teams").where("regId", "==", teamId).get();
+            
+//             if (!backupSnapshot.empty) {
+//                 teamDoc = backupSnapshot.docs[0]; // खरा दस्तऐवज मिळाला
+//                 teamData = teamDoc.data();
+//                 console.log(`%c✅ [क्वेरी यशस्वी]: बॅकअप क्वेरीद्वारे संघ सापडला! खरा दस्तऐवज आयडी -> "${teamDoc.id}"`, "color: #22c55e; font-weight: bold;");
+//             }
+//         }
+
+//         // २. जर दोन्ही मार्गाने संघ सापडला नाही, तरच एरर दाखवा
+//         if (!teamData) {
+//             console.error(`🚨 [ERR]: "master_teams" मध्ये "${teamId}" या आयडीचा किंवा regId चा डेटा कुठेही सापडला नाही!`);
+//             document.getElementById('teamProfileTabContent').innerHTML = "<p class='text-gray-500 text-xs text-center py-10'>माहिती सापडली नाही.</p>";
+//             Swal.fire("त्रुटी", `संघाचा डेटा डेटाबेसमध्ये सापडला नाही! (ID: ${teamId})`, "error");
+//             return;
+//         }
+
+//         // ३. ग्लोबल डेटा सुरक्षित करणे (खऱ्या दस्तऐवज आयडीसह जेणेकरून प्लेयर्स टॅबला अडचण येणार नाही)
+//         window.currentLoadedTeamData = { 
+//             docId: teamDoc.id, // हा नेहमी फायरबेसमधील मूळ दस्तऐवजाचा आयडीच राहील (TM_... किंवा रँडम)
+//             ...teamData 
+//         }; 
+
+//         console.log("%c📊 [ग्लोबल डेटा लॉक]: प्रोफाइल रेंडरिंगसाठी डेटा सज्ज आहे:", "color: #06b6d4; font-weight: bold;", window.currentLoadedTeamData);
+
+//         // टॉप हेडरमध्ये डेटा भरणे
+//         document.getElementById('profTeamNameHeader').innerText = teamData.teamName || "No Name";
+//         document.getElementById('profTeamAreaHeader').innerText = `📍 ${teamData.area || 'N/A'} | ${teamData.pincode || '------'}`;
+
+//         // लोगो सेट करणे
+//         const logoDiv = document.getElementById('profHeaderLogo');
+//         if (teamData.teamLogo) {
+//             logoDiv.innerHTML = `<img src="${teamData.teamLogo}" class="w-full h-full object-contain rounded-full">`;
+//         } else {
+//             const firstLetter = teamData.teamName ? teamData.teamName.charAt(0).toUpperCase() : "?";
+//             logoDiv.innerHTML = `<span class="text-orange-500 font-black text-xs font-mono italic">${firstLetter}</span>`;
+//         }
+
+//         // फॉर्म बॅजेस (W/L)
+//         const sampleForm = ['W', 'L', 'L', 'W', 'W']; 
+//         document.getElementById('profTeamFormHeader').innerHTML = sampleForm.map(res => `
+//             <span class="${res === 'W' ? 'text-green-500' : 'text-red-500'} text-[8px] font-black font-mono px-0.5">${res}</span>
+//         `).join('');
+
+//         // डीफॉल्ट पहिला टॅब 'overview' उघडा
+//         switchTeamProfileTab('overview');
+
+//     } catch (error) {
+//         console.error("🚨 [Fatal Error in viewTeamPlayers]:", error);
+//         Swal.fire("त्रुटी", "प्रोफाइल उघडताना तांत्रिक अडचण आली.", "error");
+//     }
+// }
+
+/**
+ * Team Onlick
+ * यामध्ये आपण हेडर तयार करताना तिथले हार्डकोडेड डबे पूर्णपणे काढून टाकले आहेत आणि तिथे एक युनिक id="teamHeaderFormContainer" दिला आहे, 
+ * जेणेकरून आपलं renderTeamOverviewTab इंजिन त्या जागेवर मॅचेसचा अचूक आणि थेट लाइव्ह डेटा फेकून मारेल!
+ */
+
 async function viewTeamPlayers(teamId, tId) {
-    // 🔥 [FRONTEND LIVE LOG]: प्रोफाइल कार्डवर क्लिक करताच आयडीची कुंडली फ्रंटएंडला उघडेल
+    // 🎯 [FRONTEND LIVE LOG]: कन्सोल ट्रॅकर कुंडली
     console.log("%c========================================", "color: #f97316; font-weight: bold;");
     if (!tId || tId === "") {
         console.log(`%c📂 [प्रोफाइल राउटिंग]: संघ मास्टर यादीमधून (OUTSIDE) प्रोफाइल उघडली.`, "color: #3b82f6; font-weight: bold; font-size: 11px;");
@@ -9379,6 +9480,7 @@ async function viewTeamPlayers(teamId, tId) {
     profileOverlay.id = 'fullTeamProfileOverlay';
     profileOverlay.className = "fixed inset-0 z-[150] p-4 bg-black text-white overflow-y-auto space-y-4 pb-12 animate-fadeIn";
 
+    // 🎯 [FIX]: उजव्या कोपऱ्यातील हार्डकोडेड 'W L L W W' काढून तिथे आपण 'teamHeaderFormContainer' हा डायनॅमिक आयडी लावला आहे!
     profileOverlay.innerHTML = `
         <div class="flex items-center justify-between p-2.5 bg-[#111] border border-gray-800/80 shadow-lg rounded-2xl mt-2 gap-2">
             <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -9398,7 +9500,10 @@ async function viewTeamPlayers(teamId, tId) {
                 </div>
             </div>
 
-            <div id="profTeamFormHeader" class="flex gap-0.5 shrink-0 bg-gray-950/80 p-1 rounded-lg border border-gray-900"></div>
+            <!-- 🎯 हा तो कंटेनर जो आता रिकामी आहे, आणि ज्याच्या आत ओव्हरव्ह्यू टॅब मधून लाइव्ह वलये रेंडर होतील -->
+            <div id="teamHeaderFormContainer" class="flex gap-1 shrink-0 bg-gray-950/80 p-1 rounded-lg border border-gray-900 min-w-[40px] justify-center items-center">
+                <span class="text-[7px] text-zinc-600 font-bold uppercase animate-pulse">...</span>
+            </div>
         </div>
 
         <div class="px-1 sticky top-0 z-20 bg-black/80 backdrop-blur-md py-1">
@@ -9425,7 +9530,7 @@ async function viewTeamPlayers(teamId, tId) {
 
     content.appendChild(profileOverlay);
 
-try {
+    try {
         // १. आधी नेहमीप्रमाणे थेट दस्तऐवज आयडी (Document ID) ने शोधण्याचा प्रयत्न करा
         console.log(`[डेटाबेस शोध]: थेट डॉक्युमेंट आयडीने तपासत आहे: "${teamId}"...`);
         let teamDoc = await db.collection("master_teams").doc(teamId).get();
@@ -9437,27 +9542,24 @@ try {
         } else {
             // 🟢 [अल्टीमेट बॅकअप]: जर थेट सापडला नाही, तर 'regId' फील्डमध्ये तो नंबर शोधून काढा!
             console.log(`%c⚠️ [बॅकअप सक्रिय]: थेट आयडी सापडला नाही. "regId == ${teamId}" साठी क्वेरी मारत आहे...`, "color: #eab308;");
-            
             const backupSnapshot = await db.collection("master_teams").where("regId", "==", teamId).get();
             
             if (!backupSnapshot.empty) {
-                teamDoc = backupSnapshot.docs[0]; // खरा दस्तऐवज मिळाला
+                teamDoc = backupSnapshot.docs[0]; 
                 teamData = teamDoc.data();
                 console.log(`%c✅ [क्वेरी यशस्वी]: बॅकअप क्वेरीद्वारे संघ सापडला! खरा दस्तऐवज आयडी -> "${teamDoc.id}"`, "color: #22c55e; font-weight: bold;");
             }
         }
 
-        // २. जर दोन्ही मार्गाने संघ सापडला नाही, तरच एरर दाखवा
         if (!teamData) {
-            console.error(`🚨 [ERR]: "master_teams" मध्ये "${teamId}" या आयडीचा किंवा regId चा डेटा कुठेही सापडला नाही!`);
+            console.error(`🚨 [ERR]: "master_teams" मध्ये "${teamId}" या आयडीचा किंवा regId का डेटा कुठेही सापडला नाही!`);
             document.getElementById('teamProfileTabContent').innerHTML = "<p class='text-gray-500 text-xs text-center py-10'>माहिती सापडली नाही.</p>";
-            Swal.fire("त्रुटी", `संघाचा डेटा डेटाबेसमध्ये सापडला नाही! (ID: ${teamId})`, "error");
             return;
         }
 
-        // ३. ग्लोबल डेटा सुरक्षित करणे (खऱ्या दस्तऐवज आयडीसह जेणेकरून प्लेयर्स टॅबला अडचण येणार नाही)
+        // २. ग्लोबल डेटा सुरक्षित करणे
         window.currentLoadedTeamData = { 
-            docId: teamDoc.id, // हा नेहमी फायरबेसमधील मूळ दस्तऐवजाचा आयडीच राहील (TM_... किंवा रँडम)
+            docId: teamDoc.id, 
             ...teamData 
         }; 
 
@@ -9476,18 +9578,11 @@ try {
             logoDiv.innerHTML = `<span class="text-orange-500 font-black text-xs font-mono italic">${firstLetter}</span>`;
         }
 
-        // फॉर्म बॅजेस (W/L)
-        const sampleForm = ['W', 'L', 'L', 'W', 'W']; 
-        document.getElementById('profTeamFormHeader').innerHTML = sampleForm.map(res => `
-            <span class="${res === 'W' ? 'text-green-500' : 'text-red-500'} text-[8px] font-black font-mono px-0.5">${res}</span>
-        `).join('');
-
         // डीफॉल्ट पहिला टॅब 'overview' उघडा
         switchTeamProfileTab('overview');
 
     } catch (error) {
         console.error("🚨 [Fatal Error in viewTeamPlayers]:", error);
-        Swal.fire("त्रुटी", "प्रोफाइल उघडताना तांत्रिक अडचण आली.", "error");
     }
 }
 
@@ -9544,139 +9639,261 @@ function switchTeamProfileTab(tabName) {
  * अ) Overview टॅब (गुणोत्तर आणि टॉप परफॉर्मर):
 येथे आपण क्रिकेट ॲपसारखा Win/Loss Ratio प्रोग्रेस बार आणि डिझाइन दाखवूया.
  */
+// async function renderTeamOverviewTab() {
+//     console.log(`[Team Overview]: Querying dynamic match stats for Team: ${currentViewingTeamId}`);
+//     const subContent = document.getElementById('teamProfileTabContent');
+//     if (!subContent) return;
+
+//     const teamData = window.currentLoadedTeamData || {};
+//     const teamId = currentViewingTeamId || "------";
+//     const tId = currentViewingTournamentId; // टूर्नामेंट आयडी (जर टूर्नामेंटमधून आला असेल तर)
+
+//     // लोडिंग स्क्रीन दाखवा
+//     subContent.innerHTML = `
+//         <div class="flex justify-center py-16 text-orange-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+//             सामने आणि आकडेवारी कॅल्क्युलेट होत आहे...
+//         </div>`;
+
+//     let totalMatches = 0;
+//     let matchesWon = 0;
+//     let matchesLost = 0;
+//     let matchesTied = 0;
+//     const currentTeamName = teamData.teamName;
+
+//     try {
+//         // ------------------------------------------------------------
+//         // 🔥 केस १: युजर टूर्नामेंटच्या आतल्या टॅबमधून आला आहे (tId उपलब्ध आहे)
+//         // ------------------------------------------------------------
+//         if (tId && tId !== "" && tId !== "null" && tId !== "undefined") {
+//             console.log(`[Team Overview]: Target -> Only current Tournament matches (${tId})`);
+//             const matchesSnapshot = await db.collection("tournaments").doc(tId).collection("matches").get();
+            
+//             matchesSnapshot.forEach(doc => {
+//                 const m = doc.data();
+//                 if (m.teamA === currentTeamName || m.teamB === currentTeamName) {
+//                     if (m.scoreA !== undefined && m.scoreB !== undefined && m.teamA !== "TBD" && m.teamB !== "TBD") {
+//                         totalMatches++;
+//                         const isTeamA = (m.teamA === currentTeamName);
+//                         const scoreThisTeam = isTeamA ? parseInt(m.scoreA) : parseInt(m.scoreB);
+//                         const scoreOpponent = isTeamA ? parseInt(m.scoreB) : parseInt(m.scoreA);
+
+//                         if (scoreThisTeam > scoreOpponent) matchesWon++;
+//                         else if (scoreThisTeam < scoreOpponent) matchesLost++;
+//                         else matchesTied++;
+//                     }
+//                 }
+//             });
+//         } 
+//         // ------------------------------------------------------------
+//         // 🔥 केस २: युजर बाहेरून 'Team Master' कार्डवरून आला आहे (tId नाहीये)
+//         // ------------------------------------------------------------
+//         else {
+//             console.log(`[Team Overview]: Target -> Global Search across ALL tournaments for team "${currentTeamName}"`);
+            
+//             // १. आधी सर्व टूर्नामेंट्स मिळवा
+//             const allTournamentsSnapshot = await db.collection("tournaments").get();
+            
+//             // २. प्रत्येक टूर्नामेंटच्या आत जाऊन मॅचेस तपासा (मल्टिपल सब-कलेक्शन क्वेरी)
+//             for (const tourDoc of allTournamentsSnapshot.docs) {
+//                 const matchesSnapshot = await db.collection("tournaments").doc(tourDoc.id).collection("matches").get();
+                
+//                 matchesSnapshot.forEach(doc => {
+//                     const m = doc.data();
+//                     if (m.teamA === currentTeamName || m.teamB === currentTeamName) {
+//                         if (m.scoreA !== undefined && m.scoreB !== undefined && m.teamA !== "TBD" && m.teamB !== "TBD") {
+//                             totalMatches++;
+//                             const isTeamA = (m.teamA === currentTeamName);
+//                             const scoreThisTeam = isTeamA ? parseInt(m.scoreA) : parseInt(m.scoreB);
+//                             const scoreOpponent = isTeamA ? parseInt(m.scoreB) : parseInt(m.scoreA);
+
+//                             if (scoreThisTeam > scoreOpponent) matchesWon++;
+//                             else if (scoreThisTeam < scoreOpponent) matchesLost++;
+//                             else matchesTied++;
+//                         }
+//                     }
+//                 });
+//             }
+//         }
+
+//         // ३. टक्केवारीचे कॅल्क्युलेशन
+//         const winPercentage = totalMatches > 0 ? Math.round((matchesWon / totalMatches) * 100) : 0;
+//         const lossPercentage = totalMatches > 0 ? Math.round((matchesLost / totalMatches) * 100) : 0;
+
+//         // ४. फायनल UI रेंडरिंग (पाणीदार डार्क-ऑरेंज लेआउट)
+//         subContent.innerHTML = `
+//         <div class="space-y-4 animate-fadeIn">
+            
+//             <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 shadow-lg">
+//                 <div class="flex justify-between items-center mb-3">
+//                     <h4 class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Win Loss Ratio (सामने गुणोत्तर)</h4>
+//                     <span class="text-[9px] font-mono text-gray-500 font-bold uppercase">ID: ${teamId.substring(0, 6).toUpperCase()}</span>
+//                 </div>
+//                 <div class="flex justify-between text-xs font-black text-gray-300 mb-2 font-mono">
+//                     <span class="text-orange-500">WON - ${winPercentage}%</span>
+//                     <span class="text-gray-500">LOST - ${lossPercentage}%</span>
+//                 </div>
+//                 <div class="w-full h-2.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900 flex shadow-inner">
+//                     ${totalMatches > 0 ? `
+//                         <div class="h-full bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.5)]" style="width: ${winPercentage}%"></div>
+//                         <div class="h-full bg-gray-800" style="width: ${lossPercentage}%"></div>
+//                     ` : `
+//                         <div class="h-full bg-gray-800 w-full"></div>
+//                     `}
+//                 </div>
+//             </div>
+
+//             <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 shadow-lg">
+//                 <h4 class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-3">Matches Statistics (सामने विहंगावलोकन)</h4>
+//                 <div class="grid grid-cols-4 gap-2 text-center font-mono">
+//                     <div class="bg-gray-950/60 p-3 rounded-xl border border-gray-900">
+//                         <p class="text-[8px] text-gray-500 uppercase font-black tracking-wider">Played</p>
+//                         <p class="text-sm font-black text-white mt-1">${totalMatches}</p>
+//                     </div>
+//                     <div class="bg-orange-600/10 p-3 rounded-xl border border-orange-500/10">
+//                         <p class="text-[8px] text-orange-400 uppercase font-black tracking-wider">Won</p>
+//                         <p class="text-sm font-black text-orange-500 mt-1">${matchesWon}</p>
+//                     </div>
+//                     <div class="bg-gray-950/60 p-3 rounded-xl border border-gray-900">
+//                         <p class="text-[8px] text-gray-500 uppercase font-black tracking-wider">Lost</p>
+//                         <p class="text-sm font-black text-red-500 mt-1">${matchesLost}</p>
+//                     </div>
+//                     <div class="bg-gray-950/60 p-3 rounded-xl border border-gray-900">
+//                         <p class="text-[8px] text-gray-500 uppercase font-black tracking-wider">Tied</p>
+//                         <p class="text-sm font-black text-gray-400 mt-1">${matchesTied}</p>
+//                     </div>
+//                 </div>
+//             </div>
+
+//             <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 shadow-lg relative overflow-hidden group">
+//                 <h4 class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-3">Top Performer (सर्वोत्कृष्ट खेळाडू)</h4>
+//                 <div class="flex items-center justify-between bg-gray-950/40 p-3 rounded-xl border border-gray-900/60">
+//                     <div class="flex items-center gap-3">
+//                         <div class="w-10 h-10 bg-orange-600/10 rounded-full border border-orange-500/20 flex items-center justify-center text-lg shadow-inner">🏆</div>
+//                         <div>
+//                             <p class="text-xs font-black text-white uppercase tracking-tighter">माहिती उपलब्ध नाही...</p>
+//                             <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wide mt-0.5">सामने खेळल्यावर अपडेट होईल</p>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+
+//         </div>`;
+
+//     } catch (error) {
+//         console.error("[Team Overview Dynamic Error]:", error);
+//         subContent.innerHTML = "<p class='text-center text-red-500 text-xs py-10'>माहिती कॅल्क्युलेट करताना एरर आला.</p>";
+//     }
+// }
+
+/**
+ * सुधारित संपूर्ण renderTeamOverviewTab फंक्शन (स्वतंत्र बॉक्स)
+आता हे वरील डेटा रेंडर करणारे आणि हेडरमधील W L L W W चे वलय लाइव्ह अपडेट करणारे फंक्शन तुझ्या js/app.js मध्ये रिप्लेस करून घे भावा:
+ */
 async function renderTeamOverviewTab() {
-    console.log(`[Team Overview]: Querying dynamic match stats for Team: ${currentViewingTeamId}`);
+    console.log(`%c[Team Overview]: Dynamic Overview टॅब लोडिंग सुरू...`, "color: #f97316; font-weight: bold;");
+    
     const subContent = document.getElementById('teamProfileTabContent');
     if (!subContent) return;
 
     const teamData = window.currentLoadedTeamData || {};
-    const teamId = currentViewingTeamId || "------";
-    const tId = currentViewingTournamentId; // टूर्नामेंट आयडी (जर टूर्नामेंटमधून आला असेल तर)
+    const targetTeamId = currentViewingTeamId || teamData.docId || teamData.teamId || "------";
+    const currentTeamName = teamData.teamName || "Unknown Team";
 
-    // लोडिंग स्क्रीन दाखवा
     subContent.innerHTML = `
         <div class="flex justify-center py-16 text-orange-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
             सामने आणि आकडेवारी कॅल्क्युलेट होत आहे...
         </div>`;
 
-    let totalMatches = 0;
-    let matchesWon = 0;
-    let matchesLost = 0;
-    let matchesTied = 0;
-    const currentTeamName = teamData.teamName;
+    if (!targetTeamId || targetTeamId === "------") {
+        subContent.innerHTML = "<p class='text-center text-zinc-600 text-xs py-10 uppercase font-black'>टीमचा आयडी सापडला नाही!</p>";
+        return;
+    }
 
     try {
-        // ------------------------------------------------------------
-        // 🔥 केस १: युजर टूर्नामेंटच्या आतल्या टॅबमधून आला आहे (tId उपलब्ध आहे)
-        // ------------------------------------------------------------
-        if (tId && tId !== "" && tId !== "null" && tId !== "undefined") {
-            console.log(`[Team Overview]: Target -> Only current Tournament matches (${tId})`);
-            const matchesSnapshot = await db.collection("tournaments").doc(tId).collection("matches").get();
-            
-            matchesSnapshot.forEach(doc => {
-                const m = doc.data();
-                if (m.teamA === currentTeamName || m.teamB === currentTeamName) {
-                    if (m.scoreA !== undefined && m.scoreB !== undefined && m.teamA !== "TBD" && m.teamB !== "TBD") {
-                        totalMatches++;
-                        const isTeamA = (m.teamA === currentTeamName);
-                        const scoreThisTeam = isTeamA ? parseInt(m.scoreA) : parseInt(m.scoreB);
-                        const scoreOpponent = isTeamA ? parseInt(m.scoreB) : parseInt(m.scoreA);
+        // ग्लोबल इंजिनकडून पूर्ण विनर-लॉझर डेटा गोळा करणे
+        const metrics = await compileGlobalTeamStats(targetTeamId);
 
-                        if (scoreThisTeam > scoreOpponent) matchesWon++;
-                        else if (scoreThisTeam < scoreOpponent) matchesLost++;
-                        else matchesTied++;
-                    }
-                }
-            });
-        } 
-        // ------------------------------------------------------------
-        // 🔥 केस २: युजर बाहेरून 'Team Master' कार्डवरून आला आहे (tId नाहीये)
-        // ------------------------------------------------------------
-        else {
-            console.log(`[Team Overview]: Target -> Global Search across ALL tournaments for team "${currentTeamName}"`);
-            
-            // १. आधी सर्व टूर्नामेंट्स मिळवा
-            const allTournamentsSnapshot = await db.collection("tournaments").get();
-            
-            // २. प्रत्येक टूर्नामेंटच्या आत जाऊन मॅचेस तपासा (मल्टिपल सब-कलेक्शन क्वेरी)
-            for (const tourDoc of allTournamentsSnapshot.docs) {
-                const matchesSnapshot = await db.collection("tournaments").doc(tourDoc.id).collection("matches").get();
-                
-                matchesSnapshot.forEach(doc => {
-                    const m = doc.data();
-                    if (m.teamA === currentTeamName || m.teamB === currentTeamName) {
-                        if (m.scoreA !== undefined && m.scoreB !== undefined && m.teamA !== "TBD" && m.teamB !== "TBD") {
-                            totalMatches++;
-                            const isTeamA = (m.teamA === currentTeamName);
-                            const scoreThisTeam = isTeamA ? parseInt(m.scoreA) : parseInt(m.scoreB);
-                            const scoreOpponent = isTeamA ? parseInt(m.scoreB) : parseInt(m.scoreA);
+        let topName = metrics.topPerformer.name || "маहिती उपलब्ध नाही...";
+        let topSubtext = metrics.topPerformer.points > 0 
+            ? `करिअर एकूण योगदान ➔ ${metrics.topPerformer.points} पॉईंट्स` 
+            : "सामने खेळल्यावर अपडेट होईल";
 
-                            if (scoreThisTeam > scoreOpponent) matchesWon++;
-                            else if (scoreThisTeam < scoreOpponent) matchesLost++;
-                            else matchesTied++;
-                        }
-                    }
+        // 🎯 [DYNAMIC HEADER FORM FIX]: हेडरमधील उजव्या कोपऱ्यातील 'W L L W W' चे जुने डबे हुडकून लाइव्ह बदलणे!
+        const headerFormContainer = document.getElementById('teamRecentFormBadgeWrapper') || document.querySelector('.flex.items-center.gap-1\\/5') || document.querySelector('.bg-gradient-to-br .flex.gap-1') || document.getElementById('teamHeaderFormContainer');
+        
+        if (headerFormContainer) {
+            let formHeaderHtml = "";
+            // शेवटचे ५ सामने सरळ रेषेत दाखवणे
+            let last5Form = metrics.recentForm.slice(-5);
+            
+            if (last5Form.length > 0) {
+                last5Form.forEach(letter => {
+                    let badgeColorClass = "bg-green-950/80 border-green-500/40 text-green-400";
+                    if (letter === "L") badgeColorClass = "bg-red-950/80 border-red-500/40 text-red-400";
+                    if (letter === "T") badgeColorClass = "bg-zinc-800 border-zinc-600 text-zinc-300";
+                    
+                    formHeaderHtml += `<span class="w-4 h-4 border rounded flex items-center justify-center font-mono font-black text-[8px] ${badgeColorClass}">${letter}</span>`;
                 });
+                headerFormContainer.innerHTML = formHeaderHtml;
             }
         }
 
-        // ३. टक्केवारीचे कॅल्क्युलेशन
-        const winPercentage = totalMatches > 0 ? Math.round((matchesWon / totalMatches) * 100) : 0;
-        const lossPercentage = totalMatches > 0 ? Math.round((matchesLost / totalMatches) * 100) : 0;
-
-        // ४. फायनल UI रेंडरिंग (पाणीदार डार्क-ऑरेंज लेआउट)
+        // फायनल UI रेंडरिंग
         subContent.innerHTML = `
         <div class="space-y-4 animate-fadeIn">
             
+            <!-- WIN LOSS RATIO CARD -->
             <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 shadow-lg">
                 <div class="flex justify-between items-center mb-3">
                     <h4 class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Win Loss Ratio (सामने गुणोत्तर)</h4>
-                    <span class="text-[9px] font-mono text-gray-500 font-bold uppercase">ID: ${teamId.substring(0, 6).toUpperCase()}</span>
+                    <span class="text-[9px] font-mono text-gray-500 font-bold uppercase">ID: ${targetTeamId.substring(0, 10).toUpperCase()}</span>
                 </div>
                 <div class="flex justify-between text-xs font-black text-gray-300 mb-2 font-mono">
-                    <span class="text-orange-500">WON - ${winPercentage}%</span>
-                    <span class="text-gray-500">LOST - ${lossPercentage}%</span>
+                    <span class="text-orange-500">WON - ${metrics.winRatio}%</span>
+                    <span class="text-gray-500">LOST - ${metrics.lossRatio}%</span>
                 </div>
                 <div class="w-full h-2.5 bg-gray-950 rounded-full overflow-hidden border border-gray-900 flex shadow-inner">
-                    ${totalMatches > 0 ? `
-                        <div class="h-full bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.5)]" style="width: ${winPercentage}%"></div>
-                        <div class="h-full bg-gray-800" style="width: ${lossPercentage}%"></div>
+                    ${metrics.played > 0 ? `
+                        <div class="h-full bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.5)]" style="width: ${metrics.winRatio}%"></div>
+                        <div class="h-full bg-gray-850" style="width: ${metrics.lossRatio}%"></div>
                     ` : `
                         <div class="h-full bg-gray-800 w-full"></div>
                     `}
                 </div>
             </div>
 
+            <!-- MATCHES STATISTICS GRID -->
             <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 shadow-lg">
                 <h4 class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-3">Matches Statistics (सामने विहंगावलोकन)</h4>
                 <div class="grid grid-cols-4 gap-2 text-center font-mono">
                     <div class="bg-gray-950/60 p-3 rounded-xl border border-gray-900">
                         <p class="text-[8px] text-gray-500 uppercase font-black tracking-wider">Played</p>
-                        <p class="text-sm font-black text-white mt-1">${totalMatches}</p>
+                        <p class="text-sm font-black text-white mt-1">${metrics.played}</p>
                     </div>
                     <div class="bg-orange-600/10 p-3 rounded-xl border border-orange-500/10">
                         <p class="text-[8px] text-orange-400 uppercase font-black tracking-wider">Won</p>
-                        <p class="text-sm font-black text-orange-500 mt-1">${matchesWon}</p>
+                        <p class="text-sm font-black text-orange-500 mt-1">${metrics.won}</p>
                     </div>
                     <div class="bg-gray-950/60 p-3 rounded-xl border border-gray-900">
                         <p class="text-[8px] text-gray-500 uppercase font-black tracking-wider">Lost</p>
-                        <p class="text-sm font-black text-red-500 mt-1">${matchesLost}</p>
+                        <p class="text-sm font-black text-red-500 mt-1">${metrics.lost}</p>
                     </div>
                     <div class="bg-gray-950/60 p-3 rounded-xl border border-gray-900">
                         <p class="text-[8px] text-gray-500 uppercase font-black tracking-wider">Tied</p>
-                        <p class="text-sm font-black text-gray-400 mt-1">${matchesTied}</p>
+                        <p class="text-sm font-black text-gray-400 mt-1">${metrics.tied}</p>
                     </div>
                 </div>
             </div>
 
+            <!-- TOP PERFORMER DYNAMIC CARD -->
             <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 shadow-lg relative overflow-hidden group">
                 <h4 class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-3">Top Performer (सर्वोत्कृष्ट खेळाडू)</h4>
                 <div class="flex items-center justify-between bg-gray-950/40 p-3 rounded-xl border border-gray-900/60">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-orange-600/10 rounded-full border border-orange-500/20 flex items-center justify-center text-lg shadow-inner">🏆</div>
                         <div>
-                            <p class="text-xs font-black text-white uppercase tracking-tighter">माहिती उपलब्ध नाही...</p>
-                            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wide mt-0.5">सामने खेळल्यावर अपडेट होईल</p>
+                            <p class="text-xs font-black text-white uppercase tracking-tighter">${topName}</p>
+                            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wide mt-0.5">${topSubtext}</p>
                         </div>
                     </div>
                 </div>
@@ -9685,8 +9902,8 @@ async function renderTeamOverviewTab() {
         </div>`;
 
     } catch (error) {
-        console.error("[Team Overview Dynamic Error]:", error);
-        subContent.innerHTML = "<p class='text-center text-red-500 text-xs py-10'>माहिती कॅल्क्युलेट करताना एरर आला.</p>";
+        console.error("🚨 [Team Overview Tab Crash]:", error);
+        subContent.innerHTML = "<p class='text-center text-red-500 text-xs py-10 uppercase font-black'>माहिती कॅल्क्युलेट करताना एरर आला.</p>";
     }
 }
 
@@ -9784,13 +10001,110 @@ async function renderTeamOverviewTab() {
  * Player Profile page open
  */
 
+// async function renderTeamPlayersTab() {
+//     console.log(`[Team Profile]: Fetching players from master_players for Team: ${currentViewingTeamId}`);
+//     const subContent = document.getElementById('teamProfileTabContent');
+//     if (!subContent) return;
+
+//     // चालू सीझन निश्चित करा (उदा. 2026-2027)
+//     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027";
+
+//     subContent.innerHTML = `
+//         <div class="flex justify-between items-center mb-4 px-1">
+//             <div>
+//                 <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">खेळाडू यादी (Squad)</p>
+//                 <p class="text-[8px] text-orange-500 font-bold font-mono">Season: ${currentSeason}</p>
+//             </div>
+            
+//             <button onclick="openExistingPlayerSelector()" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md italic">
+//                 + Add / Create Player
+//             </button>
+//         </div>
+//         <div id="teamPlayersContainer" class="space-y-2">
+//             <p class="text-gray-500 text-[10px] text-center py-10 uppercase tracking-widest animate-pulse">खेळाडू शोधत आहे...</p>
+//         </div>
+//     `;
+
+//     try {
+//         const container = document.getElementById('teamPlayersContainer');
+        
+//         // 'master_players' कलेक्शन् मधून या सीझनचे खेळाडू शोधा
+//         const snapshot = await db.collection("master_players")
+//             .where(`seasons.${currentSeason}.teamId`, "==", currentViewingTeamId)
+//             .get();
+
+//         if (snapshot.empty) {
+//             container.innerHTML = `
+//                 <div class="text-center py-12 bg-gray-950/40 rounded-2xl border border-gray-900">
+//                     <p class="text-gray-600 text-[10px] uppercase font-bold tracking-wider">या सीझनमध्ये अजून एकही खेळाडू जोडलेला नाही.</p>
+//                 </div>`;
+//             return;
+//         }
+
+//         let playersHTML = "";
+//         snapshot.forEach(doc => {
+//             // 🚨 [BUG PREVENTER]: फायरबेसमधून doc.id हाच खेळाडूचा अधिकृत pId असतो, तो आधी सुरक्षित मिळवू
+//             const pId = doc.id; 
+//             const p = doc.data();
+//             const seasonDetails = p.seasons[currentSeason] || {};
+//             const stats = seasonDetails.stats || { matches: 0, raidPoints: 0, tacklePoints: 0 };
+
+//             let skillColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
+//             if (p.skill === "Defender") skillColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+//             if (p.skill === "All Rounder") skillColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+
+//             // 🎯 [💥 THE MASTER INTERFACE CONNECT]: मुख्य कार्डच्या सुरुवातीला आपण onclick जोडला आहे!
+//             // १. तो 'profile' फाईल व्ह्यू लोड करेल.
+//             // २. १५० मिलीसेकंदानंतर या खेळाडूचा pId पास करून त्याचा सखोल अनालिसिस रिपोर्ट रेंडर करेल.
+//             playersHTML += `
+//             <div onclick="loadPage('profile'); setTimeout(() => { initPlayerProfileView('${pId}'); }, 150);" 
+//                  class="bg-[#111] hover:bg-zinc-900/60 p-3 rounded-2xl border border-gray-800 flex justify-between items-center shadow-md cursor-pointer active:scale-[0.98] transition-all">
+//                 <div class="flex items-center gap-3 min-w-0">
+//                     <div class="w-9 h-9 bg-gray-950 rounded-full border border-gray-800 flex items-center justify-center font-black text-xs text-gray-400 uppercase shrink-0">
+//                         ${p.photoURL ? `<img src="${p.photoURL}" class="w-full h-full object-cover rounded-full">` : p.name.charAt(0)}
+//                     </div>
+//                     <div class="min-w-0">
+//                         <p class="text-xs font-black text-white uppercase tracking-tighter truncate leading-tight">${p.name}</p>
+//                         <div class="flex items-center gap-1.5 mt-0.5">
+//                             <span class="text-[7px] font-mono font-bold text-gray-500 bg-gray-950 px-1 py-0.2 rounded border border-gray-900">Reg: ${seasonDetails.registerId || 'N/A'}</span>
+//                             <span class="text-[7px] border px-1 py-0.2 rounded font-black uppercase tracking-wide ${skillColor}">${p.skill}</span>
+//                         </div>
+//                     </div>
+//                 </div>
+                
+//                 <div class="text-right font-mono shrink-0 flex gap-4 items-center">
+//                     <div class="text-center">
+//                         <p class="text-[10px] text-white font-black leading-none">${stats.matches || 0}</p>
+//                         <p class="text-[7px] text-gray-600 font-bold uppercase tracking-tighter mt-0.5">Mat</p>
+//                     </div>
+//                     <div class="text-center min-w-8">
+//                         <p class="text-[10px] text-orange-500 font-black leading-none">${(stats.raidPoints || 0) + (stats.tacklePoints || 0)}</p>
+//                         <p class="text-[7px] text-gray-600 font-bold uppercase tracking-tighter mt-0.5">Pts</p>
+//                     </div>
+//                 </div>
+//             </div>`;
+//         });
+
+//         container.innerHTML = playersHTML;
+
+//     } catch (err) {
+//         console.error("Error loading master players into squad:", err);
+//     }
+// }
+
+/**
+ * 
+*/
+
 async function renderTeamPlayersTab() {
-    console.log(`[Team Profile]: Fetching players from master_players for Team: ${currentViewingTeamId}`);
+    console.log(`%c[Team Profile 1/3]: master_players मधून लाइव्ह स्टॅट्स आणि वर्धित फॉन्टसह खेळाडूंची यादी गोळा करत आहे...`, "color: #eab308; font-weight: bold;");
+    
     const subContent = document.getElementById('teamProfileTabContent');
     if (!subContent) return;
 
-    // चालू सीझन निश्चित करा (उदा. 2026-2027)
+    // चालू सीझन निश्चित करा
     const currentSeason = window.currentLoadedTeamData?.season || "2026-2027";
+    const targetTeamId = currentViewingTeamId || window.currentLoadedTeamData?.teamId || "";
 
     subContent.innerHTML = `
         <div class="flex justify-between items-center mb-4 px-1">
@@ -9798,23 +10112,26 @@ async function renderTeamPlayersTab() {
                 <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">खेळाडू यादी (Squad)</p>
                 <p class="text-[8px] text-orange-500 font-bold font-mono">Season: ${currentSeason}</p>
             </div>
-            
             <button onclick="openExistingPlayerSelector()" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md italic">
                 + Add / Create Player
             </button>
         </div>
         <div id="teamPlayersContainer" class="space-y-2">
-            <p class="text-gray-500 text-[10px] text-center py-10 uppercase tracking-widest animate-pulse">खेळाडू शोधत आहे...</p>
+            <p class="text-gray-500 text-[10px] text-center py-10 uppercase tracking-widest animate-pulse">डेटाबेसमधून खेळाडूंची कुंडली गोळा होत आहे...</p>
         </div>
     `;
+
+    if (!targetTeamId) {
+        console.error("🚨 [Team Profile ERR]: संघ आयडी उपलब्ध नाही!");
+        document.getElementById('teamPlayersContainer').innerHTML = "<p class='text-center text-zinc-600 text-xs py-6'>संघ आयडी गहाळ आहे.</p>";
+        return;
+    }
 
     try {
         const container = document.getElementById('teamPlayersContainer');
         
-        // 'master_players' कलेक्शन् मधून या सीझनचे खेळाडू शोधा
-        const snapshot = await db.collection("master_players")
-            .where(`seasons.${currentSeason}.teamId`, "==", currentViewingTeamId)
-            .get();
+        // १. आधी या टीमचे खेळाडू 'master_players' मधून खेचणे
+        const snapshot = await db.collection("master_players").where(`seasons.${currentSeason}.teamId`, "==", targetTeamId).get();
 
         if (snapshot.empty) {
             container.innerHTML = `
@@ -9824,73 +10141,235 @@ async function renderTeamPlayersTab() {
             return;
         }
 
-        let playersHTML = "";
+        // २. तात्पुरता मॅप तयार करून खेळाडूंची रचना साठवणे
+        let squadMap = {};
         snapshot.forEach(doc => {
-            // 🚨 [BUG PREVENTER]: फायरबेसमधून doc.id हाच खेळाडूचा अधिकृत pId असतो, तो आधी सुरक्षित मिळवू
-            const pId = doc.id; 
-            const p = doc.data();
+            squadMap[doc.id] = {
+                id: doc.id,
+                rawData: doc.data(),
+                calculatedMatches: 0,
+                calculatedPoints: 0
+            };
+        });
+
+        console.log(`   🔍 [SQUAD SCAN]: एकूण ${Object.keys(squadMap).length} खेळाडू सापडले. सामने स्कॅनिंग सुरू...`);
+
+        // ३. [DYNAMIC CROSS-MATCH SCANNED]: सर्व टूर्नामेंट्समधील 'Finished' सामने स्कॅन करून खेळाडूंचे आकडे मोजणे
+        const tournamentsSnapshot = await db.collection("tournaments").get();
+        
+        for (const tournDoc of tournamentsSnapshot.docs) {
+            const matchesSnapshot = await db.collection("tournaments").doc(tournDoc.id).collection("matches").where("status", "==", "Finished").get();
+            
+            if (!matchesSnapshot.empty) {
+                matchesSnapshot.forEach(matchDoc => {
+                    const match = matchDoc.data();
+                    const teamAPlayers = match.teamAPlayers || match.teamA_players || [];
+                    const teamBPlayers = match.teamBPlayers || match.teamB_players || [];
+                    const allMatchPlayers = [...teamAPlayers, ...teamBPlayers];
+
+                    allMatchPlayers.forEach(p => {
+                        const pId = p.pId || p.playerID || p.uid || "";
+                        
+                        // जर हा खेळाडू आपल्या स्क्वाड मॅपमध्ये असेल, तर त्याचे लाइव्ह आकडे मोजणे
+                        if (pId && squadMap[pId]) {
+                            squadMap[pId].calculatedMatches++;
+                            
+                            const pStats = p.stats || { raid_gain: 0, bonus: 0, tackle_gain: 0, super_tackles: 0, points: 0 };
+                            
+                            // एकूण गुणांची बेरीज
+                            let matchPoints = Number(pStats.points || 0);
+                            if (matchPoints === 0) {
+                                let totalRaidsPts = Number(pStats.raid_gain || 0) + Number(pStats.bonus || 0);
+                                let totalTacklePts = Number(pStats.tackle_gain || 0) + Number(pStats.super_tackles || 0);
+                                matchPoints = totalRaidsPts + totalTacklePts;
+                            }
+                            
+                            squadMap[pId].calculatedPoints += matchPoints;
+                        }
+                    });
+                });
+            }
+        }
+
+        console.log(`%c[Team Profile 2/3]: सर्व सामन्यांमधून गुणांची बेरीज यशस्वी पूर्ण झाली.`, "color: #10b981;");
+
+        // ४. गोळा झालेल्या अंतिम डेटावरून प्र्रीमियम HTML यादी तयार करणे
+        let playersHTML = "";
+        Object.keys(squadMap).forEach(key => {
+            const playerNode = squadMap[key];
+            const pId = playerNode.id; 
+            const p = playerNode.rawData;
+            
             const seasonDetails = p.seasons[currentSeason] || {};
-            const stats = seasonDetails.stats || { matches: 0, raidPoints: 0, tacklePoints: 0 };
-
+            
             let skillColor = "bg-orange-500/10 text-orange-500 border-orange-500/20";
-            if (p.skill === "Defender") skillColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-            if (p.skill === "All Rounder") skillColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+            if (p.skill === "Defender" || p.role === "Defender") skillColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+            if (p.skill === "All Rounder" || p.role === "All Rounder") skillColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
 
-            // 🎯 [💥 THE MASTER INTERFACE CONNECT]: मुख्य कार्डच्या सुरुवातीला आपण onclick जोडला आहे!
-            // १. तो 'profile' फाईल व्ह्यू लोड करेल.
-            // २. १५० मिलीसेकंदानंतर या खेळाडूचा pId पास करून त्याचा सखोल अनालिसिस रिपोर्ट रेंडर करेल.
+            // 🎯 [UI IMPROVEMENTS]: ID चा फॉन्ट एकदम Readable केला आणि MAT / PTS चे नंबर्स मोठे (text-base) आणि Bold केले आहेत
             playersHTML += `
-            <div onclick="loadPage('profile'); setTimeout(() => { initPlayerProfileView('${pId}'); }, 150);" 
-                 class="bg-[#111] hover:bg-zinc-900/60 p-3 rounded-2xl border border-gray-800 flex justify-between items-center shadow-md cursor-pointer active:scale-[0.98] transition-all">
+            <div onclick="loadPage('profile'); setTimeout(() => { currentViewingPlayerId = '${pId}'; fetchAndRenderPlayerStats(); }, 150);" 
+                 class="bg-[#111625] hover:bg-zinc-900/50 p-3.5 rounded-2xl border border-slate-800/80 flex justify-between items-center shadow-md cursor-pointer active:scale-[0.98] transition-all animate-fade-in">
+                
+                <!-- डावी बाजू: फोटो, नाव आणि ठळक प्लेयर आयडी -->
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-9 h-9 bg-gray-950 rounded-full border border-gray-800 flex items-center justify-center font-black text-xs text-gray-400 uppercase shrink-0">
-                        ${p.photoURL ? `<img src="${p.photoURL}" class="w-full h-full object-cover rounded-full">` : p.name.charAt(0)}
+                    <div class="w-10 h-10 bg-gray-950 rounded-full border border-slate-800 flex items-center justify-center font-black text-sm text-slate-400 uppercase shrink-0 shadow-inner">
+                        ${p.photoURL || p.photo ? `<img src="${p.photoURL || p.photo}" class="w-full h-full object-cover rounded-full">` : (p.name || "?").charAt(0)}
                     </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-black text-white uppercase tracking-tighter truncate leading-tight">${p.name}</p>
-                        <div class="flex items-center gap-1.5 mt-0.5">
-                            <span class="text-[7px] font-mono font-bold text-gray-500 bg-gray-950 px-1 py-0.2 rounded border border-gray-900">Reg: ${seasonDetails.registerId || 'N/A'}</span>
-                            <span class="text-[7px] border px-1 py-0.2 rounded font-black uppercase tracking-wide ${skillColor}">${p.skill}</span>
+                    <div class="min-w-0 space-y-0.5">
+                        <p class="text-xs font-black text-white uppercase tracking-tight truncate leading-tight">${p.name || "Unknown Player"}</p>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <!-- 🎯 PLAYER ID: फॉन्ट साईझ वाढवून (text-[9px]), font-extrabold करून अधिक वाचनीय केला -->
+                            <span class="text-[10px] font-mono font-extrabold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded border border-orange-500/20 tracking-wide">ID: ${pId}</span>
+                            <span class="text-[8px] border px-1.5 py-0.5 rounded font-black uppercase tracking-wider ${skillColor}">${p.skill || p.role || 'Player'}</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="text-right font-mono shrink-0 flex gap-4 items-center">
-                    <div class="text-center">
-                        <p class="text-[10px] text-white font-black leading-none">${stats.matches || 0}</p>
-                        <p class="text-[7px] text-gray-600 font-bold uppercase tracking-tighter mt-0.5">Mat</p>
+                <!-- उजवी बाजू: मोठे, ठळक आणि Catchy नंबर्स (Mat | Pts) -->
+                <div class="text-right font-mono shrink-0 flex gap-5 items-center pr-1">
+                    <div class="text-center min-w-[28px]">
+                        <!-- 🎯 MAT NUMBER: text-base (मोठा) आणि text-white (ठळक) केला -->
+                        <p class="text-base font-black text-white leading-none tracking-tight">${playerNode.calculatedMatches}</p>
+                        <p class="text-[8px] text-slate-500 font-sans font-black uppercase tracking-wider mt-1">Mat</p>
                     </div>
-                    <div class="text-center min-w-8">
-                        <p class="text-[10px] text-orange-500 font-black leading-none">${(stats.raidPoints || 0) + (stats.tacklePoints || 0)}</p>
-                        <p class="text-[7px] text-gray-600 font-bold uppercase tracking-tighter mt-0.5">Pts</p>
+                    <div class="text-center min-w-[32px]">
+                        <!-- 🎯 PTS NUMBER: text-base (मोठा) आणि आकर्षक text-orange-500 केला -->
+                        <p class="text-base font-black text-orange-500 leading-none tracking-tight">${playerNode.calculatedPoints}</p>
+                        <p class="text-[8px] text-slate-500 font-sans font-black uppercase tracking-wider mt-1">Pts</p>
                     </div>
                 </div>
             </div>`;
         });
 
+        console.log(`%c[Team Profile 3/3]: खेळाडूंची यादी लाइव्ह आकड्यांसह आणि सुधारित फॉन्टसह स्क्रीनवर यशस्वी रेंडर झाली!`, "color: #10b981; font-weight: bold;");
         container.innerHTML = playersHTML;
 
     } catch (err) {
-        console.error("Error loading master players into squad:", err);
+        console.error("🚨 [renderTeamPlayersTab CRASH]:", err);
+        const container = document.getElementById('teamPlayersContainer');
+        if (container) container.innerHTML = "<p class='text-center text-red-500 text-xs py-6 uppercase font-black'>खेळाडूंचे आकडे गोळा करताना एरर आला!</p>";
     }
 }
+
 
 /**
  * क) Matches टॅब (या संघाचे सामने):
 या संघाने खेळलेले किंवा आगामी फिक्स्चर्स:
  */
 
-function renderTeamMatchesTab() {
-    const subContent = document.getElementById('teamProfileTabContent');
-    subContent.innerHTML = `
-    <div class="space-y-2 animate-fadeIn">
-        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest px-1">सामने (Team Matches)</p>
-        <div class="bg-[#111] p-3 rounded-xl border border-gray-800 text-center py-10 text-gray-500 text-xs">
-            या स्पर्धेत अजून सामने खेळलेले नाहीत.
-        </div>
-    </div>`;
-}
+// function renderTeamMatchesTab() {
+//     const subContent = document.getElementById('teamProfileTabContent');
+//     subContent.innerHTML = `
+//     <div class="space-y-2 animate-fadeIn">
+//         <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest px-1">सामने (Team Matches)</p>
+//         <div class="bg-[#111] p-3 rounded-xl border border-gray-800 text-center py-10 text-gray-500 text-xs">
+//             या स्पर्धेत अजून सामने खेळलेले नाहीत.
+//         </div>
+//     </div>`;
+// }
 
+/** */
+async function renderTeamMatchesTab() {
+    console.log(`%c[Team Matches]: अचूक viewMatchSummary पॅरामीटर क्रमानुसार आणि ओव्हरले फिक्ससह रेंडरिंग सुरू...`, "color: #22d3ee; font-weight: bold;");
+    
+    const subContent = document.getElementById('teamProfileTabContent');
+    if (!subContent) return;
+
+    const teamData = window.currentLoadedTeamData || {};
+    const targetTeamId = currentViewingTeamId || teamData.docId || teamData.teamId || "";
+
+    subContent.innerHTML = `
+        <div class="space-y-2 animate-fadeIn">
+            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest px-1">सामने (Team Matches)</p>
+            <div class="flex justify-center py-12 text-orange-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                फायरबेस डेटाबेसमधून स्कोअर गोळा होत आहे...
+            </div>
+        </div>`;
+
+    if (!targetTeamId) {
+        subContent.innerHTML = `<div class="text-center py-10 text-gray-500 text-xs font-black uppercase">संघ आयडी उपलब्ध नाही!</div>`;
+        return;
+    }
+
+    try {
+        const metrics = await compileGlobalTeamStats(targetTeamId);
+        let matchesHtml = "";
+
+        if (metrics.matchesHistory && metrics.matchesHistory.length > 0) {
+            let sortedMatches = metrics.matchesHistory.sort((a, b) => b.date - a.date);
+
+            sortedMatches.forEach(m => {
+                let badgeColorClass = "text-green-400 bg-green-950/40 border-green-500/20";
+                if (m.result === "LOST") badgeColorClass = "text-red-400 bg-red-950/40 border-red-500/20";
+                if (m.result === "TIED") badgeColorClass = "text-slate-300 bg-zinc-800/60 border-zinc-700";
+
+                // 🎯 [💥 THE Z-INDEX & MULTI-MODAL FIX]: 
+                // क्लिक केल्यावर आधी आपण 'fullTeamProfileOverlay' डोममधून उडवून देत आहोत, 
+                // जेणेकरून मॅच सेंटर मोडल बॅकग्राउंडला न अडकता थेट सर्वात वर (Front) उघडेल!
+                matchesHtml += `
+                <div onclick="if(typeof viewMatchSummary === 'function') { 
+                        console.log('🎬 [OVERLAY CLEANUP]: मॅच सेंटर उघडण्यापूर्वी टीम प्रोफाइल ओव्हरले बंद करत आहे...');
+                        const oldOverlay = document.getElementById('fullTeamProfileOverlay');
+                        if (oldOverlay) oldOverlay.remove(); 
+                        
+                        viewMatchSummary('${m.tournamentId}', '${m.matchId}'); 
+                     } else { 
+                        console.error('viewMatchSummary फंक्शन सापडले नाही!'); 
+                     }" 
+                     class="bg-[#111625] border border-slate-800/80 rounded-2xl p-3.5 flex justify-between items-center text-xs shadow-md mb-2 transition-all hover:bg-zinc-900/60 cursor-pointer active:scale-[0.99] group animate-fade-in">
+                    
+                    <div class="space-y-1.5 min-w-0 flex-1 pr-2">
+                        <div class="font-black text-white uppercase tracking-tight text-xs flex items-center gap-1.5 truncate group-hover:text-orange-400 transition-colors">
+                            <span class="text-orange-500 font-sans font-bold text-[10px] italic">vs</span> 
+                            ${m.opponent}
+                        </div>
+                        
+                        <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wide truncate flex items-center gap-1.5 flex-wrap">
+                            <span class="text-amber-500/90 font-black"><i class="fa-solid fa-trophy text-[8px] mr-0.5"></i> ${m.tournamentName}</span>
+                            <span class="text-slate-700">|</span>
+                            <span class="text-sky-400 font-mono font-black bg-sky-950/40 px-1.5 py-0.2 rounded border border-sky-500/10">${m.roundName}</span>
+                        </div>
+                        
+                        <div class="text-[8px] text-slate-500 font-mono font-bold tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-calendar-days text-[7px] text-slate-600"></i> ${m.matchDateStr} <span class="text-slate-700 font-sans font-normal">•</span> Season: ${m.seasonYear}
+                        </div>
+                    </div>
+                    
+                    <div class="text-right font-mono shrink-0 flex gap-3 items-center">
+                        <span class="font-black text-xs text-white bg-black/50 px-2.5 py-1 rounded-xl border border-slate-800/80 shadow-inner tracking-tighter">
+                            ${m.teamScore} <span class="text-orange-500 font-sans font-black mx-0.5">:</span> ${m.oppScore}
+                        </span>
+                        
+                        <span class="text-[8px] font-black uppercase px-2 py-1 rounded-lg border tracking-wider ${badgeColorClass} min-w-[45px] text-center shadow-sm">
+                            ${m.result}
+                        </span>
+                    </div>
+                </div>`;
+            });
+
+            subContent.innerHTML = `
+                <div class="space-y-2 animate-fadeIn">
+                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest px-1 mb-1">सामने (Team Matches)</p>
+                    <div class="space-y-2">
+                        ${matchesHtml}
+                    </div>
+                </div>`;
+
+        } else {
+            subContent.innerHTML = `
+                <div class="space-y-2 animate-fadeIn">
+                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest px-1">सामने (Team Matches)</p>
+                    <div class="bg-[#111] p-4 rounded-2xl border border-gray-800 text-center py-12 text-gray-500 text-xs uppercase font-black tracking-wider">
+                        या स्पर्धेत अजून सामने खेळलेले नाहीत.
+                    </div>
+                </div>`;
+        }
+
+    } catch (error) {
+        console.error("🚨 [renderTeamMatchesTab CRASH]:", error);
+    }
+}
 /**
  * ड) Stats टॅब (एकूण आकडेवारी):
 संघाचे एकूण रेड पॉईंट्स, टॅकल पॉईंट्स, ऑल-आउट्स काउंट्स इत्यादी:
@@ -13489,69 +13968,190 @@ async function saveGoldenRaidOutcome(statusType, logDetails) {
 // 📂 FUNCTION: viewMatchSummary(tId, mId)
 // 🎯 उद्देश: सामना संपल्यानंतर थेट मॅच सेंटर (Summary Modal) उघडणे
 // =========================================================================
+// function viewMatchSummary(tId, mId) {
+//     // =========================================================================
+//     // 📂 SECTION 1: VALIDATION & ULTIMATE FALLBACK CHECKS
+//     // =========================================================================
+//     console.log("%c==================================================", "color: #10b981; font-weight: bold;");
+//     console.log("%c📊 [MATCH SUMMARY TRIGGER]: सामना समरी उघडण्याची पडताळणी सुरू...", "background: #f0fdf4; color: #166534; font-weight: bold; padding: 2px;");
+
+//     let finalTId = tId;
+//     let finalMId = mId;
+
+//     if (!finalTId && typeof matchSetupData !== 'undefined' && matchSetupData?.tId) finalTId = matchSetupData.tId;
+//     if (!finalMId && typeof matchSetupData !== 'undefined' && matchSetupData?.mId) finalMId = matchSetupData.mId;
+
+//     if (!finalTId && typeof currentMatchData !== 'undefined' && currentMatchData?.tId) finalTId = currentMatchData.tId;
+//     if (!finalMId && typeof currentMatchData !== 'undefined' && currentMatchData?.mId) finalMId = currentMatchData.mId;
+
+//     // जर अजूनही आयडी मिळाले नाहीत तर 'squad_editing_match' स्टोरेज बॅकअप ओढणे
+//     if (!finalTId || !finalMId) {
+//         const savedMatchRaw = localStorage.getItem('squad_editing_match');
+//         if (savedMatchRaw) {
+//             const parsed = JSON.parse(savedMatchRaw);
+//             finalTId = finalTId || parsed.tId;
+//             finalMId = finalMId || parsed.mId;
+//         }
+//     }
+
+//     if (!finalTId || !finalMId) {
+//         console.error("🚨 [SUMMARY CRITICAL ERROR]: टूर्नामेंट आयडी किंवा मॅच आयडी दोन्ही मेमरीमध्ये सापडले नाहीत!");
+//         Swal.fire("त्रुटी", "मॅच समरी उघडण्यासाठी आवश्यक आयडी मिळाले नाहीत.", "error");
+//         return;
+//     }
+
+//     console.log(`👉 Targeting Tournament: ${finalTId} | Match: ${finalMId}`);
+
+
+//     // =========================================================================
+//     // 📂 SECTION 2: SECURE LOG DISCOVERY & TIMELINE MEMORY RECOVERY 🧪
+//     // =========================================================================
+//     console.log("%c============== 🧪 [SECURE LOG DIAGNOSTIC] ==============", "background: #0284c7; color: #fff; font-weight: bold; padding: 2px;");
+    
+//     // १. आधी ग्लोबल मेमरी चेक करणे
+//     if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
+//         console.log("⚠️ [Memory Empty]: ग्लोबल activeRaidsList रिकामी आहे. आता 'raids_secure_log' शोधत आहे...");
+        
+//         // २. लोकल स्टोरेजमधील सुरक्षित एनकोडेड लॉग ट्रॅक करणे
+//         const secureLogRaw = localStorage.getItem(`raids_secure_log_${finalMId}`);
+        
+//         if (secureLogRaw) {
+//             try {
+//                 const decoded = decodeURIComponent(escape(atob(secureLogRaw)));
+//                 window.activeRaidsList = JSON.parse(decoded);
+//                 console.log(`🎯 [DIAGNOSTIC SUCCESS]: raids_secure_log_${finalMId} सापडला! एकूण ${window.activeRaidsList.length} रेड्स मेमरीमध्ये यशस्वीरीत्या रिस्टोर केल्या.`);
+//             } catch (e) {
+//                 console.error("🚨 [DIAGNOSTIC ERROR]: raids_secure_log डीकोड करताना क्रॅश झाला:", e);
+//             }
+//         } else {
+//             console.log(`❌ [DIAGNOSTIC FAIL]: 'raids_secure_log_${finalMId}' नावाचा कप्पा लोकल स्टोरेजमध्ये सापडला नाही!`);
+//         }
+//     } else {
+//         console.log(`✅ [Memory Alive]: ग्लोबल मेमरीमध्ये आधीच ${window.activeRaidsList.length} रेड्स ट्रॅकवर आहेत.`);
+//     }
+//     console.log("%c================================================================", "color: #0284c7;");
+
+
+//     // =========================================================================
+//     // 📂 SECTION 3: LIVE SCORECARD RE-SYNC TO HOME MEMORY
+//     // =========================================================================
+//     try {
+//         const localCard = localStorage.getItem('global_score_card');
+//         const activeMatchKey = `active_match_${finalTId}_${finalMId}`;
+//         const localMatchDetails = localStorage.getItem(activeMatchKey);
+
+//         if (localMatchDetails && typeof homeLiveMatchesStorage !== 'undefined') {
+//             const parsedMatch = JSON.parse(localMatchDetails);
+//             const combinedKey = `${finalTId}_${finalMId}`;
+            
+//             if (!homeLiveMatchesStorage[combinedKey]) homeLiveMatchesStorage[combinedKey] = {};
+            
+//             homeLiveMatchesStorage[combinedKey] = {
+//                 ...parsedMatch,
+//                 scoreCard: localCard ? JSON.parse(localCard) : parsedMatch.scoreCard,
+//                 timeline: window.activeRaidsList || parsedMatch.timeline || []
+//             };
+//             console.log("💾 [LOCAL RESYNC SUCCESS]: होम स्टोरेज मेमरी तात्पुरती सिंक केली.");
+//         }
+//     } catch (syncErr) {
+//         console.warn("⚠️ [LOCAL RESYNC WARN]: होम मेमरी सिंक एरर:", syncErr);
+//     }
+
+
+//     // =========================================================================
+//     // 📂 SECTION 4: ROUTING TO CORRECT SUMMARY MODAL ENGINE (🎯 THE TRIPLE FIX)
+//     // =========================================================================
+//     // 🚨 [FIXED]: जुने openMatchCentreFromHome काढून थेट आपले मुख्य openSummaryModal इंजिन चालू केले!
+//     if (typeof openSummaryModal === "function") {
+//         console.log("🚀 [ROUTING]: मुख्य openSummaryModal() कडे ताबा सोपवत आहे...");
+//         openSummaryModal(finalTId, finalMId);
+//     } else {
+//         console.error("🚨 [CORE MISSING]: 'openSummaryModal' हे मुख्य फंक्शन स्क्रिप्टमध्ये सापडले नाही!");
+//         Swal.fire("त्रुटी", "मॅच समरीचे मुख्य मोडल इंजिन सापडले नाही.", "error");
+//     }
+
+//     console.log("%c==================================================", "color: #10b981; font-weight: bold;");
+// }
+
+/**
+ * 
+ * @param {
+ * } targetPlayerId 
+ */
+
+// =========================================================================
+// 📂 FUNCTION: viewMatchSummary(tId, mId)
+// 🎯 उद्देश: सामना संपल्यानंतर थेट मॅच सेंटर (Summary Modal) उघडणे + कडक लॉग्स
+// =========================================================================
 function viewMatchSummary(tId, mId) {
-    // =========================================================================
-    // 📂 SECTION 1: VALIDATION & ULTIMATE FALLBACK CHECKS
-    // =========================================================================
+    // 🚨 [BREAKPOINT LOG 1]: फंक्शन एंट्री ट्रॅकर
     console.log("%c==================================================", "color: #10b981; font-weight: bold;");
-    console.log("%c📊 [MATCH SUMMARY TRIGGER]: सामना समरी उघडण्याची पडताळणी सुरू...", "background: #f0fdf4; color: #166534; font-weight: bold; padding: 2px;");
+    console.log("%c📊 [STEP 1][CLICK DETECTED]: viewMatchSummary यशस्वीरीत्या ट्रिगर झाले आहे!", "background: #f0fdf4; color: #166534; font-weight: bold; padding: 3px; font-size: 12px;");
+    
+    // इनपुट डेटाचा पंचनामा
+    console.log(`   ➔ 📥 Received tId (टूर्नामेंट आयडी) : %c"${tId}"`, "color: #eab308; font-weight: bold;");
+    console.log(`   ➔ 📥 Received mId (मॅच आयडी)      : %c"${mId}"`, "color: #eab308; font-weight: bold;");
 
     let finalTId = tId;
     let finalMId = mId;
 
-    if (!finalTId && typeof matchSetupData !== 'undefined' && matchSetupData?.tId) finalTId = matchSetupData.tId;
-    if (!finalMId && typeof matchSetupData !== 'undefined' && matchSetupData?.mId) finalMId = matchSetupData.mId;
+    // 🚨 [BREAKPOINT LOG 2]: मेमरी फॉलबॅक तपासणी
+    if (!finalTId || finalTId === "undefined" || finalTId === "null") {
+        console.warn("   ⚠️ Warning: tId रिकामी किंवा चुकीचा आला आहे. मेमरी बॅकअप तपासत आहे...");
+        if (typeof matchSetupData !== 'undefined' && matchSetupData?.tId) finalTId = matchSetupData.tId;
+        if (!finalTId && typeof currentMatchData !== 'undefined' && currentMatchData?.tId) finalTId = currentMatchData.tId;
+    }
+    
+    if (!finalMId || finalMId === "undefined" || finalMId === "null") {
+        console.warn("   ⚠️ Warning: mId रिकामी किंवा चुकीचा आला आहे. मेमरी बॅकअप तपासत आहे...");
+        if (typeof matchSetupData !== 'undefined' && matchSetupData?.mId) finalMId = matchSetupData.mId;
+        if (!finalMId && typeof currentMatchData !== 'undefined' && currentMatchData?.mId) finalMId = currentMatchData.mId;
+    }
 
-    if (!finalTId && typeof currentMatchData !== 'undefined' && currentMatchData?.tId) finalTId = currentMatchData.tId;
-    if (!finalMId && typeof currentMatchData !== 'undefined' && currentMatchData?.mId) finalMId = currentMatchData.mId;
-
-    // जर अजूनही आयडी मिळाले नाहीत तर 'squad_editing_match' स्टोरेज बॅकअप ओढणे
+    // जर अजूनही आयडी मिळाले नाहीत तर लोकलस्टोरेज बॅकअप ओढणे
     if (!finalTId || !finalMId) {
+        console.log("   🔍 [LOCAL STORAGE CHECK]: 'squad_editing_match' कप्पा तपासत आहे...");
         const savedMatchRaw = localStorage.getItem('squad_editing_match');
         if (savedMatchRaw) {
             const parsed = JSON.parse(savedMatchRaw);
             finalTId = finalTId || parsed.tId;
             finalMId = finalMId || parsed.mId;
+            console.log("   ✅ [LOCAL SYNC]: Storage मधून बॅकअप आयडी मिळाले ➔", { finalTId, finalMId });
         }
     }
 
-    if (!finalTId || !finalMId) {
-        console.error("🚨 [SUMMARY CRITICAL ERROR]: टूर्नामेंट आयडी किंवा मॅच आयडी दोन्ही मेमरीमध्ये सापडले नाहीत!");
-        Swal.fire("त्रुटी", "मॅच समरी उघडण्यासाठी आवश्यक आयडी मिळाले नाहीत.", "error");
+    // अंतिम पडताळणी लॉक
+    console.log(`%c👉 [STEP 2][FINAL TARGET ID LOCK]: टूर्नामेंट ➔ "${finalTId}" | सामना ➔ "${finalMId}"`, "color: #22d3ee; font-weight: bold;");
+
+    if (!finalTId || finalTId === "------" || !finalMId) {
+        console.error("🚨 [CRITICAL ERROR]: विझ्युअल आयडी गहाळ! टूर्नामेंट किंवा मॅच आयडी दोन्ही मेमरीमध्ये सापडले नाहीत! इंजिन थांबवले.");
+        Swal.fire("त्रुटी", `मॅच समरी उघडण्यासाठी आवश्यक आयडी मिळाले नाहीत! (tId: ${finalTId}, mId: ${finalMId})`, "error");
         return;
     }
 
-    console.log(`👉 Targeting Tournament: ${finalTId} | Match: ${finalMId}`);
-
-
     // =========================================================================
-    // 📂 SECTION 2: SECURE LOG DISCOVERY & TIMELINE MEMORY RECOVERY 🧪
+    // 📂 SECTION 2: SECURE LOG DISCOVERY & TIMELINE MEMORY RECOVERY
     // =========================================================================
-    console.log("%c============== 🧪 [SECURE LOG DIAGNOSTIC] ==============", "background: #0284c7; color: #fff; font-weight: bold; padding: 2px;");
+    console.log("%c============== 🧪 [STEP 3][SECURE LOG DIAGNOSTIC] ==============", "background: #0284c7; color: #fff; font-weight: bold; padding: 2px;");
     
-    // १. आधी ग्लोबल मेमरी चेक करणे
     if (!window.activeRaidsList || window.activeRaidsList.length === 0) {
-        console.log("⚠️ [Memory Empty]: ग्लोबल activeRaidsList रिकामी आहे. आता 'raids_secure_log' शोधत आहे...");
-        
-        // २. लोकल स्टोरेजमधील सुरक्षित एनकोडेड लॉग ट्रॅक करणे
+        console.log(`   ⚠️ [Memory Empty]: ग्लोबल activeRaidsList रिकामी आहे. 'raids_secure_log_${finalMId}' शोधत आहे...`);
         const secureLogRaw = localStorage.getItem(`raids_secure_log_${finalMId}`);
         
         if (secureLogRaw) {
             try {
                 const decoded = decodeURIComponent(escape(atob(secureLogRaw)));
                 window.activeRaidsList = JSON.parse(decoded);
-                console.log(`🎯 [DIAGNOSTIC SUCCESS]: raids_secure_log_${finalMId} सापडला! एकूण ${window.activeRaidsList.length} रेड्स मेमरीमध्ये यशस्वीरीत्या रिस्टोर केल्या.`);
+                console.log(`   🎯 [DIAGNOSTIC SUCCESS]: एकूण ${window.activeRaidsList.length} रेड्स यशस्वीरीत्या रिस्टोर केल्या.`);
             } catch (e) {
-                console.error("🚨 [DIAGNOSTIC ERROR]: raids_secure_log डीकोड करताना क्रॅश झाला:", e);
+                console.error("   🚨 [DIAGNOSTIC ERROR]: raids_secure_log डीकोड करताना क्रॅश झाला:", e);
             }
         } else {
-            console.log(`❌ [DIAGNOSTIC FAIL]: 'raids_secure_log_${finalMId}' नावाचा कप्पा लोकल स्टोरेजमध्ये सापडला नाही!`);
+            console.log(`   ❌ [DIAGNOSTIC FAIL]: 'raids_secure_log_${finalMId}' लोकल स्टोरेजमध्ये सापडला नाही!`);
         }
     } else {
-        console.log(`✅ [Memory Alive]: ग्लोबल मेमरीमध्ये आधीच ${window.activeRaidsList.length} रेड्स ट्रॅकवर आहेत.`);
+        console.log(`   ✅ [Memory Alive]: ग्लोबल मेमरीमध्ये आधीच ${window.activeRaidsList.length} रेड्स रेडी आहेत.`);
     }
-    console.log("%c================================================================", "color: #0284c7;");
-
 
     // =========================================================================
     // 📂 SECTION 3: LIVE SCORECARD RE-SYNC TO HOME MEMORY
@@ -13572,28 +14172,27 @@ function viewMatchSummary(tId, mId) {
                 scoreCard: localCard ? JSON.parse(localCard) : parsedMatch.scoreCard,
                 timeline: window.activeRaidsList || parsedMatch.timeline || []
             };
-            console.log("💾 [LOCAL RESYNC SUCCESS]: होम स्टोरेज मेमरी तात्पुरती सिंक केली.");
+            console.log("   💾 [LOCAL RESYNC]: होम मेमरी तात्पुरती सिंक केली.");
         }
     } catch (syncErr) {
-        console.warn("⚠️ [LOCAL RESYNC WARN]: होम मेमरी सिंक एरर:", syncErr);
+        console.warn("   ⚠️ Home मेमरी सिंक एरर:", syncErr);
     }
 
-
     // =========================================================================
-    // 📂 SECTION 4: ROUTING TO CORRECT SUMMARY MODAL ENGINE (🎯 THE TRIPLE FIX)
+    // 📂 SECTION 4: ROUTING TO CORRECT SUMMARY MODAL ENGINE
     // =========================================================================
-    // 🚨 [FIXED]: जुने openMatchCentreFromHome काढून थेट आपले मुख्य openSummaryModal इंजिन चालू केले!
+    console.log("%c🚀 [STEP 4][MODAL LAUNCH]: मुख्य openSummaryModal() कडे ताबा सोपवत आहे...", "color: #10b981; font-weight: bold;");
+    
     if (typeof openSummaryModal === "function") {
-        console.log("🚀 [ROUTING]: मुख्य openSummaryModal() कडे ताबा सोपवत आहे...");
+        console.log("%c   ✅ [ROUTING SUCCESS]: openSummaryModal फंक्शन स्क्रिप्टमध्ये अस्तित्वात आहे. आता फायर करत आहे...", "color: #10b981;");
         openSummaryModal(finalTId, finalMId);
     } else {
-        console.error("🚨 [CORE MISSING]: 'openSummaryModal' हे मुख्य फंक्शन स्क्रिप्टमध्ये सापडले नाही!");
-        Swal.fire("त्रुटी", "मॅच समरीचे मुख्य मोडल इंजिन सापडले नाही.", "error");
+        console.error("🚨 [CORE CRITICAL MISSING]: 'openSummaryModal' हे मुख्य मोडल इंजिन फंक्शन स्क्रिप्टमध्ये कुठेही सापडले नाही!");
+        Swal.fire("त्रुटी", "'openSummaryModal' हे मॅच समरीचे मुख्य मोडल इंजिन कोडमध्ये सापडले नाही.", "error");
     }
 
     console.log("%c==================================================", "color: #10b981; font-weight: bold;");
 }
-
 
     // =========================================================================
 //आपण बनवलेल्या initPlayerProfileView फंक्शनमध्ये फक्त एक ओळ जोडून घेऊया, जी ओळखेल की स्वतःची प्रोफाईल सुरू आहे की दुसऱ्या प्लेयरची:
@@ -13639,57 +14238,180 @@ async function initPlayerProfileView(targetPlayerId = null) {
 }
 
 
-async function fetchAndRenderPlayerStats() {
-    if (!currentViewingPlayerId) return;
+// =========================================================================
+// 📂 SECTION 6: ADVANCED MULTI-TAB PLAYER PROFILE ENGINE ☁️ (🎯 ROLE-SAFE FIX)
+// =========================================================================
+// 🎯 ग्लोबल प्लेयर्स ट्रॅकर (मेमरी मॅनेजमेंट)
+/**
+ * 📁 तुकडा १: ग्लोबल ट्रॅकर्स आणि टॅब स्विचर (switchProfileTab)
+हा कोड आधीच्या switchProfileTab च्या जागी रिप्लेस कर भावा. 
+हा प्रत्येक टॅबच्या डोम पॅनेलची पडताळणी करेल आणि जर पॅनेल सापडला नाही तर कन्सोलमध्ये थेट एरर फेकेल.
+ */
+let currentViewingPlayerId = null
 
-    // सीजन फिल्टर आणि डोम एलिमेंट्स
-    const selectedSeason = document.getElementById('profileSeasonFilter')?.value || "2026";
+function switchProfileTab(tabName) {
+    console.log(`%c🎯 [PROFILE TAB ENGINE]: Switching To ➔ ${tabName.toUpperCase()}`, "color: #ff007f; font-weight: bold; font-size: 11px;");
+    
+    // १. सर्व प्रोफाइल पॅनेल्स हायड करा
+    const panels = document.querySelectorAll('.profile-panel');
+    if (panels.length === 0) {
+        console.error("🚨 [TAB CRITICAL ERROR]: DOM मध्ये '.profile-panel' क्लास असलेला एकही डबा सापडला नाही!");
+    }
+    panels.forEach(p => p.classList.add('hidden'));
+    
+    // २. सर्व टॅब बटनांचे ऍक्टिव्ह रंग काढा
+    document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active-prof-tab'));
+
+    // ३. निवडलेला पॅनेल आणि बटण ऑन करा
+    const targetPanel = document.getElementById(`pPanel-${tabName}`);
+    const targetBtn = document.getElementById(`pTab-${tabName}`);
+    
+    if (targetPanel) {
+        targetPanel.classList.remove('hidden');
+        console.log(`   🔓 [PANEL VISIBLE]: '#pPanel-${tabName}' यशस्वीरित्या स्क्रीनवर दाखवला.`);
+    } else {
+        console.error(`   🚨 [PANEL RENDER FAIL]: HTML मध्ये '#pPanel-${tabName}' आयडीचा पॅनेल सापडला नाही! स्पेलिंग तपासा.`);
+    }
+    
+    if (targetBtn) {
+        targetBtn.classList.add('active-prof-tab');
+    } else {
+        console.warn(`   ⚠️ [TAB WARN]: HTML मध्ये '#pTab-${tabName}' आयडीचे बटण सापडले नाही.`);
+    }
+}
+
+/**
+ * 📁 तुकडा २: मास्टर एंट्री गेट (initPlayerProfileView)
+जेव्हा प्रोफाईल पेज उघडेल (स्वतःचे किंवा स्क्वाडमधून क्लिक करून), 
+तेव्हा हे फंक्शन आधी रोल-ॲक्सेस तपासणी करेल, डोमचे मुख्य लोडर रिफ्रेश करेल आणि ओव्हरव्ह्यू टॅब ट्रिगर करेल.
+ */
+async function initPlayerProfileView(targetPlayerId = null) {
+    console.log("%c====================================================================", "color: #3b82f6; font-weight: bold;");
+    
+    // लॉगिन युझर आयडी मॅपिंग (सुरक्षित फॉलबॅकसह)
+    const currentUserId = window.loggedInUserPlayerId || localStorage.getItem('current_logged_in_pId') || "";
+    const isOwnProfile = !targetPlayerId || targetPlayerId === currentUserId;
+    
+    currentViewingPlayerId = targetPlayerId || currentUserId || "RXOKQQC"; 
+    
+    console.log(`👤 [PROFILE INITIALIZE]: View Mode ➔ ${isOwnProfile ? 'OWN_PROFILE' : 'SELECTOR_MODE'} | Target Player ID ➔ ${currentViewingPlayerId}`);
+
+    // अ. बॅक बटण कंटेनर हँडलर (स्पेस मॅनेजमेंट)
+    const backBtnContainer = document.getElementById('profileBackButtonContainer');
+    if (backBtnContainer) {
+        if (!isOwnProfile) {
+            backBtnContainer.classList.remove('hidden');
+            backBtnContainer.innerHTML = `
+                <button onclick="loadPage('team_profile')" class="text-[9px] font-black text-zinc-400 bg-zinc-950 border border-zinc-850 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> BACK TO SQUAD
+                </button>`;
+            console.log("   🔙 [UI CONTROL]: दुसऱ्या खेळाडूची प्रोफाईल उघडली, 'BACK TO SQUAD' बटण ऑन केले.");
+        } else {
+            backBtnContainer.innerHTML = "";
+            backBtnContainer.classList.add('hidden');
+        }
+    }
+
+    // ब. लॉगआऊट बटण विजिबिलिटी
+    const logoutContainer = document.getElementById('profileLogoutBtnWrapper');
+    if (logoutContainer) {
+        if (isOwnProfile) logoutContainer.classList.remove('hidden');
+        else logoutContainer.classList.add('hidden');
+    }
+
+    // क. डीफॉल्ट ओव्हरव्ह्यू टॅबवर स्विच करणे
+    switchProfileTab('overview');
+
+    // ड. मुख्य आकडे गोळा करण्याच्या इंजिनला कॉल करणे
+    await fetchAndRenderPlayerStats();
+}
+
+/**
+ * 📁 तुकडा ३: मूळ डेटा कॅल्क्युलेटर आणि फेचर इंजिन (fetchAndRenderPlayerStats)
+हे फंक्शन फक्त फायरबेसमधून डेटा ओढणे, मॅच फिल्टर करणे आणि बेरीज करणे एवढंच काम करेल.
+ हे स्वतः डोममध्ये डेटा भरणार नाही, तर कॅल्क्युलेशन झाल्यावर इतर हेल्पर्सना डेटा सुपूर्द करेल.
+ */
+async function fetchAndRenderPlayerStats() {
+    console.log("%c[STEP 1][EMAIL ENGINE]: fetchAndRenderPlayerStats सुरू झाले आहे.", "color: #eab308; font-weight: bold; font-size: 12px;");
+
+    // 🎯 गुगल ऑथेंटिकेशनमधून लॉगिन युझरचा ईमेल मिळवणे
+    const currentUser = firebase.auth().currentUser;
+    let targetEmail = "";
+
+    if (currentUser && currentUser.email) {
+        targetEmail = currentUser.email.toLowerCase().trim();
+    }
+
+    // 🚨 [DEEP LOG 1]: ईमेल ट्रॅकर पंचनामा
+    console.log(`%c[STEP 2][EMAIL DETECTED]: सिस्टीम या खेळाडूच्या EMAIL आयडीचा डेटा शोधत आहे ➔ "${targetEmail}"`, "color: #22d3ee; font-weight: bold; font-size: 12px;");
+
+    if (!targetEmail) {
+        console.error("🚨 [CRITICAL ERR]: फायरबेस ऑथेंटिकेशनमध्ये युझरचा ईमेल आयडी सापडला नाही! इंजिन थांबवले.");
+        const gridEl = document.getElementById('playerStatsMainGrid');
+        const loadingEl = document.getElementById('playerStatsLoadingState');
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (gridEl) gridEl.classList.remove('hidden');
+        return;
+    }
+
     const gridEl = document.getElementById('playerStatsMainGrid');
     const loadingEl = document.getElementById('playerStatsLoadingState');
 
     if (gridEl) gridEl.classList.add('hidden');
     if (loadingEl) loadingEl.classList.remove('hidden');
 
-    console.log(`%c📊 [COMPILING STATS]: Player ID: ${currentViewingPlayerId} | Season: ${selectedSeason}`, "color: #eab308; font-weight: bold;");
-
     try {
         let totalMatches = 0;
         let detectedTeamName = "No Active Team";
-        
-        // 🧮 सर्व प्रिमियम आकड्यांचे सुरुवातीचे फॉलबॅक मॅट्रिक्स
-        let finalStats = {
-            raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0,
-            tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0,
-            points: 0
-        };
+        let finalStats = { raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0, tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0, points: 0 };
         
         let historyHtml = "";
+        let recentMatchesList = [];
+        let tournamentWiseMap = {};
+        let teamWiseMap = {};
 
-        // 🔥 [FIRESTORE DEEP QUERY]: टूर्नामेंटमधील सर्व Finished सामने तपासणे
+        // टूर्नामेंट आयडी सुरक्षित मिळवणे
         const tId = window.matchSetupData?.tId || window.currentMatchData?.tId || "KV_CUP_2026";
+        console.log(`   🔍 [DATABASE PATH CHECK]: Reference PATH ➔ tournaments/${tId}/matches वर 'Finished' सामने शोधत आहे...`);
+        
         const matchesSnapshot = await db.collection("tournaments").doc(tId).collection("matches").where("status", "==", "Finished").get();
+        console.log(`   %c📊 [FIRESTORE RESPONSE]: फायरबेस कडून एकूण ${matchesSnapshot.size} संपलेले (Finished) सामने मिळाले.`, "color: #a855f7; font-weight: bold;");
+
+        if (matchesSnapshot.empty) {
+            console.warn(`⚠️ [DIAGNOSTIC WARN]: tournaments/${tId}/matches मध्ये 'Finished' स्टेटस असलेला एकही सामना सापडला नाही!`);
+        }
 
         matchesSnapshot.forEach(doc => {
             const match = doc.data();
             const teamAPlayers = match.teamAPlayers || match.teamA_players || [];
             const teamBPlayers = match.teamBPlayers || match.teamB_players || [];
 
-            // १. दोन्ही संघांच्या खेळाडूंमध्ये हा Player ID शोधणे
-            let playerObj = [...teamAPlayers, ...teamBPlayers].find(p => p.pId === currentViewingPlayerId);
+            // 🎯 [EMAIL MATCHER ENGINE]: दोन्ही टीमच्या यादीत खेळाडूचा ईमेल मॅच करून शोधणे (Case Insensitive)
+            let playerObj = [...teamAPlayers, ...teamBPlayers].find(p => {
+                const pEmail = p.email || p.pEmail || p.playerEmail || "";
+                return pEmail.toLowerCase().trim() === targetEmail;
+            });
 
             if (playerObj) {
                 totalMatches++;
+                console.log(`%c      🎯 [MATCH FOUND]: सामना आयडी '${doc.id}' मध्ये खेळाडू ईमेलद्वारे सापडला! (खेळाडूचे नाव: ${playerObj.name})`, "color: #10b981;");
                 
-                // २. डेटाबेसमधून त्या विशिष्ट सामन्याचे प्रिमियम आकडे गोळा करणे
                 const pStats = playerObj.stats || { raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0, tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0, points: 0 };
 
-                // ३. करंट टीम अचूक शोधणे
+                // खेळाडू संघ A मध्ये आहे की B मध्ये ते तपासणे
+                let isTeamA = teamAPlayers.some(p => {
+                    const pEmail = p.email || p.pEmail || p.playerEmail || "";
+                    return pEmail.toLowerCase().trim() === targetEmail;
+                });
+                
+                let currentMatchTeam = isTeamA ? (match.teamA || "Team A") : (match.teamB || "Team B");
+                
                 if (detectedTeamName === "No Active Team") {
-                    let isTeamA = teamAPlayers.some(p => p.pId === currentViewingPlayerId);
-                    detectedTeamName = isTeamA ? (match.teamA || "Team A") : (match.teamB || "Team B");
+                    detectedTeamName = currentMatchTeam;
+                    console.log(`      ➔ 🛡️ [TEAM NAME DETECTED]: खेळाडूची मूळ टीम सापडली ➔ "${detectedTeamName}"`);
                 }
 
-                // ४. करिअर ग्रँड टोटल बेरीज (Accumulating Stats)
+                // आकडे एकत्र मोजणे (Accumulating)
                 finalStats.raids += Number(pStats.raids || 0);
                 finalStats.raid_gain += Number(pStats.raid_gain || 0);
                 finalStats.raid_loss += Number(pStats.raid_loss || 0);
@@ -13702,83 +14424,714 @@ async function fetchAndRenderPlayerStats() {
                 finalStats.super_tackles += Number(pStats.super_tackles || 0);
                 finalStats.points += Number(pStats.points || 0);
 
-                // ५. पहिल्या मॅचच्या स्क्वाडमधून प्रोफाइलचे मुख्य डिटेल्स भरणे
+                recentMatchesList.push({
+                    pts: Number(pStats.points || 0),
+                    timestamp: match.statsCalculatedOn || match.statsSyncedOn || doc.id
+                });
+
+                let tournName = match.tournamentName || "KV-CUP 2026";
+                if (!tournamentWiseMap[tournName]) {
+                    tournamentWiseMap[tournName] = { matches: 0, pts: 0 };
+                }
+                tournamentWiseMap[tournName].matches += 1;
+                tournamentWiseMap[tournName].pts += Number(pStats.points || 0);
+
+                if (!teamWiseMap[currentMatchTeam]) {
+                    teamWiseMap[currentMatchTeam] = { matches: 0, pts: 0 };
+                }
+                teamWiseMap[currentMatchTeam].matches += 1;
+                teamWiseMap[currentMatchTeam].pts += Number(pStats.points || 0);
+
+                // पहिल्या मॅचच्या डेटावरून प्रोफाइलचे कार्ड डिटेल्स भरणे
                 if (totalMatches === 1) {
                     document.getElementById('userDisplayName').innerText = playerObj.name || "Unknown Player";
                     document.getElementById('profJerseyNo').innerText = playerObj.no ? `#${playerObj.no}` : "#--";
                     document.getElementById('profPlayerRole').innerText = `${playerObj.role || 'Player'}`;
                     document.getElementById('profRegNo').innerText = playerObj.pId || "00000";
                     
-                    // फोटो बॅकअप चेक
                     const imgEl = document.getElementById('userProfilePic');
-                    if (imgEl) {
-                        imgEl.src = playerObj.photo || match.userProfilePic || "assets/logo/logo.png";
-                    }
+                    if (imgEl) imgEl.src = playerObj.photo || "assets/logo/logo.png";
                 }
 
-                // ६. मॅच वाईज हिस्ट्री रो (History Row) तयार करणे
-                let vsTeam = (match.teamA_id === playerObj.teamId || match.teamA === detectedTeamName) ? match.teamB : match.teamA;
+                let vsTeam = isTeamA ? match.teamB : match.teamA;
                 let matchPts = Number(pStats.points || 0);
 
                 historyHtml += `
-                    <div class="bg-black/20 border border-slate-850/60 rounded-xl p-2 flex justify-between items-center animate-fade-in text-[10px]">
-                        <div class="space-y-0.5">
-                            <div class="font-black text-white uppercase">vs ${vsTeam || 'Opponent'}</div>
-                            <div class="text-[8px] text-zinc-500 font-bold font-mono">R: ${pStats.raids || 0} (Gain: ${pStats.raid_gain || 0}) | TK: ${pStats.tackles || 0}</div>
+                    <div class="bg-[#111625] border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs shadow-sm mb-1.5">
+                        <div>
+                            <div class="font-black text-white uppercase tracking-wide">vs ${vsTeam || 'Opponent'}</div>
+                            <div class="text-[10px] text-slate-400 font-bold font-mono mt-0.5">Raid: ${pStats.raids || 0} (G: ${pStats.raid_gain || 0}) | Tk: ${pStats.tackles || 0}</div>
                         </div>
-                        <div class="text-right font-mono font-black text-yellow-400 bg-yellow-500/5 border border-yellow-500/10 px-2 py-0.5 rounded-lg">
+                        <div class="text-right font-mono font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-lg">
                             +${matchPts} PTS
                         </div>
                     </div>`;
             }
         });
 
-        // =========================================================================
-        // 📤 DOM INJECTION: गोळा झालेले आकडे स्क्रीनवर रेंडर करणे
-        // =========================================================================
+        console.log(`%c[STEP 3][COMPUTATION METRICS]: बेरीज पूर्ण झाली. एकूण सामने ➔ ${totalMatches} | एकूण पॉईंट्स ➔ ${finalStats.points}`, "color: #10b981; font-weight: bold; font-size: 12px;");
+
+        // 📤 DOM INJECTIONS
         const teamLabel = document.getElementById('profCurrentTeam');
         if (teamLabel) teamLabel.innerText = detectedTeamName;
 
-        // अ. ३ मुख्य ओव्हरव्ह्यू बॉक्सेस
-        document.getElementById('statTotalMatches').innerText = totalMatches;
-        document.getElementById('statTotalPoints').innerText = finalStats.points;
+        if (document.getElementById('statTotalMatches')) document.getElementById('statTotalMatches').innerText = totalMatches;
+        if (document.getElementById('statTotalPoints')) document.getElementById('statTotalPoints').innerText = finalStats.points;
         
-        // Net Impact Score = (एकंण पॉईंट्स) - (रेड लॉस + टॅकल लॉस)
         let netImpact = finalStats.points - (finalStats.raid_loss + finalStats.tackle_loss);
         const netEl = document.getElementById('statNetImpact');
         if (netEl) {
             netEl.innerText = netImpact >= 0 ? `+${netImpact}` : netImpact;
-            netEl.className = netImpact >= 0 ? "text-sm font-mono font-black text-green-400 block" : "text-sm font-mono font-black text-red-500 block";
+            netEl.className = netImpact >= 0 ? "text-xl md:text-3xl font-mono font-black text-emerald-400 block tracking-tight" : "text-xl md:text-3xl font-mono font-black text-red-500 block tracking-tight";
         }
 
-        // ब. Raid Breakdown डेटा इंजेक्शन
-        document.getElementById('statRaidTotal').innerText = finalStats.raids;
-        document.getElementById('statRaidGain').innerText = finalStats.raid_gain;
-        document.getElementById('statRaidLoss').innerText = finalStats.raid_loss;
-        document.getElementById('statRaidEmpty').innerText = finalStats.empty_raids;
+        // Recent Form (वलये)
+        recentMatchesList.sort((a, b) => b.timestamp - a.timestamp);
+        let last5Matches = recentMatchesList.slice(0, 5).reverse(); 
+        let formHtml = "";
+        if (last5Matches.length > 0) {
+            last5Matches.forEach(m => {
+                let circleColor = "bg-zinc-900 border-zinc-700 text-zinc-300";
+                if (m.pts >= 7) circleColor = "bg-emerald-950/60 border-emerald-500/40 text-emerald-400";
+                else if (m.pts > 0) circleColor = "bg-orange-950/40 border-orange-500/30 text-orange-400";
+
+                formHtml += `
+                    <div class="w-7 h-7 ${circleColor} border rounded-full flex flex-col items-center justify-center font-mono font-black text-[9px] shadow-sm">
+                        ${m.pts}
+                        <span class="text-[5px] font-sans text-slate-500 font-bold leading-none -mt-0.5">PTS</span>
+                    </div>`;
+            });
+        } else {
+            formHtml = `<span class="text-slate-500 text-[10px] italic font-black">सामना खेळलेला नाही</span>`;
+        }
+        const formContainer = document.getElementById('profRecentFormContainer');
+        if (formContainer) formContainer.innerHTML = formHtml;
+
+        // Efficiency Status Badge
+        const statusBadge = document.getElementById('profPlayerStatusBadge');
+        if (statusBadge) {
+            if (finalStats.points === 0) {
+                statusBadge.innerText = "NO DATA";
+                statusBadge.className = "text-slate-500 font-black uppercase tracking-wider bg-zinc-950 px-2 py-0.5 rounded";
+            } else if (netImpact > 15) {
+                statusBadge.innerText = "LEGENDARY FORM 👑";
+                statusBadge.className = "text-amber-400 font-black uppercase tracking-widest bg-amber-950/40 border border-amber-500/20 px-2.5 py-0.5 rounded";
+            } else if (netImpact > 5) {
+                statusBadge.innerText = "GOLDEN FORM 🔥";
+                statusBadge.className = "text-emerald-400 font-black uppercase tracking-widest bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-lg";
+            } else {
+                statusBadge.innerText = "STABLE FORM 🏃‍♂️";
+                statusBadge.className = "text-sky-400 font-black uppercase tracking-widest bg-sky-950/40 border border-sky-500/20 px-2.5 py-1 rounded-lg";
+            }
+        }
+
+        // Raid Breakdown
+        if (document.getElementById('statRaidTotal')) document.getElementById('statRaidTotal').innerText = finalStats.raids;
+        if (document.getElementById('statRaidGain')) document.getElementById('statRaidGain').innerText = finalStats.raid_gain;
+        if (document.getElementById('statRaidLoss')) document.getElementById('statRaidLoss').innerText = finalStats.raid_loss;
+        if (document.getElementById('statRaidEmpty')) document.getElementById('statRaidEmpty').innerText = finalStats.empty_raids;
         let rSuccess = finalStats.raids > 0 ? Math.round((finalStats.raid_gain / finalStats.raids) * 100) : 0;
-        document.getElementById('statRaidSuccessRate').innerText = `Success: ${rSuccess}%`;
+        if (document.getElementById('statRaidSuccessRate')) document.getElementById('statRaidSuccessRate').innerText = `Success: ${rSuccess}%`;
 
-        // क. Tackle Breakdown डेटा इंजेक्शन
-        document.getElementById('statTackleTotal').innerText = finalStats.tackles;
-        document.getElementById('statTackleGain').innerText = finalStats.tackle_gain;
-        document.getElementById('statTackleLoss').innerText = finalStats.tackle_loss;
-        document.getElementById('statSuperTackles').innerText = finalStats.super_tackles;
+        // Tackle Breakdown
+        if (document.getElementById('statTackleTotal')) document.getElementById('statTackleTotal').innerText = finalStats.tackles;
+        if (document.getElementById('statTackleGain')) document.getElementById('statTackleGain').innerText = finalStats.tackle_gain;
+        if (document.getElementById('statTackleLoss')) document.getElementById('statTackleLoss').innerText = finalStats.tackle_loss;
+        if (document.getElementById('statSuperTackles')) document.getElementById('statSuperTackles').innerText = finalStats.super_tackles;
         let tSuccess = finalStats.tackles > 0 ? Math.round((finalStats.tackle_gain / finalStats.tackles) * 100) : 0;
-        document.getElementById('statTackleSuccessRate').innerText = `Success: ${tSuccess}%`;
+        if (document.getElementById('statTackleSuccessRate')) document.getElementById('statTackleSuccessRate').innerText = `Success: ${tSuccess}%`;
 
-        // ड. मॅच हिस्ट्री यादी रेंडर करणे
+        // Matches Rows
         const historyContainer = document.getElementById('playerMatchHistoryRows');
         if (historyContainer) {
-            historyContainer.innerHTML = totalMatches > 0 ? historyHtml : `<div class="text-center p-4 text-zinc-600 text-[10px] italic font-bold uppercase">अजून एकही सामना खेळलेला नाही!</div>`;
+            historyContainer.innerHTML = totalMatches > 0 ? historyHtml : `<div class="text-center p-4 text-slate-600 text-[10px] italic font-bold uppercase">No Matches</div>`;
         }
 
-        console.log(`%c✅ [STATS RENDER SUCCESS]: खेळाडूची कुंडली ऑन-स्क्रीन चकाचक रेंडर झाली!`, "color: #10b981; font-weight: bold;");
+        // Tournaments Rows
+        let tournHtml = "";
+        Object.keys(tournamentWiseMap).forEach(tName => {
+            let tData = tournamentWiseMap[tName];
+            tournHtml += `
+                <div class="bg-[#111625] border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-[11px] shadow-sm mb-1.5">
+                    <div>
+                        <div class="font-black text-white uppercase tracking-wide"><i class="fa-solid fa-trophy text-amber-500 mr-1"></i> ${tName}</div>
+                        <div class="text-[9px] text-slate-400 font-bold font-mono mt-0.5">Played: ${tData.matches} Matches</div>
+                    </div>
+                    <div class="font-mono font-black text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-lg">${tData.pts} PTS</div>
+                </div>`;
+        });
+        const tournContainer = document.getElementById('playerTournamentsHistoryRows');
+        if (tournContainer) tournContainer.innerHTML = tournHtml || `<div class="text-center p-4 text-slate-600 text-xs font-bold">No Tournaments Data</div>`;
+
+        // Teams Rows
+        let teamsHtml = "";
+        Object.keys(teamWiseMap).forEach(tmName => {
+            let tmData = teamWiseMap[tmName];
+            teamsHtml += `
+                <div class="bg-[#111625] border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-[11px] shadow-sm mb-1.5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 bg-zinc-950 rounded-full flex items-center justify-center font-black text-[10px] text-orange-500 uppercase">${tmName.charAt(0)}</div>
+                        <div class="font-black text-slate-200 uppercase tracking-wide">${tmName}</div>
+                    </div>
+                    <div class="text-[9px] font-bold text-slate-400 font-mono">Total Contributed: <span class="text-amber-400 font-black">${tmData.pts} Pts</span></div>
+                </div>`;
+        });
+        const teamsContainer = document.getElementById('playerTeamsHistoryRows');
+        if (teamsContainer) teamsContainer.innerHTML = teamsHtml || `<div class="text-center p-4 text-slate-600 text-xs font-bold">No Teams History</div>`;
+
+        console.log("%c[STEP 4][EMAIL ENGINE SUCCESS]: ईमेल हिशोब पूर्ण झाला आणि डेटा स्क्रीनवर रेंडर झाला!", "color: #10b981; font-weight: bold;");
 
     } catch (err) {
-        console.error("🚨 [STATS RENDER FATAL CRASH]:", err);
+        console.error("🚨 [EMAIL ENGINE CRASH]:", err);
     } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
         if (gridEl) gridEl.classList.remove('hidden');
     }
 }
+
+/**
+ * 📁 तुकडा ४: कार्ड हेडर हेल्पर फंक्शन (renderPlayerCardHeader)
+खेळाडूचे नाव, फोटो, रजिस्ट्रेशन आयडी आणि करंट टीम सुरक्षितपणे कार्डवर इंजेक्ट करण्याचे काम हे छोटे फंक्शन करेल. 
+जर एखादा आयडी डोममध्ये गायब असेल, तर ते कन्सोलमध्ये स्पष्ट इशारा देईल.
+ */
+
+async function fetchAndRenderPlayerStats() {
+    console.log("%c[STEP 1][DYNAMIC ENGINE]: fetchAndRenderPlayerStats सुरू झाले आहे.", "color: #eab308; font-weight: bold; font-size: 12px;");
+
+    const gridEl = document.getElementById('playerStatsMainGrid');
+    const loadingEl = document.getElementById('playerStatsLoadingState');
+
+    if (gridEl) gridEl.classList.add('hidden');
+    if (loadingEl) loadingEl.classList.remove('hidden');
+
+    try {
+        // गुगल ऑथेंटिकेशनमधून लॉगिन युझरचा ईमेल मिळवणे
+        const currentUser = firebase.auth().currentUser;
+        let loginUserEmail = "";
+
+        if (currentUser && currentUser.email) {
+            loginUserEmail = currentUser.email.toLowerCase().trim();
+        }
+
+        console.log(`   📊 [AUTH] लॉगिन युझर ईमेल ➔ "${loginUserEmail}"`);
+
+        // जर प्लेयर लिस्टवरून आलेलो नसू, तर ईमेलवरून त्याचा शॉर्ट Player ID शोधणे
+        if (!currentViewingPlayerId && loginUserEmail) {
+            const playerDocSnapshot = await db.collection("master_players").where("email", "==", loginUserEmail).get();
+            
+            if (!playerDocSnapshot.empty) {
+                currentViewingPlayerId = playerDocSnapshot.docs[0].id;
+                console.log(`%c   ✅ [RESOLVER SUCCESS]: master_players मधून शॉर्ट ID सापडला ➔ "${currentViewingPlayerId}"`, "color: #10b981; font-weight: bold;");
+            } else {
+                console.warn(`   ⚠️ [RESOLVER WARN]: master_players मध्ये "${loginUserEmail}" ईमेलचा शॉर्ट ID सापडला नाही.`);
+            }
+        }
+
+        if (!currentViewingPlayerId) {
+            currentViewingPlayerId = window.loggedInUserPlayerId || localStorage.getItem('current_logged_in_pId') || "";
+        }
+
+        console.log(`%c[STEP 2][DYNAMIC TARGET]: या Player ID चे सामने स्कॅन करत आहे ➔ "${currentViewingPlayerId}"`, "color: #22d3ee; font-weight: bold;");
+
+        if (!currentViewingPlayerId) {
+            console.error("🚨 [CRITICAL ERR]: सिस्टीमला खेळाडूचा कोणताही शॉर्ट ID (RXxxxx) सापडला नाही! इंजिन थांबवले.");
+            if (loadingEl) loadingEl.classList.add('hidden');
+            if (gridEl) gridEl.classList.remove('hidden');
+            return;
+        }
+
+        let totalMatches = 0;
+        let detectedTeamName = "No Active Team";
+        let finalStats = { raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0, tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0, points: 0 };
+        
+        let historyHtml = "";
+        let recentMatchesList = [];
+        let tournamentWiseMap = {};
+        let teamWiseMap = {};
+
+        // सर्व टूर्नामेंट्स डाॅक्युमेंट्सची यादी गोळा करत आहे
+        const tournamentsSnapshot = await db.collection("tournaments").get();
+
+        for (const tournDoc of tournamentsSnapshot.docs) {
+            const currentTournId = tournDoc.id;
+            const tournData = tournDoc.data();
+            const tournDisplayTitle = tournData.name || tournData.tournamentName || currentTournId;
+
+            const matchesSnapshot = await db.collection("tournaments").doc(currentTournId).collection("matches").where("status", "==", "Finished").get();
+            
+            if (!matchesSnapshot.empty) {
+                matchesSnapshot.forEach(doc => {
+                    const match = doc.data();
+                    const teamAPlayers = match.teamAPlayers || match.teamA_players || [];
+                    const teamBPlayers = match.teamBPlayers || match.teamB_players || [];
+
+                    let playerObj = [...teamAPlayers, ...teamBPlayers].find(p => p.pId === currentViewingPlayerId || p.playerID === currentViewingPlayerId);
+
+                    if (playerObj) {
+                        totalMatches++;
+                        const pStats = playerObj.stats || { raids: 0, raid_gain: 0, raid_loss: 0, bonus: 0, empty_raids: 0, tackles: 0, tackle_gain: 0, tackle_loss: 0, super_tackles: 0, points: 0 };
+
+                        let isTeamA = teamAPlayers.some(p => p.pId === currentViewingPlayerId || p.playerID === currentViewingPlayerId);
+                        let currentMatchTeam = isTeamA ? (match.teamA || "Team A") : (match.teamB || "Team B");
+                        
+                        if (detectedTeamName === "No Active Team") {
+                            detectedTeamName = currentMatchTeam;
+                        }
+
+                        // आकडे एकत्र जोडणे
+                        finalStats.raids += Number(pStats.raids || 0);
+                        finalStats.raid_gain += Number(pStats.raid_gain || 0);
+                        finalStats.raid_loss += Number(pStats.raid_loss || 0);
+                        finalStats.bonus += Number(pStats.bonus || 0);
+                        finalStats.empty_raids += Number(pStats.empty_raids || 0);
+                        
+                        finalStats.tackles += Number(pStats.tackles || 0);
+                        finalStats.tackle_gain += Number(pStats.tackle_gain || 0);
+                        finalStats.tackle_loss += Number(pStats.tackle_loss || 0);
+                        finalStats.super_tackles += Number(pStats.super_tackles || 0);
+                        finalStats.points += Number(pStats.points || 0);
+
+                        recentMatchesList.push({
+                            pts: Number(pStats.points || 0),
+                            timestamp: match.statsCalculatedOn || match.statsSyncedOn || doc.id
+                        });
+
+                        if (!tournamentWiseMap[tournDisplayTitle]) {
+                            tournamentWiseMap[tournDisplayTitle] = { matches: 0, pts: 0 };
+                        }
+                        tournamentWiseMap[tournDisplayTitle].matches += 1;
+                        tournamentWiseMap[tournDisplayTitle].pts += Number(pStats.points || 0);
+
+                        if (!teamWiseMap[currentMatchTeam]) {
+                            teamWiseMap[currentMatchTeam] = { matches: 0, pts: 0 };
+                        }
+                        teamWiseMap[currentMatchTeam].matches += 1;
+                        teamWiseMap[currentMatchTeam].pts += Number(pStats.points || 0);
+
+                        if (totalMatches === 1) {
+                            document.getElementById('userDisplayName').innerText = playerObj.name || "Unknown Player";
+                            document.getElementById('profJerseyNo').innerText = playerObj.no ? `#${playerObj.no}` : "#--";
+                            document.getElementById('profPlayerRole').innerText = `${playerObj.role || 'Player'}`;
+                            document.getElementById('profRegNo').innerText = playerObj.pId || currentViewingPlayerId;
+                            
+                            const imgEl = document.getElementById('userProfilePic');
+                            if (imgEl) imgEl.src = playerObj.photo || "assets/logo/logo.png";
+                        }
+
+                        let vsTeam = isTeamA ? match.teamB : match.teamA;
+                        let matchPts = Number(pStats.points || 0);
+
+                        // 🎯 [HISTORY CARD FIX]: विचारल्याप्रमाणे Raid (G: L:) आणि Tk (G: L:) चे डीप डिटेल्स इथे सेट केले आहेत
+                        historyHtml += `
+                            <div class="bg-[#111625] border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs shadow-sm mb-1.5">
+                                <div>
+                                    <div class="font-black text-white uppercase tracking-wide">vs ${vsTeam || 'Opponent'}</div>
+                                    <div class="text-[10px] text-slate-400 font-bold font-mono mt-0.5">
+                                        Raid: ${pStats.raids || 0} <span class="text-slate-500">(G:${pStats.raid_gain || 0} L:${pStats.raid_loss || 0})</span> 
+                                        <span class="text-slate-700">|</span> 
+                                        Tk: ${pStats.tackles || 0} <span class="text-slate-500">(G:${pStats.tackle_gain || 0} L:${pStats.tackle_loss || 0})</span>
+                                    </div>
+                                </div>
+                                <div class="text-right font-mono font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-lg">
+                                    +${matchPts} PTS
+                                </div>
+                            </div>`;
+                    }
+                });
+            }
+        }
+
+        // 📤 DOM INJECTIONS
+        const teamLabel = document.getElementById('profCurrentTeam');
+        if (teamLabel) teamLabel.innerText = detectedTeamName;
+
+        if (document.getElementById('statTotalMatches')) document.getElementById('statTotalMatches').innerText = totalMatches;
+        if (document.getElementById('statTotalPoints')) document.getElementById('statTotalPoints').innerText = finalStats.points;
+        
+        let netImpact = finalStats.points - (finalStats.raid_loss + finalStats.tackle_loss);
+        const netEl = document.getElementById('statNetImpact');
+        if (netEl) {
+            netEl.innerText = netImpact >= 0 ? `+${netImpact}` : netImpact;
+            netEl.className = netImpact >= 0 ? "text-xl md:text-3xl font-mono font-black text-emerald-400 block tracking-tight" : "text-xl md:text-3xl font-mono font-black text-red-500 block tracking-tight";
+        }
+
+        // Recent Form
+        recentMatchesList.sort((a, b) => b.timestamp - a.timestamp);
+        let last5Matches = recentMatchesList.slice(0, 5).reverse(); 
+        let formHtml = "";
+        if (last5Matches.length > 0) {
+            last5Matches.forEach(m => {
+                let circleColor = "bg-zinc-900 border-zinc-700 text-zinc-300";
+                if (m.pts >= 7) circleColor = "bg-emerald-950/60 border-emerald-500/40 text-emerald-400";
+                else if (m.pts > 0) circleColor = "bg-orange-950/40 border-orange-500/30 text-orange-400";
+
+                formHtml += `
+                    <div class="w-8 h-8 ${circleColor} border-2 rounded-full flex flex-col items-center justify-center font-mono font-black text-xs shadow-sm">
+                        ${m.pts}
+                        <span class="text-[6px] font-sans text-slate-500 font-bold leading-none">PTS</span>
+                    </div>`;
+            });
+        } else {
+            formHtml = `<span class="text-slate-500 text-xs italic font-black">सामना खेळलेला नाही</span>`;
+        }
+        const formContainer = document.getElementById('profRecentFormContainer');
+        if (formContainer) formContainer.innerHTML = formHtml;
+
+        // Efficiency Status Badge
+        const statusBadge = document.getElementById('profPlayerStatusBadge');
+        if (statusBadge) {
+            if (finalStats.points === 0) {
+                statusBadge.innerText = "NO DATA";
+                statusBadge.className = "text-slate-500 font-black uppercase tracking-wider bg-zinc-950 px-2 py-0.5 rounded";
+            } else if (netImpact > 15) {
+                statusBadge.innerText = "LEGENDARY FORM 👑";
+                statusBadge.className = "text-amber-400 font-black uppercase tracking-widest bg-amber-950/40 border border-amber-500/20 px-2.5 py-0.5 rounded";
+            } else if (netImpact > 5) {
+                statusBadge.innerText = "GOLDEN FORM 🔥";
+                statusBadge.className = "text-emerald-400 font-black uppercase tracking-widest bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-lg";
+            } else {
+                statusBadge.innerText = "STABLE FORM 跑";
+                statusBadge.className = "text-sky-400 font-black uppercase tracking-widest bg-sky-950/40 border border-sky-500/20 px-2.5 py-1 rounded-lg";
+            }
+        }
+
+        // Raid Breakdown
+        if (document.getElementById('statRaidTotal')) document.getElementById('statRaidTotal').innerText = finalStats.raids;
+        if (document.getElementById('statRaidGain')) document.getElementById('statRaidGain').innerText = finalStats.raid_gain;
+        if (document.getElementById('statRaidLoss')) document.getElementById('statRaidLoss').innerText = finalStats.raid_loss;
+        if (document.getElementById('statRaidEmpty')) document.getElementById('statRaidEmpty').innerText = finalStats.empty_raids;
+        
+        let rSuccess = finalStats.raids > 0 ? Math.round((finalStats.raid_gain / finalStats.raids) * 100) : 0;
+        if (rSuccess > 100) rSuccess = 100;
+        if (document.getElementById('statRaidSuccessRate')) document.getElementById('statRaidSuccessRate').innerText = `Success: ${rSuccess}%`;
+
+        // Tackle Breakdown
+        if (document.getElementById('statTackleTotal')) document.getElementById('statTackleTotal').innerText = finalStats.tackles;
+        if (document.getElementById('statTackleGain')) document.getElementById('statTackleGain').innerText = finalStats.tackle_gain;
+        if (document.getElementById('statTackleLoss')) document.getElementById('statTackleLoss').innerText = finalStats.tackle_loss;
+        if (document.getElementById('statSuperTackles')) document.getElementById('statSuperTackles').innerText = finalStats.super_tackles;
+        
+        let tSuccess = finalStats.tackles > 0 ? Math.round((finalStats.tackle_gain / finalStats.tackles) * 100) : 0;
+        if (tSuccess > 100) tSuccess = 100;
+        if (document.getElementById('statTackleSuccessRate')) document.getElementById('statTackleSuccessRate').innerText = `Success: ${tSuccess}%`;
+
+        // Matches Container Injection
+        const historyContainer = document.getElementById('playerMatchHistoryRows');
+        if (historyContainer) {
+            historyContainer.innerHTML = totalMatches > 0 ? historyHtml : `<div class="text-center p-4 text-slate-600 text-xs font-bold uppercase">No Matches</div>`;
+        }
+
+        let tournHtml = "";
+        Object.keys(tournamentWiseMap).forEach(tName => {
+            let tData = tournamentWiseMap[tName];
+            tournHtml += `
+                <div class="bg-[#111625] border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs shadow-sm mb-1.5">
+                    <div>
+                        <div class="font-black text-white uppercase tracking-wide"><i class="fa-solid fa-trophy text-amber-500 mr-1"></i> ${tName}</div>
+                        <div class="text-[10px] text-slate-400 font-bold font-mono mt-0.5">Played: ${tData.matches} Matches</div>
+                    </div>
+                    <div class="font-mono font-black text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-lg">${tData.pts} PTS</div>
+                </div>`;
+        });
+        const tournContainer = document.getElementById('playerTournamentsHistoryRows');
+        if (tournContainer) tournContainer.innerHTML = tournHtml || `<div class="text-center p-4 text-slate-600 text-xs font-bold">No Tournaments Data</div>`;
+
+        let teamsHtml = "";
+        Object.keys(teamWiseMap).forEach(tmName => {
+            let tmData = teamWiseMap[tmName];
+            teamsHtml += `
+                <div class="bg-[#111625] border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs shadow-sm mb-1.5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 bg-zinc-950 rounded-full flex items-center justify-center font-black text-[10px] text-orange-500 uppercase">${tmName.charAt(0)}</div>
+                        <div class="font-black text-slate-200 uppercase tracking-wide">${tmName}</div>
+                    </div>
+                    <div class="text-[10px] font-bold text-slate-400 font-mono">Total Contributed: <span class="text-amber-400 font-black">${tmData.pts} Pts</span></div>
+                </div>`;
+        });
+        const teamsContainer = document.getElementById('playerTeamsHistoryRows');
+        if (teamsContainer) teamsContainer.innerHTML = teamsHtml || `<div class="text-center p-4 text-slate-600 text-xs font-bold">No Teams History</div>`;
+
+        console.log("%c[STEP 4][SUCCESS]: मॅच हिस्ट्री कार्ड डिटेल्स अपडेट झाले आहेत!", "color: #10b981; font-weight: bold;");
+
+    } catch (err) {
+        console.error("🚨 [DYNAMIC ENGINE CRASH]:", err);
+    } finally {
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (gridEl) gridEl.classList.remove('hidden');
+    }
+}
+
+
+/** 
+ * 📁 तुकडा ५: ओव्हरव्ह्यू आणि स्टॅट्स इंजेक्टर हेल्पर (renderOverviewAndStatsDOM)
+हे फंक्शन Overview आणि Statistics या दोन्ही टॅब्समधील आकड्यांची बेरीज, रिसेंट फॉर्म वलये आणि सक्सेस रेटची टक्केवारी डोममध्ये ढकलून देईल.
+*/
+
+function renderOverviewAndStatsDOM(totalMatches, finalStats, recentMatchesList, teamName) {
+    console.log("🧪 [OVERVIEW & STATS INJECTOR]: मुख्य रिपोर्ट पॅनेल्स अपडेट करत आहे...");
+
+    // १. मुख्य ३ ओव्हरव्ह्यू डबे भरणे
+    if (document.getElementById('statTotalMatches')) document.getElementById('statTotalMatches').innerText = totalMatches;
+    if (document.getElementById('statTotalPoints')) document.getElementById('statTotalPoints').innerText = finalStats.points;
+    
+    let netImpact = finalStats.points - (finalStats.raid_loss + finalStats.tackle_loss);
+    const netEl = document.getElementById('statNetImpact');
+    if (netEl) {
+        netEl.innerText = netImpact >= 0 ? `+${netImpact}` : netImpact;
+        netEl.className = netImpact >= 0 ? "text-sm font-mono font-black text-green-400 block" : "text-sm font-mono font-black text-red-500 block";
+    }
+
+    // २. रिसेंट फॉर्म वलय जनरेशन (Last 5 Matches)
+    recentMatchesList.sort((a, b) => b.timestamp - a.timestamp);
+    let last5Matches = recentMatchesList.slice(0, 5).reverse(); 
+    let formHtml = "";
+    
+    if (last5Matches.length > 0) {
+        last5Matches.forEach(m => {
+            let circleColor = "bg-zinc-900 border-zinc-700 text-zinc-300";
+            if (m.pts >= 7) circleColor = "bg-green-950/60 border-green-500/40 text-green-400";
+            else if (m.pts > 0) circleColor = "bg-orange-950/40 border-orange-500/30 text-orange-400";
+
+            formHtml += `
+                <div class="w-7 h-7 ${circleColor} border rounded-full flex flex-col items-center justify-center font-mono font-black text-[9px] shadow-md animate-fade-in">
+                    ${m.pts}
+                    <span class="text-[5px] font-sans text-zinc-500 font-bold leading-none -mt-0.5">PTS</span>
+                </div>`;
+        });
+    } else {
+        formHtml = `<span class="text-zinc-600 text-[9px] italic uppercase font-black">अजून सामना खेळलेला नाही</span>`;
+    }
+    const formContainer = document.getElementById('profRecentFormContainer');
+    if (formContainer) formContainer.innerHTML = formHtml;
+
+    // ३. STATS Breakdown डबे भरणे
+    if (document.getElementById('statRaidTotal')) document.getElementById('statRaidTotal').innerText = finalStats.raids;
+    if (document.getElementById('statRaidGain')) document.getElementById('statRaidGain').innerText = finalStats.raid_gain;
+    if (document.getElementById('statRaidLoss')) document.getElementById('statRaidLoss').innerText = finalStats.raid_loss;
+    if (document.getElementById('statRaidEmpty')) document.getElementById('statRaidEmpty').innerText = finalStats.empty_raids;
+    if (document.getElementById('statRaidSuccessRate')) {
+        document.getElementById('statRaidSuccessRate').innerText = `Success: ${finalStats.raids > 0 ? Math.round((finalStats.raid_gain / finalStats.raids) * 100) : 0}%`;
+    }
+
+    if (document.getElementById('statTackleTotal')) document.getElementById('statTackleTotal').innerText = finalStats.tackles;
+    if (document.getElementById('statTackleGain')) document.getElementById('statTackleGain').innerText = finalStats.tackle_gain;
+    if (document.getElementById('statTackleLoss')) document.getElementById('statTackleLoss').innerText = finalStats.tackle_loss;
+    if (document.getElementById('statSuperTackles')) document.getElementById('statSuperTackles').innerText = finalStats.super_tackles;
+    if (document.getElementById('statTackleSuccessRate')) {
+        document.getElementById('statTackleSuccessRate').innerText = `Success: ${finalStats.tackles > 0 ? Math.round((finalStats.tackle_gain / finalStats.tackles) * 100) : 0}%`;
+    }
+}
+
+function renderSubPanelsDOM(historyHtml, tournamentWiseMap, teamWiseMap, totalMatches) {
+    // ४. Matches पॅनेल भरणे
+    const historyContainer = document.getElementById('playerMatchHistoryRows');
+    if (historyContainer) {
+        historyContainer.innerHTML = totalMatches > 0 ? historyHtml : `<div class="text-center p-4 text-zinc-600 text-[10px] italic font-bold uppercase">No Matches</div>`;
+    }
+
+    // ५. Tournaments पॅनेल भरणे
+    let tournHtml = "";
+    Object.keys(tournamentWiseMap).forEach(tName => {
+        let tData = tournamentWiseMap[tName];
+        tournHtml += `
+            <div class="bg-gradient-to-r from-slate-900 to-black border border-slate-850 p-2.5 rounded-xl flex justify-between items-center text-[10px] mb-1.5">
+                <div>
+                    <div class="font-black text-white uppercase"><i class="fa-solid fa-trophy text-orange-500 mr-1"></i> ${tName}</div>
+                    <div class="text-[8px] text-zinc-500 font-bold font-mono mt-0.5">Played: ${tData.matches} Matches</div>
+                </div>
+                <div class="font-mono font-black text-orange-400 bg-orange-500/5 border border-orange-500/10 px-2 py-0.5 rounded-lg">${tData.pts} PTS</div>
+            </div>`;
+    });
+    const tournContainer = document.getElementById('playerTournamentsHistoryRows');
+    if (tournContainer) tournContainer.innerHTML = tournHtml || `<div class="text-center p-4 text-zinc-600 text-[9px] italic font-bold">No Tournaments Data</div>`;
+
+    // ६. Teams पॅनेल भरणे
+    let teamsHtml = "";
+    Object.keys(teamWiseMap).forEach(tmName => {
+        let tmData = teamWiseMap[tmName];
+        teamsHtml += `
+            <div class="bg-black/30 border border-slate-850 p-2.5 rounded-xl flex justify-between items-center text-[10px] mb-1.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-zinc-950 rounded-full flex items-center justify-center font-black text-[9px] text-orange-500 uppercase">${tmName.charAt(0)}</div>
+                    <div class="font-black text-zinc-200 uppercase">${tmName}</div>
+                </div>
+                <div class="text-[8px] font-bold text-zinc-500 font-mono">Contributed: <span class="text-yellow-400 font-black">${tmData.pts} Pts</span></div>
+            </div>`;
+    });
+    const teamsContainer = document.getElementById('playerTeamsHistoryRows');
+    if (teamsContainer) teamsContainer.innerHTML = teamsHtml || `<div class="text-center p-4 text-zinc-600 text-[9px] italic font-bold">No Teams History</div>`;
+}
+
+/**
+ * 
+ */
+
+
+
+function handleSeasonFilterChange() {
+    fetchAndRenderPlayerStats();
+}
+
+/**
+ * 🛠️ १. संपूर्ण ग्लोबल टीम फंक्शन compileGlobalTeamStats (स्वतंत्र बॉक्स)
+तुझ्या js/app.js मध्ये किंवा कॉमन युटिलिटी फाईलमध्ये हा संपूर्ण कोड एका स्वतंत्र जागेवर पेस्ट करून घे भावा. 
+हे फंक्शन कोणत्याही स्क्रीनवर कॉल करता येईल आणि संपूर्ण डेटा गोळा करून देईल:
+ */
+
+
+/**
+ * 🚀 GLOBAL TEAM STATS COMPILER ENGINE (SCORECARD PATH FIXED)
+ * scoreCard.mainMatch चा अचूक पाथ वापरून कडक डायग्नोस्टिक लॉग्ससह स्कोअर खेचणारे इंजिन.
+ * @param {string} targetTeamId - शोधायच्या टीमचा अधिकृत आयडी (उदा. "TM_BANDAY_MARUTI_081")
+ * @returns {Object} - मोजलेला संपूर्ण डेटा समरी
+ */
+async function compileGlobalTeamStats(targetTeamId) {
+    console.log(`%c[DIAGNOSTIC ENGINE]: "${targetTeamId}" साठी इंजिन सुरू झाले आहे.`, "color: #f97316; font-weight: bold; font-size: 13px;");
+    
+    let teamMetrics = {
+        played: 0, won: 0, lost: 0, tied: 0,
+        winRatio: 0, lossRatio: 0,
+        recentForm: [], 
+        topPerformer: { name: "माहिती उपलब्ध नाही...", points: 0, id: "" },
+        allPlayerMap: {}, 
+        matchesHistory: [] 
+    };
+
+    if (!targetTeamId || targetTeamId.trim() === "") {
+        console.error("🚨 [ENGINE ERR]: टीमचा ID रिकामे आला आहे!");
+        return teamMetrics;
+    }
+
+    try {
+        const tournamentsSnapshot = await db.collection("tournaments").get();
+
+        for (const tournDoc of tournamentsSnapshot.docs) {
+            const currentTournId = tournDoc.id;
+            const tournData = tournDoc.data();
+            const tournTitle = tournData.name || tournData.tournamentName || currentTournId;
+
+            const matchesSnapshot = await db.collection("tournaments").doc(currentTournId).collection("matches").where("status", "==", "Finished").get();
+            
+            if (!matchesSnapshot.empty) {
+                matchesSnapshot.forEach(doc => {
+                    const match = doc.data();
+                    
+                    const teamA_Id = (match.teamA_id || match.teamAId || "").trim();
+                    const teamB_Id = (match.teamB_id || match.teamBId || "").trim();
+                    const searchId = targetTeamId.trim();
+
+                    const isTeamA = (teamA_Id === searchId);
+                    const isTeamB = (teamB_Id === searchId);
+
+                    if (isTeamA || isTeamB) {
+                        // 📊 [💥 DEEP DIAGNOSTIC LOGS]: डेटाबेसच्या स्ट्रक्चरचा पंचनामा
+                        console.log(`%c---------- 📦 MATCH DOC ID: ${doc.id} ----------`, "color: #a855f7; font-weight: bold;");
+                        console.log("   👉 Full Match Object From DB:", match);
+                        console.log("   👉 scoreCard Structure:", match.scoreCard);
+                        
+                        // 🎯 [SCORECARD KEY MAP PATH FIX]: प्रतिमा 'image_97a2bb.png' नुसार अचूक पाथ सिंक केला
+                        let scoreA_Raw = undefined;
+                        let scoreB_Raw = undefined;
+
+                        if (match.scoreCard && match.scoreCard.mainMatch) {
+                            scoreA_Raw = match.scoreCard.mainMatch.teamA;
+                            scoreB_Raw = match.scoreCard.mainMatch.teamB;
+                            console.log(`   ✅ [SCORE CARD DETECTED]: scoreCard.mainMatch मधून स्कोअर सापडला ➔ TeamA: ${scoreA_Raw} | TeamB: ${scoreB_Raw}`);
+                        } else {
+                            // जुना फॉलबॅक जर काही मॅचेस जुन्या पॅटर्नच्या असतील तर
+                            scoreA_Raw = match.teamAScore !== undefined ? match.teamAScore : match.scoreA;
+                            scoreB_Raw = match.teamBScore !== undefined ? match.teamBScore : match.scoreB;
+                            console.log(`   ⚠️ [FALLBACK SCORE]: मुख्य ऑब्जेक्टमधून स्कोअर तपासला ➔ TeamA: ${scoreA_Raw} | TeamB: ${scoreB_Raw}`);
+                        }
+
+                        if (scoreA_Raw !== undefined && scoreB_Raw !== undefined) {
+                            teamMetrics.played++;
+                            
+                            const scoreThisTeam = isTeamA ? parseInt(scoreA_Raw) : parseInt(scoreB_Raw);
+                            const scoreOpponent = isTeamA ? parseInt(scoreB_Raw) : parseInt(scoreA_Raw);
+                            const winnerId = (match.winnerId || match.winner_id || match.winner || "").trim();
+                            const opponentId = isTeamA ? teamB_Id : teamA_Id;
+
+                            // विनर/लॉझर निश्चित करण्याचे वॉटरप्रूफ लॉजिक
+                            if (winnerId === searchId) {
+                                teamMetrics.won++;
+                                teamMetrics.recentForm.push("W");
+                            } else if (winnerId.toLowerCase() === "tie" || winnerId.toLowerCase() === "draw" || match.isTie === true || scoreThisTeam === scoreOpponent) {
+                                teamMetrics.tied++;
+                                teamMetrics.recentForm.push("T");
+                            } else if (winnerId === opponentId || (winnerId !== "" && winnerId !== searchId)) {
+                                teamMetrics.lost++;
+                                teamMetrics.recentForm.push("L");
+                            } else {
+                                if (scoreThisTeam > scoreOpponent) {
+                                    teamMetrics.won++;
+                                    teamMetrics.recentForm.push("W");
+                                } else if (scoreThisTeam < scoreOpponent) {
+                                    teamMetrics.lost++;
+                                    teamMetrics.recentForm.push("L");
+                                } else {
+                                    teamMetrics.tied++;
+                                    teamMetrics.recentForm.push("T");
+                                }
+                            }
+
+                            let opponentTeamName = isTeamA ? (match.teamB || "Opponent") : (match.teamA || "Opponent");
+                            let lastFormLetter = teamMetrics.recentForm[teamMetrics.recentForm.length - 1];
+                            let currentResult = "LOST";
+                            if (lastFormLetter === "W") currentResult = "WON";
+                            if (lastFormLetter === "T") currentResult = "TIED";
+
+                            teamMetrics.matchesHistory.push({
+                                matchId: doc.id,
+                                tournamentId: currentTournId,
+                                tournamentName: tournTitle,
+                                opponent: opponentTeamName,
+                                teamScore: scoreThisTeam,
+                                oppScore: scoreOpponent,
+                                roundName: match.round || match.roundName || "League Match",
+                                matchDateStr: match.matchDate || match.dateStr || "Finished",
+                                seasonYear: match.season || match.seasonYear || tournData.season || "2026",
+                                result: currentResult
+                            });
+
+                            // प्लेयर्स पॉईंट्स मोजणी
+                            const teamPlayers = isTeamA ? (match.teamAPlayers || match.teamA_players || []) : (match.teamB_players || match.teamBPlayers || []);
+                            teamPlayers.forEach(p => {
+                                const pId = p.pId || p.playerID || p.uid || "UNKNOWN";
+                                const pName = p.name || "Unknown Player";
+                                const pPoints = Number(p.stats?.points || 0);
+
+                                if (!teamMetrics.allPlayerMap[pId]) {
+                                    teamMetrics.allPlayerMap[pId] = { name: pName, totalPoints: 0 };
+                                }
+                                teamMetrics.allPlayerMap[pId].totalPoints += pPoints;
+                            });
+                        } else {
+                            console.error(`   🚨 [SCORE CRITICAL ERR]: सामना ${doc.id} मध्ये कोणत्याही रचनेत स्कोअर मिळाला नाही!`);
+                        }
+                    }
+                });
+            }
+        }
+
+        if (teamMetrics.played > 0) {
+            teamMetrics.winRatio = Math.round((teamMetrics.won / teamMetrics.played) * 100);
+            teamMetrics.lossRatio = Math.round((teamMetrics.lost / teamMetrics.played) * 100);
+        }
+
+        let maxPoints = 0;
+        Object.keys(teamMetrics.allPlayerMap).forEach(id => {
+            const playerInfo = teamMetrics.allPlayerMap[id];
+            if (playerInfo.totalPoints > maxPoints) {
+                maxPoints = playerInfo.totalPoints;
+                teamMetrics.topPerformer = { id: id, name: playerInfo.name, points: playerInfo.totalPoints };
+            }
+        });
+
+        return teamMetrics;
+    } catch (err) {
+        console.error("🚨 [GLOBAL TEAM ENGINE CRASH]:", err);
+        return teamMetrics;
+    }
+}
+
