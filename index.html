@@ -111,6 +111,11 @@
             <span class="text-sm font-black uppercase tracking-wider">Tournaments</span>
         </button>
 
+        <button id="side-management" onclick="loadPage('management')" class="drawer-item hidden flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-300 hover:bg-orange-500/10 transition-all">
+            <i class="fa-solid fa-user-shield w-5 text-amber-500"></i>
+            <span class="text-sm font-bold uppercase tracking-wider">Staff Access</span>
+        </button>
+
         <div class="border-t border-white/5 my-4 pt-4">
              <button class="drawer-item flex items-center gap-4 w-full text-left py-3 px-4 rounded-xl text-gray-400 hover:text-white transition-all">
                 <i class="fa-solid fa-gear w-5"></i>
@@ -465,8 +470,8 @@
 
     <div class="flex justify-between items-center border-b border-gray-800 pb-2">
         <div>
-            <h3 class="text-white font-black text-base uppercase tracking-tighter italic">नवीन खेळाडू नोंदणी</h3>
-            <p class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">Create New Master Player</p>
+            <h3 id="pModalTitle" class="text-white font-black text-base uppercase tracking-tighter italic">नवीन खेळाडू नोंदणी</h3>
+            <p id="pModalSubTitle" class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">Create New Master Player</p>
         </div>
         <button onclick="closeNewPlayerModal()" class="text-gray-500 text-2xl hover:text-white active:scale-75 transition-all">&times;</button>
     </div>
@@ -543,7 +548,7 @@
     </div>
 
     <div class="pt-2 border-t border-gray-800 space-y-2 shrink-0">
-        <button onclick="saveNewPlayerToMaster()" class="w-full bg-orange-600 hover:bg-orange-700 p-3.5 rounded-2xl text-white font-black text-xs uppercase shadow-[0_4px_15px_rgba(249,115,22,0.3)] active:scale-95 transition-all tracking-tighter italic">
+        <button id="savePlayerBtn" onclick="saveNewPlayerToMaster()" class="w-full bg-orange-600 hover:bg-orange-700 p-3.5 rounded-2xl text-white font-black text-xs uppercase shadow-[0_4px_15px_rgba(249,115,22,0.3)] active:scale-95 transition-all tracking-tighter italic">
           खेळाडू सुरक्षित करा (Save Player)
         </button>
     </div>

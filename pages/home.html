@@ -17,11 +17,103 @@
     <div class="space-y-3 px-4">
         <div class="text-[10px] font-black tracking-wider text-zinc-400 uppercase flex items-center justify-between">
             <span><i class="fa-solid fa-layer-group text-orange-500 mr-1"></i> सर्व स्पर्धा (Tournaments)</span>
-            <span id="tournamentCountLabel" class="text-zinc-600 font-mono text-[9px] font-bold"></span>
+            <span id="tournamentCountLabel" class="text-zinc-600 font-mono text-[9px] font-bold">0 TOTAL</span>
         </div>
         
-        <div id="dynamicTournamentsContainer" class="grid grid-cols-1 gap-3.5">
-            <div class="text-center py-8 text-zinc-700 italic font-bold text-xs">टूर्नामेंट्स लोड होत आहेत...</div>
+        <div class="flex gap-2 pb-1 overflow-x-auto scrollbar-none text-[8.5px] font-black uppercase tracking-wider">
+            <button onclick="switchTournamentTab('LIVE')" id="tab-LIVE" class="px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md active:scale-95 transition-all flex items-center gap-1 shrink-0">
+                <span class="w-1 h-1 rounded-full bg-white live-blink"></span> Live
+            </button>
+            <button onclick="switchTournamentTab('UPCOMING')" id="tab-UPCOMING" class="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 border border-zinc-800/80 active:scale-95 transition-all shrink-0">
+                Upcoming
+            </button>
+            <button onclick="switchTournamentTab('COMPLETED')" id="tab-COMPLETED" class="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 border border-zinc-800/80 active:scale-95 transition-all shrink-0">
+                Completed
+            </button>
+        </div>
+        
+        <div id="dynamicTournamentsContainer" class="flex gap-3 overflow-x-auto pb-3 pt-0.5 scrollbar-none snap-x snap-mandatory" style="scrollbar-width: none;">
+            <div class="text-center py-8 text-zinc-700 italic font-bold text-xs w-full">टूर्नामेंट्स लोड होत आहेत...</div>
+        </div>
+    </div>
+
+    <div id="playerQuickStatsWidget" class="px-4 mt-2 animate-fadeIn hidden">
+        <div class="bg-gradient-to-r from-orange-600/20 via-zinc-900 to-zinc-950 border border-orange-500/20 p-3.5 rounded-2xl shadow-xl flex justify-between items-center relative overflow-hidden group active:scale-[0.99] transition-transform duration-100 cursor-pointer" onclick="loadPage('profile')">
+            <div class="absolute top-0 left-0 w-[2px] h-full bg-orange-500"></div>
+            
+            <div class="space-y-1 min-w-0">
+                <p class="text-[8px] text-orange-500 font-black uppercase tracking-widest flex items-center gap-1">
+                    🏃‍♂️ खेळाडू डॅशबोर्ड (My Status)
+                </p>
+                <h3 id="quickPlayerName" class="text-xs font-black text-white uppercase tracking-tight truncate leading-tight">रामराम, खेळाडू!</h3>
+                <p id="quickPlayerStatsText" class="text-[8px] text-zinc-400 font-bold tracking-wide truncate">तुझे या सीझनचे लाइव्ह आकडे लोड होत आहेत...</p>
+            </div>
+            
+            <div class="shrink-0 bg-zinc-900 p-2 rounded-xl border border-zinc-800/60 text-zinc-500 group-hover:text-orange-500 transition-colors">
+                <i class="fa-solid fa-chevron-right text-[9px]"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3 px-4 mt-2 animate-fadeIn">
+        <div class="text-[10px] font-black tracking-wider text-zinc-400 uppercase flex items-center gap-1.5">
+            <span><i class="fa-solid fa-fire text-orange-500 mr-1"></i> अव्वल परफॉर्मर्स (Top Performers)</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-900/80 rounded-2xl p-3 space-y-2.5 shadow-xl">
+                <div class="flex justify-between items-center border-b border-zinc-800/60 pb-1.5">
+                    <span class="text-[9px] font-black text-orange-500 uppercase tracking-tight italic">⚡ Top Raiders</span>
+                    <span class="text-[7px] text-zinc-600 font-bold font-mono">PTS</span>
+                </div>
+                <div id="topRaidersContainer" class="space-y-2 text-[9px] text-zinc-700 italic font-black uppercase py-2 text-center tracking-wider">
+                    मोजणी सुरू आहे...
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-900/80 rounded-2xl p-3 space-y-2.5 shadow-xl">
+                <div class="flex justify-between items-center border-b border-zinc-800/60 pb-1.5">
+                    <span class="text-[9px] font-black text-blue-400 uppercase tracking-tight italic">🛡️ Top Defenders</span>
+                    <span class="text-[7px] text-zinc-600 font-bold font-mono">PTS</span>
+                </div>
+                <div id="topDefendersContainer" class="space-y-2 text-[9px] text-zinc-700 italic font-black uppercase py-2 text-center tracking-wider">
+                    मोजणी सुरू आहे...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-2.5 px-4 mt-2 animate-fadeIn">
+        <div class="text-[10px] font-black tracking-wider text-zinc-400 uppercase flex items-center justify-between">
+            <span><i class="fa-solid fa-calendar-check text-orange-500 mr-1"></i> आगामी सामने (Upcoming Matches)</span>
+        </div>
+        
+        <div id="homeUpcomingMatchesContainer" class="space-y-2">
+            <div class="bg-zinc-950 border border-zinc-900/60 p-4 rounded-xl text-center text-zinc-600 italic text-[9px] font-black uppercase">
+                वेळापत्रक तपासले जात आहे...
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-2.5 px-4 mt-2 animate-fadeIn">
+        <div class="text-[10px] font-black tracking-wider text-zinc-400 uppercase flex items-center justify-between">
+            <span><i class="fa-solid fa-table-list text-orange-500 mr-1"></i> गुण तक्ता झलक (Points Table)</span>
+        </div>
+        
+        <div class="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-900 rounded-2xl p-3 shadow-xl space-y-2">
+            <div class="grid grid-cols-12 text-[7.5px] font-black text-zinc-500 uppercase tracking-wider pb-1.5 border-b border-zinc-900 font-mono text-center">
+                <div class="col-span-1 text-left">#</div>
+                <div class="col-span-5 text-left">संघ (Team Name)</div>
+                <div class="col-span-2">मॅच</div>
+                <div class="col-span-2">गुण</div>
+                <div class="col-span-2 text-orange-500">DIFF</div>
+            </div>
+            
+            <div id="homePointsTableContainer" class="space-y-1.5">
+                <div class="text-center text-zinc-700 italic text-[9px] font-black py-2 uppercase tracking-wide">
+                    गुण मोजणी सुरू आहे...
+                </div>
+            </div>
         </div>
     </div>
 
